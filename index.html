@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stratégo - Map Interactive</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&family=Raleway:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Vous construisez pour vos clients. Mais qui vous aide à construire votre rentabilité ?</h1>
+            <p class="subtitle">De l'atelier au chantier, vos défis sont les mêmes : transformer un savoir-faire exceptionnel en une activité sereine et rentable.</p>
+        </header>
+
+        <!-- Section 1 : Rentabilité -->
+        <section class="section" data-section="1">
+            <div class="section-content">
+                <h2>Votre <span class="highlight">rentabilité</span>, ce grand brouillard.</h2>
+                <p class="section-description">
+                    Vous terminez un chantier, la satisfaction du travail bien fait est là. Mais rapidement, la question qui fâche revient : "Combien ai-je vraiment gagné sur ce projet ?".
+                </p>
+                
+                <div class="challenges">
+                    <div class="challenge">
+                        <h3>Fixer le juste prix</h3>
+                        <p>Quel taux horaire pour valoriser votre savoir-faire ? Quel coefficient appliquer sur les fournitures ?</p>
+                    </div>
+                    <div class="challenge">
+                        <h3>Facturer chaque minute</h3>
+                        <p>Comment être sûr de ne pas oublier les temps de trajet, les allers-retours imprévus chez le fournisseur ?</p>
+                    </div>
+                    <div class="challenge">
+                        <h3>Analyser le passé</h3>
+                        <p>Savoir précisément sur quel chantier vous avez gagné de l'argent, et surtout, lequel vous en a fait perdre.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="interactive-map" id="map-1">
+                <div class="tile problem" data-tile="devis" style="grid-column: 1; grid-row: 1;">
+                    <div class="tile-icon">📄</div>
+                    <div class="tile-title">Devis</div>
+                </div>
+                <div class="tile problem" data-tile="materiaux" style="grid-column: 3; grid-row: 2;">
+                    <div class="tile-icon">📦</div>
+                    <div class="tile-title">Matières Premières</div>
+                </div>
+                <div class="tile problem" data-tile="temps" style="grid-column: 5; grid-row: 1;">
+                    <div class="tile-icon">⏰</div>
+                    <div class="tile-title">Temps de Travail</div>
+                </div>
+                <div class="tile solution" data-tile="marge" style="grid-column: 3; grid-row: 3;">
+                    <div class="tile-icon">📊</div>
+                    <div class="tile-title">Marge par Chantier</div>
+                </div>
+                <div class="tile benefit" data-tile="decisions" style="grid-column: 5; grid-row: 4;">
+                    <div class="tile-icon">💡</div>
+                    <div class="tile-title">Décisions Éclairées</div>
+                </div>
+                <svg class="connections" width="100%" height="100%">
+                    <path class="connection-line" data-from="devis" data-to="marge"></path>
+                    <path class="connection-line" data-from="materiaux" data-to="marge"></path>
+                    <path class="connection-line" data-from="temps" data-to="marge"></path>
+                    <path class="connection-line" data-from="marge" data-to="decisions"></path>
+                </svg>
+            </div>
+        </section>
+
+        <!-- Section 2 : Trésorerie -->
+        <section class="section" data-section="2">
+            <div class="section-content">
+                <h2>La <span class="highlight">trésorerie</span> en dents de scie : piloter à vue en permanence</h2>
+                <p class="section-description">
+                    Votre compte en banque ressemble aux montagnes russes. Cette absence de visibilité vous empêche de vous projeter et génère un stress constant. Vous maîtrisez vos outils, mais les flux financiers semblent vous échapper.
+                </p>
+                
+                <div class="challenges">
+                    <div class="challenge">
+                        <h3>Le décalage permanent</h3>
+                        <p>Vous payez vos matériaux et vos charges aujourd'hui, mais vos clients, eux, vous paieront dans 30, 60, voire 90 jours.</p>
+                    </div>
+                    <div class="challenge">
+                        <h3>Le coût du stock</h3>
+                        <p>Vous financez des matières premières qui dorment à l'atelier ou dans la camionnette, sans savoir quand elles se transformeront en chiffre d'affaires.</p>
+                    </div>
+                    <div class="challenge">
+                        <h3>L'absence de visibilité</h3>
+                        <p>Impossible de savoir sereinement ce dont vous disposerez dans 3 mois pour payer l'URSSAF, la TVA ou simplement votre salaire.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="interactive-map" id="map-2">
+                <div class="tile problem" data-tile="fournisseurs" style="grid-column: 1; grid-row: 2;">
+                    <div class="tile-icon">🛒</div>
+                    <div class="tile-title">Fournisseurs / Achats</div>
+                </div>
+                <div class="tile problem" data-tile="charges" style="grid-column: 2; grid-row: 1;">
+                    <div class="tile-icon">👤💰</div>
+                    <div class="tile-title">Charges / Salaires</div>
+                </div>
+                <div class="tile problem" data-tile="factures" style="grid-column: 5; grid-row: 2;">
+                    <div class="tile-icon">📋⏰</div>
+                    <div class="tile-title">Factures Clients</div>
+                </div>
+                <div class="tile solution" data-tile="previsionnel" style="grid-column: 3; grid-row: 3;">
+                    <div class="tile-icon">📈</div>
+                    <div class="tile-title">Prévisionnel de Trésorerie</div>
+                </div>
+                <div class="tile benefit" data-tile="serenite" style="grid-column: 4; grid-row: 4;">
+                    <div class="tile-icon">✅</div>
+                    <div class="tile-title">Sérénité / Anticipation</div>
+                </div>
+                <svg class="connections" width="100%" height="100%">
+                    <path class="connection-line dashed" data-from="fournisseurs" data-to="previsionnel"></path>
+                    <path class="connection-line dashed" data-from="charges" data-to="previsionnel"></path>
+                    <path class="connection-line dashed" data-from="factures" data-to="previsionnel"></path>
+                    <path class="connection-line" data-from="previsionnel" data-to="serenite"></path>
+                </svg>
+            </div>
+        </section>
+
+        <!-- Section 3 : Croissance -->
+        <section class="section" data-section="3">
+            <div class="section-content">
+                <h2>Investir, recruter : seul face aux grandes <span class="highlight">décisions</span>.</h2>
+                <p class="section-description">
+                    Votre carnet de commandes se remplit, votre réputation grandit. Viennent alors les grandes décisions qui peuvent faire passer votre entreprise à l'étape supérieure... ou la mettre en difficulté. Et pour ces choix, vous êtes souvent seul.
+                </p>
+                
+                <div class="challenges">
+                    <div class="challenge">
+                        <h3>Le pari matériel</h3>
+                        <p>Est-ce le bon moment d'investir dans cette nouvelle machine ? De changer de véhicule ? Pouvez-vous vraiment vous le permettre ?</p>
+                    </div>
+                    <div class="challenge">
+                        <h3>Le défi humain</h3>
+                        <p>L'idée d'embaucher votre premier salarié ou un apprenti vous tente, mais les démarches et les responsabilités vous semblent être une véritable montagne.</p>
+                    </div>
+                    <div class="challenge">
+                        <h3>La peur du risque</h3>
+                        <p>Chaque grande décision ressemble à un pari sur l'avenir, et vous avez le sentiment de le faire seul, sans filet de sécurité pour valider vos intuitions.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="interactive-map" id="map-3">
+                <div class="tile problem central" data-tile="doute" style="grid-column: 3; grid-row: 2;">
+                    <div class="tile-icon">🛤️</div>
+                    <div class="tile-title">Doute / Incertitude</div>
+                </div>
+                <div class="tile problem" data-tile="investissement" style="grid-column: 1; grid-row: 3;">
+                    <div class="tile-icon">🔧⚒️</div>
+                    <div class="tile-title">Investissement Matériel</div>
+                </div>
+                <div class="tile problem" data-tile="recrutement" style="grid-column: 5; grid-row: 3;">
+                    <div class="tile-icon">👤➕</div>
+                    <div class="tile-title">Recrutement</div>
+                </div>
+                <div class="tile solution" data-tile="conseil" style="grid-column: 3; grid-row: 3;">
+                    <div class="tile-icon">💬⭐</div>
+                    <div class="tile-title">Conseil Stratégique</div>
+                </div>
+                <div class="tile benefit" data-tile="croissance" style="grid-column: 4; grid-row: 4;">
+                    <div class="tile-icon">🛡️✅</div>
+                    <div class="tile-title">Croissance Sereine</div>
+                </div>
+                <svg class="connections" width="100%" height="100%">
+                    <path class="connection-line dashed" data-from="doute" data-to="investissement"></path>
+                    <path class="connection-line dashed" data-from="doute" data-to="recrutement"></path>
+                    <path class="connection-line intervention" data-from="conseil" data-to="doute"></path>
+                    <path class="connection-line" data-from="conseil" data-to="croissance"></path>
+                </svg>
+            </div>
+        </section>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
