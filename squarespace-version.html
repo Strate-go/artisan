@@ -1,0 +1,816 @@
+<!-- 
+=======================================================
+CARTE INTERACTIVE STRATÉGO - VERSION SQUARESPACE
+=======================================================
+INSTRUCTIONS :
+1. Copiez TOUT ce code
+2. Dans Squarespace : Ajoutez un "Bloc de code"
+3. Collez ce code dans le bloc
+4. Sauvegardez et publiez !
+=======================================================
+-->
+
+<!-- Google Fonts (nécessaire pour les typographies) -->
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&family=Raleway:wght@400;700&display=swap" rel="stylesheet">
+
+<!-- Container principal -->
+<div id="stratego-interactive-map" style="width: 100%; max-width: none; margin: 0; padding: 0;">
+
+<div class="stratego-container">
+    <header class="stratego-header">
+        <h1>Vous construisez pour vos clients. Mais qui vous aide à construire votre rentabilité ?</h1>
+        <p class="subtitle">De l'atelier au chantier, vos défis sont les mêmes : transformer un savoir-faire exceptionnel en une activité sereine et rentable.</p>
+    </header>
+
+    <!-- Section 1 : Rentabilité -->
+    <section class="stratego-section" data-section="1">
+        <div class="section-content">
+            <h2>Votre <span class="highlight">rentabilité</span>, ce grand brouillard.</h2>
+            <p class="section-description">
+                Vous terminez un chantier, la satisfaction du travail bien fait est là. Mais rapidement, la question qui fâche revient : "Combien ai-je vraiment gagné sur ce projet ?".
+            </p>
+            
+            <div class="challenges">
+                <div class="challenge">
+                    <h3>Fixer le juste prix</h3>
+                    <p>Quel taux horaire pour valoriser votre savoir-faire ? Quel coefficient appliquer sur les fournitures ?</p>
+                </div>
+                <div class="challenge">
+                    <h3>Facturer chaque minute</h3>
+                    <p>Comment être sûr de ne pas oublier les temps de trajet, les allers-retours imprévus chez le fournisseur ?</p>
+                </div>
+                <div class="challenge">
+                    <h3>Analyser le passé</h3>
+                    <p>Savoir précisément sur quel chantier vous avez gagné de l'argent, et surtout, lequel vous en a fait perdre.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="interactive-map" id="map-1">
+            <div class="tile problem" data-tile="devis" style="grid-column: 1; grid-row: 1;">
+                <div class="tile-icon">📄</div>
+                <div class="tile-title">Devis</div>
+            </div>
+            <div class="tile problem" data-tile="materiaux" style="grid-column: 3; grid-row: 2;">
+                <div class="tile-icon">📦</div>
+                <div class="tile-title">Matières Premières</div>
+            </div>
+            <div class="tile problem" data-tile="temps" style="grid-column: 5; grid-row: 1;">
+                <div class="tile-icon">⏰</div>
+                <div class="tile-title">Temps de Travail</div>
+            </div>
+            <div class="tile solution" data-tile="marge" style="grid-column: 3; grid-row: 3;">
+                <div class="tile-icon">📊</div>
+                <div class="tile-title">Marge par Chantier</div>
+            </div>
+            <div class="tile benefit" data-tile="decisions" style="grid-column: 5; grid-row: 4;">
+                <div class="tile-icon">💡</div>
+                <div class="tile-title">Décisions Éclairées</div>
+            </div>
+            <svg class="connections" width="100%" height="100%">
+                <path class="connection-line" data-from="devis" data-to="marge"></path>
+                <path class="connection-line" data-from="materiaux" data-to="marge"></path>
+                <path class="connection-line" data-from="temps" data-to="marge"></path>
+                <path class="connection-line" data-from="marge" data-to="decisions"></path>
+            </svg>
+        </div>
+    </section>
+
+    <!-- Section 2 : Trésorerie -->
+    <section class="stratego-section" data-section="2">
+        <div class="section-content">
+            <h2>La <span class="highlight">trésorerie</span> en dents de scie : piloter à vue en permanence</h2>
+            <p class="section-description">
+                Votre compte en banque ressemble aux montagnes russes. Cette absence de visibilité vous empêche de vous projeter et génère un stress constant. Vous maîtrisez vos outils, mais les flux financiers semblent vous échapper.
+            </p>
+            
+            <div class="challenges">
+                <div class="challenge">
+                    <h3>Le décalage permanent</h3>
+                    <p>Vous payez vos matériaux et vos charges aujourd'hui, mais vos clients, eux, vous paieront dans 30, 60, voire 90 jours.</p>
+                </div>
+                <div class="challenge">
+                    <h3>Le coût du stock</h3>
+                    <p>Vous financez des matières premières qui dorment à l'atelier ou dans la camionnette, sans savoir quand elles se transformeront en chiffre d'affaires.</p>
+                </div>
+                <div class="challenge">
+                    <h3>L'absence de visibilité</h3>
+                    <p>Impossible de savoir sereinement ce dont vous disposerez dans 3 mois pour payer l'URSSAF, la TVA ou simplement votre salaire.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="interactive-map" id="map-2">
+            <div class="tile problem" data-tile="fournisseurs" style="grid-column: 1; grid-row: 2;">
+                <div class="tile-icon">🛒</div>
+                <div class="tile-title">Fournisseurs / Achats</div>
+            </div>
+            <div class="tile problem" data-tile="charges" style="grid-column: 2; grid-row: 1;">
+                <div class="tile-icon">👤💰</div>
+                <div class="tile-title">Charges / Salaires</div>
+            </div>
+            <div class="tile problem" data-tile="factures" style="grid-column: 5; grid-row: 2;">
+                <div class="tile-icon">📋⏰</div>
+                <div class="tile-title">Factures Clients</div>
+            </div>
+            <div class="tile solution" data-tile="previsionnel" style="grid-column: 3; grid-row: 3;">
+                <div class="tile-icon">📈</div>
+                <div class="tile-title">Prévisionnel de Trésorerie</div>
+            </div>
+            <div class="tile benefit" data-tile="serenite" style="grid-column: 4; grid-row: 4;">
+                <div class="tile-icon">✅</div>
+                <div class="tile-title">Sérénité / Anticipation</div>
+            </div>
+            <svg class="connections" width="100%" height="100%">
+                <path class="connection-line dashed" data-from="fournisseurs" data-to="previsionnel"></path>
+                <path class="connection-line dashed" data-from="charges" data-to="previsionnel"></path>
+                <path class="connection-line dashed" data-from="factures" data-to="previsionnel"></path>
+                <path class="connection-line" data-from="previsionnel" data-to="serenite"></path>
+            </svg>
+        </div>
+    </section>
+
+    <!-- Section 3 : Croissance -->
+    <section class="stratego-section" data-section="3">
+        <div class="section-content">
+            <h2>Investir, recruter : seul face aux grandes <span class="highlight">décisions</span>.</h2>
+            <p class="section-description">
+                Votre carnet de commandes se remplit, votre réputation grandit. Viennent alors les grandes décisions qui peuvent faire passer votre entreprise à l'étape supérieure... ou la mettre en difficulté. Et pour ces choix, vous êtes souvent seul.
+            </p>
+            
+            <div class="challenges">
+                <div class="challenge">
+                    <h3>Le pari matériel</h3>
+                    <p>Est-ce le bon moment d'investir dans cette nouvelle machine ? De changer de véhicule ? Pouvez-vous vraiment vous le permettre ?</p>
+                </div>
+                <div class="challenge">
+                    <h3>Le défi humain</h3>
+                    <p>L'idée d'embaucher votre premier salarié ou un apprenti vous tente, mais les démarches et les responsabilités vous semblent être une véritable montagne.</p>
+                </div>
+                <div class="challenge">
+                    <h3>La peur du risque</h3>
+                    <p>Chaque grande décision ressemble à un pari sur l'avenir, et vous avez le sentiment de le faire seul, sans filet de sécurité pour valider vos intuitions.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="interactive-map" id="map-3">
+            <div class="tile problem central" data-tile="doute" style="grid-column: 3; grid-row: 2;">
+                <div class="tile-icon">🛤️</div>
+                <div class="tile-title">Doute / Incertitude</div>
+            </div>
+            <div class="tile problem" data-tile="investissement" style="grid-column: 1; grid-row: 3;">
+                <div class="tile-icon">🔧⚒️</div>
+                <div class="tile-title">Investissement Matériel</div>
+            </div>
+            <div class="tile problem" data-tile="recrutement" style="grid-column: 5; grid-row: 3;">
+                <div class="tile-icon">👤➕</div>
+                <div class="tile-title">Recrutement</div>
+            </div>
+            <div class="tile solution" data-tile="conseil" style="grid-column: 3; grid-row: 3;">
+                <div class="tile-icon">💬⭐</div>
+                <div class="tile-title">Conseil Stratégique</div>
+            </div>
+            <div class="tile benefit" data-tile="croissance" style="grid-column: 4; grid-row: 4;">
+                <div class="tile-icon">🛡️✅</div>
+                <div class="tile-title">Croissance Sereine</div>
+            </div>
+            <svg class="connections" width="100%" height="100%">
+                <path class="connection-line dashed" data-from="doute" data-to="investissement"></path>
+                <path class="connection-line dashed" data-from="doute" data-to="recrutement"></path>
+                <path class="connection-line intervention" data-from="conseil" data-to="doute"></path>
+                <path class="connection-line" data-from="conseil" data-to="croissance"></path>
+            </svg>
+        </div>
+    </section>
+</div>
+
+<!-- CSS optimisé pour Squarespace -->
+<style>
+/* Isolation pour Squarespace */
+#stratego-interactive-map {
+    --dark-blue: #0B2957;
+    --gold: #BF9B30;
+    --light-blue: #3a8eff;
+    --dark-gray: #4A4A4A;
+    --light-gray: #f8f9fa;
+    --inactive-gray: #e5e7eb;
+    --white: #ffffff;
+    --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    
+    font-family: 'Raleway', sans-serif !important;
+    line-height: 1.6;
+    color: var(--dark-gray);
+    position: relative;
+    z-index: 1;
+    background: transparent;
+}
+
+#stratego-interactive-map *,
+#stratego-interactive-map *::before,
+#stratego-interactive-map *::after {
+    box-sizing: border-box;
+}
+
+#stratego-interactive-map .stratego-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+#stratego-interactive-map .stratego-header {
+    text-align: center;
+    padding: 80px 0 60px;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+#stratego-interactive-map .stratego-header h1 {
+    font-family: 'Space Grotesk', sans-serif !important;
+    font-weight: 700 !important;
+    font-size: 3.5rem !important;
+    color: var(--dark-blue) !important;
+    margin: 0 0 24px 0 !important;
+    line-height: 1.2 !important;
+    text-align: center !important;
+}
+
+#stratego-interactive-map .subtitle {
+    font-size: 1.25rem !important;
+    color: var(--dark-gray) !important;
+    max-width: 800px;
+    margin: 0 auto !important;
+    text-align: center;
+}
+
+#stratego-interactive-map .stratego-section {
+    margin-bottom: 120px !important;
+    opacity: 0;
+    transform: translateY(50px);
+    transition: all 0.8s ease;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: start;
+}
+
+#stratego-interactive-map .stratego-section.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+#stratego-interactive-map .section-content {
+    padding-right: 40px;
+}
+
+#stratego-interactive-map .stratego-section h2 {
+    font-family: 'Space Grotesk', sans-serif !important;
+    font-weight: 700 !important;
+    font-size: 2.5rem !important;
+    color: var(--dark-blue) !important;
+    margin: 0 0 24px 0 !important;
+    line-height: 1.3 !important;
+}
+
+#stratego-interactive-map .highlight {
+    color: var(--gold) !important;
+}
+
+#stratego-interactive-map .section-description {
+    font-size: 1.125rem !important;
+    color: var(--dark-gray) !important;
+    margin-bottom: 40px !important;
+}
+
+#stratego-interactive-map .challenges {
+    display: flex !important;
+    flex-direction: column;
+    gap: 24px;
+}
+
+#stratego-interactive-map .challenge {
+    background: var(--white) !important;
+    padding: 24px !important;
+    border-radius: 12px !important;
+    box-shadow: var(--shadow) !important;
+}
+
+#stratego-interactive-map .challenge h3 {
+    font-family: 'Raleway', sans-serif !important;
+    font-weight: 700 !important;
+    color: var(--dark-blue) !important;
+    margin: 0 0 8px 0 !important;
+    font-size: 1.125rem !important;
+}
+
+#stratego-interactive-map .challenge p {
+    color: var(--dark-gray) !important;
+    font-size: 0.95rem !important;
+    margin: 0 !important;
+}
+
+#stratego-interactive-map .interactive-map {
+    position: relative;
+    height: 500px;
+    background: var(--white) !important;
+    border-radius: 20px !important;
+    box-shadow: var(--shadow-lg) !important;
+    padding: 40px !important;
+    display: grid !important;
+    grid-template-columns: repeat(6, 1fr) !important;
+    grid-template-rows: repeat(5, 1fr) !important;
+    gap: 20px !important;
+    overflow: hidden;
+}
+
+#stratego-interactive-map .tile {
+    background: var(--inactive-gray) !important;
+    border-radius: 16px !important;
+    padding: 20px !important;
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    cursor: pointer;
+    position: relative;
+    z-index: 2;
+    min-height: 80px;
+    border: 2px solid transparent !important;
+}
+
+#stratego-interactive-map .tile-icon {
+    font-size: 2rem !important;
+    margin-bottom: 8px !important;
+    opacity: 0.7;
+    transition: all 0.4s ease;
+}
+
+#stratego-interactive-map .tile-title {
+    font-size: 0.875rem !important;
+    font-weight: 600 !important;
+    color: var(--dark-gray) !important;
+    transition: all 0.4s ease;
+    opacity: 0.7;
+    margin: 0 !important;
+}
+
+#stratego-interactive-map .tile.active {
+    background: var(--white) !important;
+    box-shadow: var(--shadow-lg) !important;
+    transform: translateY(-4px) !important;
+    border-color: var(--light-blue) !important;
+}
+
+#stratego-interactive-map .tile.active.problem {
+    border-color: var(--gold) !important;
+    background: linear-gradient(135deg, var(--white) 0%, #fefcf3 100%) !important;
+}
+
+#stratego-interactive-map .tile.active.solution {
+    border-color: var(--light-blue) !important;
+    background: linear-gradient(135deg, var(--light-blue) 0%, #60a5fa 100%) !important;
+    color: var(--white) !important;
+}
+
+#stratego-interactive-map .tile.active.benefit {
+    border-color: var(--light-blue) !important;
+    background: linear-gradient(135deg, var(--light-blue) 0%, #2563eb 100%) !important;
+    color: var(--white) !important;
+}
+
+#stratego-interactive-map .tile.active .tile-icon,
+#stratego-interactive-map .tile.active .tile-title {
+    opacity: 1 !important;
+}
+
+#stratego-interactive-map .tile.active.solution .tile-title,
+#stratego-interactive-map .tile.active.benefit .tile-title {
+    color: var(--white) !important;
+}
+
+#stratego-interactive-map .tile:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: var(--shadow) !important;
+}
+
+#stratego-interactive-map .connections {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+#stratego-interactive-map .connection-line {
+    stroke: var(--gold);
+    stroke-width: 3;
+    fill: none;
+    stroke-dasharray: 0;
+    stroke-dashoffset: 0;
+    opacity: 0;
+    transition: all 0.6s ease;
+}
+
+#stratego-interactive-map .connection-line.dashed {
+    stroke-dasharray: 8 4;
+}
+
+#stratego-interactive-map .connection-line.active {
+    opacity: 1;
+    animation: drawLine 1.5s ease forwards;
+}
+
+#stratego-interactive-map .connection-line.intervention {
+    stroke: var(--light-blue);
+    stroke-width: 4;
+}
+
+#stratego-interactive-map .connection-line.solution-line {
+    stroke: var(--light-blue);
+}
+
+@keyframes drawLine {
+    from { stroke-dashoffset: 1000; }
+    to { stroke-dashoffset: 0; }
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+#stratego-interactive-map .tile.pulse {
+    animation: pulse 2s infinite;
+}
+
+#stratego-interactive-map .tile.glow {
+    box-shadow: 0 0 20px rgba(58, 143, 255, 0.6) !important;
+}
+
+#stratego-interactive-map .tile.fade-in {
+    animation: fadeInUp 0.6s ease forwards;
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive pour Squarespace */
+@media (max-width: 1024px) {
+    #stratego-interactive-map .stratego-section {
+        grid-template-columns: 1fr !important;
+        gap: 40px !important;
+    }
+    
+    #stratego-interactive-map .section-content {
+        padding-right: 0 !important;
+    }
+    
+    #stratego-interactive-map .interactive-map {
+        height: 400px !important;
+        padding: 20px !important;
+    }
+    
+    #stratego-interactive-map .stratego-header h1 {
+        font-size: 2.5rem !important;
+    }
+    
+    #stratego-interactive-map .stratego-section h2 {
+        font-size: 2rem !important;
+    }
+}
+
+@media (max-width: 768px) {
+    #stratego-interactive-map .interactive-map {
+        height: 350px !important;
+        grid-template-columns: repeat(4, 1fr) !important;
+        grid-template-rows: repeat(6, 1fr) !important;
+    }
+    
+    #stratego-interactive-map .tile {
+        padding: 15px !important;
+        min-height: 60px !important;
+    }
+    
+    #stratego-interactive-map .tile-icon {
+        font-size: 1.5rem !important;
+        margin-bottom: 4px !important;
+    }
+    
+    #stratego-interactive-map .tile-title {
+        font-size: 0.75rem !important;
+    }
+    
+    #stratego-interactive-map .stratego-header h1 {
+        font-size: 2rem !important;
+    }
+    
+    #stratego-interactive-map .stratego-section h2 {
+        font-size: 1.75rem !important;
+    }
+}
+</style>
+
+<!-- JavaScript optimisé pour Squarespace -->
+<script>
+(function() {
+    'use strict';
+    
+    // Attendre que Squarespace soit prêt
+    function initStrategoMap() {
+        if (!document.querySelector('#stratego-interactive-map')) {
+            setTimeout(initStrategoMap, 100);
+            return;
+        }
+        
+        class SquarespaceStrategoMap {
+            constructor() {
+                this.sections = document.querySelectorAll('#stratego-interactive-map .stratego-section');
+                this.animationTimers = [];
+                this.init();
+            }
+            
+            init() {
+                this.setupIntersectionObserver();
+                this.setupSVGPaths();
+                this.bindEvents();
+            }
+            
+            setupIntersectionObserver() {
+                const options = {
+                    root: null,
+                    rootMargin: '-20% 0px -20% 0px',
+                    threshold: 0.3
+                };
+                
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const section = entry.target;
+                            const sectionNumber = section.dataset.section;
+                            
+                            section.classList.add('visible');
+                            
+                            setTimeout(() => {
+                                this.triggerSectionAnimation(sectionNumber);
+                            }, 500);
+                        }
+                    });
+                }, options);
+                
+                this.sections.forEach(section => {
+                    observer.observe(section);
+                });
+            }
+            
+            setupSVGPaths() {
+                this.sections.forEach(section => {
+                    const svg = section.querySelector('.connections');
+                    if (svg) {
+                        this.calculatePaths(svg);
+                    }
+                });
+            }
+            
+            calculatePaths(svg) {
+                const paths = svg.querySelectorAll('.connection-line');
+                const container = svg.parentElement;
+                
+                paths.forEach(path => {
+                    const fromTile = path.dataset.from;
+                    const toTile = path.dataset.to;
+                    
+                    const fromElement = container.querySelector(`[data-tile="${fromTile}"]`);
+                    const toElement = container.querySelector(`[data-tile="${toTile}"]`);
+                    
+                    if (fromElement && toElement) {
+                        const fromRect = fromElement.getBoundingClientRect();
+                        const toRect = toElement.getBoundingClientRect();
+                        const containerRect = container.getBoundingClientRect();
+                        
+                        const fromX = fromRect.left + fromRect.width / 2 - containerRect.left;
+                        const fromY = fromRect.top + fromRect.height / 2 - containerRect.top;
+                        const toX = toRect.left + toRect.width / 2 - containerRect.left;
+                        const toY = toRect.top + toRect.height / 2 - containerRect.top;
+                        
+                        const midX = (fromX + toX) / 2;
+                        const controlX1 = fromX + (midX - fromX) * 0.5;
+                        const controlY1 = fromY;
+                        const controlX2 = toX - (toX - midX) * 0.5;
+                        const controlY2 = toY;
+                        
+                        const pathData = `M ${fromX} ${fromY} C ${controlX1} ${controlY1}, ${controlX2} ${controlY2}, ${toX} ${toY}`;
+                        path.setAttribute('d', pathData);
+                        
+                        const length = path.getTotalLength();
+                        path.style.strokeDasharray = length;
+                        path.style.strokeDashoffset = length;
+                    }
+                });
+            }
+            
+            triggerSectionAnimation(sectionNumber) {
+                this.clearAnimationTimers();
+                
+                switch(sectionNumber) {
+                    case '1': this.animateSection1(); break;
+                    case '2': this.animateSection2(); break;
+                    case '3': this.animateSection3(); break;
+                }
+            }
+            
+            animateSection1() {
+                const section = document.querySelector('#stratego-interactive-map [data-section="1"]');
+                const tiles = {
+                    devis: section.querySelector('[data-tile="devis"]'),
+                    materiaux: section.querySelector('[data-tile="materiaux"]'),
+                    temps: section.querySelector('[data-tile="temps"]'),
+                    marge: section.querySelector('[data-tile="marge"]'),
+                    decisions: section.querySelector('[data-tile="decisions"]')
+                };
+                
+                this.animationTimers.push(setTimeout(() => tiles.devis.classList.add('active', 'fade-in'), 0));
+                this.animationTimers.push(setTimeout(() => tiles.materiaux.classList.add('active', 'fade-in'), 200));
+                this.animationTimers.push(setTimeout(() => tiles.temps.classList.add('active', 'fade-in'), 400));
+                this.animationTimers.push(setTimeout(() => this.animateConnections(section, ['devis', 'materiaux', 'temps'], 'marge'), 1200));
+                this.animationTimers.push(setTimeout(() => tiles.marge.classList.add('active', 'fade-in', 'glow'), 2000));
+                this.animationTimers.push(setTimeout(() => this.animateConnection(section, 'marge', 'decisions'), 2800));
+                this.animationTimers.push(setTimeout(() => tiles.decisions.classList.add('active', 'fade-in'), 3200));
+            }
+            
+            animateSection2() {
+                const section = document.querySelector('#stratego-interactive-map [data-section="2"]');
+                const tiles = {
+                    fournisseurs: section.querySelector('[data-tile="fournisseurs"]'),
+                    charges: section.querySelector('[data-tile="charges"]'),
+                    factures: section.querySelector('[data-tile="factures"]'),
+                    previsionnel: section.querySelector('[data-tile="previsionnel"]'),
+                    serenite: section.querySelector('[data-tile="serenite"]')
+                };
+                
+                this.animationTimers.push(setTimeout(() => {
+                    tiles.fournisseurs.classList.add('active', 'fade-in');
+                    tiles.charges.classList.add('active', 'fade-in');
+                }, 0));
+                
+                this.animationTimers.push(setTimeout(() => {
+                    tiles.factures.classList.add('active', 'fade-in');
+                    tiles.factures.style.animation = 'pulse 1.5s infinite';
+                }, 600));
+                
+                this.animationTimers.push(setTimeout(() => this.animateConnections(section, ['fournisseurs', 'charges', 'factures'], 'previsionnel'), 1400));
+                
+                this.animationTimers.push(setTimeout(() => {
+                    tiles.previsionnel.classList.add('active', 'fade-in', 'glow');
+                    tiles.factures.style.animation = '';
+                    this.solidifyConnections(section, ['fournisseurs', 'charges', 'factures']);
+                }, 2200));
+                
+                this.animationTimers.push(setTimeout(() => this.animateConnection(section, 'previsionnel', 'serenite'), 3000));
+                this.animationTimers.push(setTimeout(() => tiles.serenite.classList.add('active', 'fade-in'), 3400));
+            }
+            
+            animateSection3() {
+                const section = document.querySelector('#stratego-interactive-map [data-section="3"]');
+                const tiles = {
+                    doute: section.querySelector('[data-tile="doute"]'),
+                    investissement: section.querySelector('[data-tile="investissement"]'),
+                    recrutement: section.querySelector('[data-tile="recrutement"]'),
+                    conseil: section.querySelector('[data-tile="conseil"]'),
+                    croissance: section.querySelector('[data-tile="croissance"]')
+                };
+                
+                this.animationTimers.push(setTimeout(() => tiles.doute.classList.add('active', 'fade-in', 'pulse'), 0));
+                
+                this.animationTimers.push(setTimeout(() => {
+                    this.animateConnections(section, ['doute'], 'investissement');
+                    this.animateConnections(section, ['doute'], 'recrutement');
+                }, 800));
+                
+                this.animationTimers.push(setTimeout(() => {
+                    tiles.investissement.classList.add('active', 'fade-in');
+                    tiles.recrutement.classList.add('active', 'fade-in');
+                }, 1200));
+                
+                this.animationTimers.push(setTimeout(() => this.animateInterventionLine(section, 'conseil', 'doute'), 2000));
+                
+                this.animationTimers.push(setTimeout(() => {
+                    tiles.doute.classList.remove('active', 'pulse');
+                    tiles.doute.style.opacity = '0.3';
+                    tiles.conseil.classList.add('active', 'fade-in', 'glow');
+                    this.hideConnections(section, ['doute']);
+                }, 2600));
+                
+                this.animationTimers.push(setTimeout(() => this.animateConnection(section, 'conseil', 'croissance'), 3400));
+                this.animationTimers.push(setTimeout(() => tiles.croissance.classList.add('active', 'fade-in'), 3800));
+            }
+            
+            animateConnection(section, fromTile, toTile) {
+                const path = section.querySelector(`[data-from="${fromTile}"][data-to="${toTile}"]`);
+                if (path) path.classList.add('active');
+            }
+            
+            animateConnections(section, fromTiles, toTile) {
+                fromTiles.forEach((fromTile, index) => {
+                    setTimeout(() => this.animateConnection(section, fromTile, toTile), index * 200);
+                });
+            }
+            
+            animateInterventionLine(section, fromTile, toTile) {
+                const path = section.querySelector(`[data-from="${fromTile}"][data-to="${toTile}"]`);
+                if (path) path.classList.add('intervention', 'active');
+            }
+            
+            hideConnections(section, tiles) {
+                tiles.forEach(tile => {
+                    const connections = section.querySelectorAll(`[data-from="${tile}"], [data-to="${tile}"]`);
+                    connections.forEach(connection => {
+                        if (!connection.classList.contains('intervention')) {
+                            connection.style.opacity = '0';
+                        }
+                    });
+                });
+            }
+            
+            solidifyConnections(section, tiles) {
+                tiles.forEach(tile => {
+                    const connections = section.querySelectorAll(`[data-from="${tile}"]`);
+                    connections.forEach(connection => {
+                        connection.classList.remove('dashed');
+                        connection.classList.add('solution-line');
+                    });
+                });
+            }
+            
+            bindEvents() {
+                window.addEventListener('resize', this.debounce(() => this.setupSVGPaths(), 250));
+                
+                document.addEventListener('click', (e) => {
+                    if (e.target.closest('#stratego-interactive-map .tile')) {
+                        const tile = e.target.closest('.tile');
+                        tile.style.transform = 'scale(0.95)';
+                        setTimeout(() => tile.style.transform = '', 150);
+                    }
+                });
+            }
+            
+            clearAnimationTimers() {
+                this.animationTimers.forEach(timer => clearTimeout(timer));
+                this.animationTimers = [];
+            }
+            
+            debounce(func, wait) {
+                let timeout;
+                return function(...args) {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => func.apply(this, args), wait);
+                };
+            }
+        }
+        
+        // Initialiser la carte
+        new SquarespaceStrategoMap();
+    }
+    
+    // Démarrer quand Squarespace est prêt
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initStrategoMap);
+    } else {
+        initStrategoMap();
+    }
+    
+    // Backup pour Squarespace
+    window.addEventListener('load', initStrategoMap);
+})();
+</script>
+
+</div>
+
+<!-- 
+=======================================================
+INSTRUCTIONS SQUARESPACE - RÉCAPITULATIF :
+=======================================================
+
+1. ✅ COPIEZ tout ce code ci-dessus
+2. ✅ Ouvrez votre éditeur Squarespace 
+3. ✅ Ajoutez un "Bloc de code" (Code Block)
+4. ✅ COLLEZ tout le code dans le bloc
+5. ✅ Sauvegardez et publiez !
+
+✨ Ça marche immédiatement !
+
+IMPORTANT : N'ajoutez rien d'autre, tout est inclus.
+Le code est optimisé spécialement pour Squarespace.
+
+Si ça ne marche pas :
+- Vérifiez que vous êtes sur un plan Business+ 
+- Essayez de publier puis recharger la page
+
+=======================================================
+-->
