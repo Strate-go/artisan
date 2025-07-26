@@ -669,8 +669,12 @@ INSTRUCTIONS :
             init() {
                 this.setupSVGPaths();
                 this.setupScrollObserver();
-                this.startSection(1);
                 this.bindEvents();
+                
+                // Initialisation automatique de la première section avec un délai
+                setTimeout(() => {
+                    this.startSection(1);
+                }, 500);
             }
             
             setupScrollObserver() {
@@ -686,9 +690,12 @@ INSTRUCTIONS :
                     entries.forEach(entry => {
                         if (entry.isIntersecting) {
                             const sectionNumber = parseInt(entry.target.dataset.content);
-                            console.log('🎯 Section detected:', sectionNumber);
+                            console.log('🎯 Section detected:', sectionNumber, 'Current:', this.currentSection);
                             if (sectionNumber !== this.currentSection) {
+                                console.log('🚀 Changing to section:', sectionNumber);
                                 this.startSection(sectionNumber);
+                            } else {
+                                console.log('📍 Same section, continuing...');
                             }
                         }
                     });
@@ -702,7 +709,8 @@ INSTRUCTIONS :
             }
             
             startSection(sectionNumber) {
-                console.log('🚀 Starting section:', sectionNumber);
+                console.log('✨ Starting section:', sectionNumber);
+                
                 // Arrêter les animations précédentes
                 this.stopAllContinuousAnimations();
                 this.clearAnimationTimers();
@@ -712,8 +720,11 @@ INSTRUCTIONS :
                 // Réinitialiser toutes les tuiles
                 this.resetAllTiles();
                 
-                // Démarrer les animations continues pour cette section
-                this.startContinuousAnimation(sectionNumber);
+                // Petite pause pour s'assurer que le reset est terminé
+                setTimeout(() => {
+                    // Démarrer les animations continues pour cette section
+                    this.startContinuousAnimation(sectionNumber);
+                }, 100);
             }
             
             stopAllContinuousAnimations() {
@@ -736,16 +747,28 @@ INSTRUCTIONS :
             }
             
             startContinuousAnimation(sectionNumber) {
+                console.log('🎬 Starting continuous animation for section:', sectionNumber);
+                
+                // S'assurer qu'il n'y a pas déjà une animation en cours pour cette section
+                if (this.continuousIntervals[sectionNumber]) {
+                    clearInterval(this.continuousIntervals[sectionNumber]);
+                }
+                
                 // Première animation immédiate
                 this.runSectionAnimation(sectionNumber);
                 
                 // Animation continue toutes les 8 secondes (plus lent comme Stripe)
                 this.continuousIntervals[sectionNumber] = setInterval(() => {
-                    this.runSectionAnimation(sectionNumber);
+                    // Vérifier qu'on est toujours dans la bonne section
+                    if (this.currentSection === sectionNumber) {
+                        console.log('🔄 Repeating animation for section:', sectionNumber);
+                        this.runSectionAnimation(sectionNumber);
+                    }
                 }, 8000);
             }
             
             runSectionAnimation(sectionNumber) {
+                console.log('🎭 Running animation for section:', sectionNumber);
                 this.resetAllTiles();
                 
                 // Masquer toutes les tuiles d'abord
@@ -985,6 +1008,7 @@ INSTRUCTIONS :
             }
             
             clearAnimationTimers() {
+                console.log('🧹 Clearing', this.animationTimers.length, 'animation timers');
                 this.animationTimers.forEach(timer => clearTimeout(timer));
                 this.animationTimers = [];
             }
