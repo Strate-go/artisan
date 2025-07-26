@@ -675,6 +675,10 @@ INSTRUCTIONS :
             
             setupScrollObserver() {
                 const contentBlocks = document.querySelectorAll('.content-block');
+                console.log('🔍 Found content blocks:', contentBlocks.length);
+                contentBlocks.forEach((block, index) => {
+                    console.log(`Block ${index}:`, block, 'data-content:', block.dataset.content);
+                });
                 
                 const observerOptions = {
                     root: null,
@@ -684,10 +688,15 @@ INSTRUCTIONS :
                 
                 const observer = new IntersectionObserver((entries) => {
                     entries.forEach(entry => {
+                        console.log('🎯 Intersection:', entry.target, 'isIntersecting:', entry.isIntersecting, 'data-content:', entry.target.dataset.content);
                         if (entry.isIntersecting) {
                             const sectionNumber = parseInt(entry.target.dataset.content);
+                            console.log('📍 Section detected:', sectionNumber, 'Current:', this.currentSection);
                             if (sectionNumber !== this.currentSection) {
+                                console.log('🚀 Starting section:', sectionNumber);
                                 this.startSection(sectionNumber);
+                            } else {
+                                console.log('⏭️ Same section, skipping');
                             }
                         }
                     });
@@ -701,6 +710,7 @@ INSTRUCTIONS :
             }
             
             startSection(sectionNumber) {
+                console.log('✨ START SECTION:', sectionNumber);
                 // Arrêter les animations précédentes
                 this.stopAllContinuousAnimations();
                 this.clearAnimationTimers();
@@ -744,6 +754,7 @@ INSTRUCTIONS :
             }
             
             runSectionAnimation(sectionNumber) {
+                console.log('🎬 RUN ANIMATION for section:', sectionNumber);
                 this.resetAllTiles();
                 
                 // Masquer toutes les tuiles d'abord
@@ -757,10 +768,22 @@ INSTRUCTIONS :
                 });
                 
                 setTimeout(() => {
+                    console.log('🎭 SWITCH section:', sectionNumber, typeof sectionNumber);
                     switch(sectionNumber) {
-                        case 1: this.animateSection1(); break;
-                        case 2: this.animateSection2(); break;
-                        case 3: this.animateSection3(); break;
+                        case 1: 
+                            console.log('→ animateSection1');
+                            this.animateSection1(); 
+                            break;
+                        case 2: 
+                            console.log('→ animateSection2');
+                            this.animateSection2(); 
+                            break;
+                        case 3: 
+                            console.log('→ animateSection3');
+                            this.animateSection3(); 
+                            break;
+                        default:
+                            console.log('❌ Unknown section:', sectionNumber);
                     }
                 }, 200);
             }
@@ -796,6 +819,7 @@ INSTRUCTIONS :
             }
             
             animateSection2() {
+                console.log('🎪 ANIMATE SECTION 2');
                 const tiles = {
                     fournisseurs: document.querySelector('[data-tile="fournisseurs"][data-section="2"]'),
                     charges: document.querySelector('[data-tile="charges"][data-section="2"]'),
@@ -803,6 +827,7 @@ INSTRUCTIONS :
                     previsionnel: document.querySelector('[data-tile="previsionnel"][data-section="2"]'),
                     serenite: document.querySelector('[data-tile="serenite"][data-section="2"]')
                 };
+                console.log('🎯 Section 2 tiles found:', tiles);
                 
                 this.animationTimers.push(setTimeout(() => {
                     if (tiles.fournisseurs) tiles.fournisseurs.classList.add('active');
