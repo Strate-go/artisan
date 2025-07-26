@@ -22,6 +22,9 @@ INSTRUCTIONS :
     <!-- Section avec texte à gauche et carte à droite -->
     <section class="main-section">
         <div class="section-content">
+            <!-- Balise début Section 1 -->
+            <div class="section-marker section-start" data-section="1"></div>
+            
             <!-- Section 1 : Rentabilité -->
             <div class="content-block active" data-content="1">
                 <h2>Votre <span class="highlight">rentabilité</span>, ce grand brouillard.</h2>
@@ -44,6 +47,10 @@ INSTRUCTIONS :
                     </div>
                 </div>
             </div>
+
+            <!-- Balise fin Section 1 / début Section 2 -->
+            <div class="section-marker section-end" data-section="1"></div>
+            <div class="section-marker section-start" data-section="2"></div>
 
             <!-- Section 2 : Trésorerie -->
             <div class="content-block" data-content="2">
@@ -68,6 +75,10 @@ INSTRUCTIONS :
                 </div>
             </div>
 
+            <!-- Balise fin Section 2 / début Section 3 -->
+            <div class="section-marker section-end" data-section="2"></div>
+            <div class="section-marker section-start" data-section="3"></div>
+
             <!-- Section 3 : Croissance -->
             <div class="content-block" data-content="3">
                 <h2>Investir, recruter : seul face aux grandes <span class="highlight">décisions</span>.</h2>
@@ -91,6 +102,8 @@ INSTRUCTIONS :
                 </div>
             </div>
 
+            <!-- Balise fin Section 3 -->
+            <div class="section-marker section-end" data-section="3"></div>
 
         </div>
 
@@ -278,6 +291,14 @@ INSTRUCTIONS :
     --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
     
     font-family: 'Raleway', sans-serif !important;
+}
+
+/* Balises de section invisibles */
+.section-marker {
+    height: 1px;
+    width: 100%;
+    opacity: 0;
+    pointer-events: none;
     line-height: 1.6;
     color: var(--dark-gray);
     position: relative;
@@ -663,7 +684,6 @@ INSTRUCTIONS :
                 this.animationTimers = [];
                 this.observers = [];
                 this.continuousIntervals = {};
-                this.isAnimating = {}; // Verrouillage pour chaque section
                 this.init();
             }
             
@@ -679,34 +699,51 @@ INSTRUCTIONS :
             }
             
             setupScrollObserver() {
-                const contentBlocks = document.querySelectorAll('.content-block');
+                console.log('🔧 Setting up NEW marker-based scroll observer');
                 
-                const observerOptions = {
-                    root: null,
-                    rootMargin: '-20% 0px -20% 0px',
-                    threshold: 0.3
-                };
-                
-                const observer = new IntersectionObserver((entries) => {
+                // Observer pour les balises de début (entrée dans une section)
+                const startObserver = new IntersectionObserver((entries) => {
                     entries.forEach(entry => {
                         if (entry.isIntersecting) {
-                            const sectionNumber = parseInt(entry.target.dataset.content);
-                            console.log('🎯 Section detected:', sectionNumber, 'Current:', this.currentSection, 'Animating:', this.isAnimating[sectionNumber]);
+                            const sectionNumber = parseInt(entry.target.dataset.section);
+                            console.log('🚀 ENTERING section:', sectionNumber, 'Current:', this.currentSection);
                             if (sectionNumber !== this.currentSection) {
-                                console.log('🚀 Changing to section:', sectionNumber);
                                 this.startSection(sectionNumber);
-                            } else {
-                                console.log('📍 Same section, no change needed - animation continues...');
                             }
                         }
                     });
-                }, observerOptions);
-                
-                contentBlocks.forEach(block => {
-                    observer.observe(block);
+                }, {
+                    root: null,
+                    rootMargin: '0px',
+                    threshold: 0.1
                 });
                 
-                this.observers.push(observer);
+                // Observer pour les balises de fin (sortie d'une section)
+                const endObserver = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (!entry.isIntersecting) {
+                            const sectionNumber = parseInt(entry.target.dataset.section);
+                            console.log('👋 LEAVING section:', sectionNumber, 'Current:', this.currentSection);
+                            // Ne rien faire ici, on ne change que sur les entrées
+                        }
+                    });
+                }, {
+                    root: null,
+                    rootMargin: '0px',
+                    threshold: 0.1
+                });
+                
+                // Observer toutes les balises de début
+                document.querySelectorAll('.section-marker.section-start').forEach(marker => {
+                    startObserver.observe(marker);
+                });
+                
+                // Observer toutes les balises de fin
+                document.querySelectorAll('.section-marker.section-end').forEach(marker => {
+                    endObserver.observe(marker);
+                });
+                
+                this.observers.push(startObserver, endObserver);
             }
             
             startSection(sectionNumber) {
@@ -716,19 +753,13 @@ INSTRUCTIONS :
                 this.stopAllContinuousAnimations();
                 this.clearAnimationTimers();
                 
-                // Réinitialiser tous les verrous d'animation
-                this.isAnimating = {};
-                
                 this.currentSection = sectionNumber;
                 
                 // Réinitialiser toutes les tuiles
                 this.resetAllTiles();
                 
-                // Petite pause pour s'assurer que le reset est terminé
-                setTimeout(() => {
-                    // Démarrer les animations continues pour cette section
-                    this.startContinuousAnimation(sectionNumber);
-                }, 100);
+                // Démarrer les animations continues pour cette section immédiatement
+                this.startContinuousAnimation(sectionNumber);
             }
             
             stopAllContinuousAnimations() {
@@ -736,11 +767,6 @@ INSTRUCTIONS :
                     clearInterval(interval);
                 });
                 this.continuousIntervals = {};
-                
-                // Nettoyer aussi tous les verrous d'animation
-                Object.keys(this.isAnimating).forEach(section => {
-                    this.clearAnimationLock(parseInt(section));
-                });
             }
             
             resetAllTiles() {
@@ -782,23 +808,13 @@ INSTRUCTIONS :
                 
                 // Animation continue toutes les 8 secondes (plus lent comme Stripe)
                 this.continuousIntervals[sectionNumber] = setInterval(() => {
-                    // Vérifier qu'on est toujours dans la bonne section
-                    if (this.currentSection === sectionNumber) {
-                        console.log('🔄 Repeating animation for section:', sectionNumber);
-                        this.runSectionAnimation(sectionNumber);
-                    }
+                    console.log('🔄 Repeating animation for section:', sectionNumber);
+                    this.runSectionAnimation(sectionNumber);
                 }, 8000);
             }
             
             runSectionAnimation(sectionNumber) {
-                // Vérifier si une animation est déjà en cours pour cette section
-                if (this.isAnimating[sectionNumber]) {
-                    console.log('⏸️ Animation already running for section:', sectionNumber, '- skipping RESET and new animation');
-                    return;
-                }
-                
                 console.log('🎭 Running animation for section:', sectionNumber);
-                this.isAnimating[sectionNumber] = true;
                 
                 // Reset seulement les tuiles de cette section
                 this.resetTilesForSection(sectionNumber);
@@ -819,12 +835,6 @@ INSTRUCTIONS :
                         case 2: this.animateSection2(); break;
                         case 3: this.animateSection3(); break;
                     }
-                    
-                    // Déverrouiller l'animation après sa completion
-                    setTimeout(() => {
-                        this.isAnimating[sectionNumber] = false;
-                        console.log('🔓 Animation unlocked for section:', sectionNumber);
-                    }, 5500); // 5.5 secondes pour que l'animation se termine complètement
                 }, 200);
             }
             
@@ -1051,12 +1061,7 @@ INSTRUCTIONS :
                 this.animationTimers = [];
             }
             
-            clearAnimationLock(sectionNumber) {
-                if (this.isAnimating[sectionNumber]) {
-                    this.isAnimating[sectionNumber] = false;
-                    console.log('🔓 Force unlocked section:', sectionNumber);
-                }
-            }
+
             
             destroy() {
                 this.stopAllContinuousAnimations();
