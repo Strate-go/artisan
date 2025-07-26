@@ -335,15 +335,15 @@ INSTRUCTIONS :
 
 #stratego-final-map .section-content {
     padding-right: 40px;
-    padding-bottom: 50vh;
+    padding-bottom: 100px;
 }
 
 #stratego-final-map .content-block {
     opacity: 1;
     visibility: visible;
     transition: all 0.6s ease;
-    margin-bottom: 60vh;
-    padding: 60px 0;
+    margin-bottom: 0vh;
+    padding: 80px 0;
 }
 
 #stratego-final-map .content-block h2 {
@@ -398,34 +398,34 @@ INSTRUCTIONS :
 /* CARTE INTERACTIVE UNIQUE */
 #stratego-final-map .single-interactive-map {
     position: sticky;
-    top: 50%;
+    top: 50vh;
     transform: translateY(-50%);
-    height: calc(100vh - 200px);
-    min-height: 600px;
-    max-height: 700px;
+    height: 80vh;
+    min-height: 500px;
+    max-height: 800px;
     background: var(--white) !important;
     border-radius: 20px !important;
     box-shadow: var(--shadow-lg) !important;
-    padding: 40px !important;
+    padding: 30px !important;
     display: grid !important;
     grid-template-columns: repeat(8, 1fr) !important;
     grid-template-rows: repeat(7, 1fr) !important;
-    gap: 20px !important;
-    overflow: hidden;
+    gap: 15px !important;
+    overflow: visible;
 }
 
-/* TUILES - NOUVELLES SPÉCIFICATIONS */
+/* TUILES - STYLE STRIPE */
 #stratego-final-map .tile {
-    background: var(--white) !important;
-    border: 2px solid var(--inactive-gray) !important;
-    border-radius: 16px !important;
-    padding: 8px !important;
+    background: var(--light-gray) !important;
+    border: 1px solid transparent !important;
+    border-radius: 12px !important;
+    padding: 12px !important;
     display: flex !important;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     text-align: center;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
     cursor: pointer;
     position: relative;
     z-index: 2;
@@ -438,16 +438,17 @@ INSTRUCTIONS :
 
 #stratego-final-map .tile-icon {
     position: absolute;
-    top: 8px;
-    left: 8px;
-    right: 8px;
-    bottom: 32px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 70%;
+    height: 70%;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.4s ease;
-    color: var(--dark-gray);
-    margin-bottom: 8px;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    color: var(--inactive-gray);
+    opacity: 0.7;
 }
 
 #stratego-final-map .tile-icon svg {
@@ -458,15 +459,16 @@ INSTRUCTIONS :
 }
 
 #stratego-final-map .tile-title {
-    font-size: 0.65rem !important;
+    font-size: 0.7rem !important;
     font-weight: 600 !important;
-    color: var(--dark-gray) !important;
-    transition: all 0.4s ease;
+    color: var(--dark-blue) !important;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     margin: 0 !important;
     opacity: 0 !important;
+    visibility: hidden !important;
     transform: translateY(10px);
     position: absolute;
-    bottom: 6px;
+    bottom: 8px;
     left: 50%;
     transform: translateX(-50%) translateY(10px);
     width: 90%;
@@ -474,13 +476,31 @@ INSTRUCTIONS :
     z-index: 3;
 }
 
-/* TUILES ACTIVES */
+/* TUILES ACTIVES - STYLE STRIPE */
 #stratego-final-map .tile.active {
     background: var(--white) !important;
-    box-shadow: var(--shadow-lg) !important;
-    transform: translateY(-4px) !important;
+    border: 1px solid var(--inactive-gray) !important;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12) !important;
+    transform: translateY(-2px) !important;
 }
 
+/* Icône se réduit et remonte quand active */
+#stratego-final-map .tile.active .tile-icon {
+    top: 25%;
+    transform: translate(-50%, -50%);
+    width: 40%;
+    height: 40%;
+    opacity: 1;
+}
+
+/* Titre apparaît quand active */
+#stratego-final-map .tile.active .tile-title {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateX(-50%) translateY(0) !important;
+}
+
+/* Styles spécifiques par type */
 #stratego-final-map .tile.active.problem {
     border-color: var(--gold) !important;
 }
@@ -492,26 +512,25 @@ INSTRUCTIONS :
 #stratego-final-map .tile.active.solution {
     border-color: var(--light-blue) !important;
     background: linear-gradient(135deg, var(--light-blue) 0%, #60a5fa 100%) !important;
+}
+
+#stratego-final-map .tile.active.solution .tile-icon {
+    color: var(--white) !important;
+}
+
+#stratego-final-map .tile.active.solution .tile-title {
     color: var(--white) !important;
 }
 
 #stratego-final-map .tile.active.benefit {
     border-color: var(--light-blue) !important;
     background: linear-gradient(135deg, var(--light-blue) 0%, #2563eb 100%) !important;
-    color: var(--white) !important;
 }
 
-#stratego-final-map .tile.active .tile-title {
-    opacity: 1 !important;
-    transform: translateX(-50%) translateY(0) !important;
-}
-
-#stratego-final-map .tile.active.solution .tile-icon,
 #stratego-final-map .tile.active.benefit .tile-icon {
     color: var(--white) !important;
 }
 
-#stratego-final-map .tile.active.solution .tile-title,
 #stratego-final-map .tile.active.benefit .tile-title {
     color: var(--white) !important;
 }
@@ -594,15 +613,16 @@ INSTRUCTIONS :
     }
     
     #stratego-final-map .content-block {
-        margin-bottom: 40px !important;
-        padding: 20px 0 !important;
+        margin-bottom: 30px !important;
+        padding: 40px 0 !important;
     }
     
     #stratego-final-map .single-interactive-map {
         position: relative !important;
         top: auto !important;
         transform: none !important;
-        height: 500px !important;
+        height: 60vh !important;
+        min-height: 400px !important;
         padding: 20px !important;
         grid-template-columns: repeat(6, 1fr) !important;
     }
@@ -634,8 +654,13 @@ INSTRUCTIONS :
     }
     
     #stratego-final-map .tile-title {
-        font-size: 0.6rem !important;
-        bottom: 4px !important;
+        font-size: 0.65rem !important;
+        bottom: 6px !important;
+    }
+    
+    #stratego-final-map .tile.active .tile-icon {
+        width: 35% !important;
+        height: 35% !important;
     }
     
 
