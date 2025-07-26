@@ -94,12 +94,7 @@ INSTRUCTIONS :
                 </div>
             </div>
 
-            <!-- Navigation entre sections -->
-            <div class="section-nav">
-                <button class="nav-btn active" data-target="1">Rentabilité</button>
-                <button class="nav-btn" data-target="2">Trésorerie</button>
-                <button class="nav-btn" data-target="3">Croissance</button>
-            </div>
+
         </div>
 
         <!-- CARTE INTERACTIVE UNIQUE -->
@@ -340,20 +335,15 @@ INSTRUCTIONS :
 
 #stratego-final-map .section-content {
     padding-right: 40px;
-    padding-bottom: 200vh;
+    padding-bottom: 100vh;
 }
 
 #stratego-final-map .content-block {
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.6s ease;
-    margin-bottom: 100vh;
-    padding: 60px 0;
-}
-
-#stratego-final-map .content-block.active {
     opacity: 1;
     visibility: visible;
+    transition: all 0.6s ease;
+    margin-bottom: 120vh;
+    padding: 60px 0;
 }
 
 #stratego-final-map .content-block h2 {
@@ -403,36 +393,7 @@ INSTRUCTIONS :
     margin: 0 !important;
 }
 
-/* Navigation entre sections */
-#stratego-final-map .section-nav {
-    display: flex !important;
-    gap: 12px;
-    margin-top: 40px;
-}
 
-#stratego-final-map .nav-btn {
-    background: var(--white) !important;
-    border: 2px solid var(--inactive-gray) !important;
-    border-radius: 8px !important;
-    padding: 12px 24px !important;
-    font-family: 'Raleway', sans-serif !important;
-    font-weight: 600 !important;
-    color: var(--dark-gray) !important;
-    cursor: pointer !important;
-    transition: all 0.3s ease !important;
-    font-size: 0.9rem !important;
-}
-
-#stratego-final-map .nav-btn:hover {
-    border-color: var(--gold) !important;
-    color: var(--dark-blue) !important;
-}
-
-#stratego-final-map .nav-btn.active {
-    background: var(--dark-blue) !important;
-    border-color: var(--dark-blue) !important;
-    color: var(--white) !important;
-}
 
 /* CARTE INTERACTIVE UNIQUE */
 #stratego-final-map .single-interactive-map {
@@ -669,13 +630,7 @@ INSTRUCTIONS :
         bottom: 4px !important;
     }
     
-    #stratego-final-map .section-nav {
-        flex-direction: column !important;
-    }
-    
-    #stratego-final-map .nav-btn {
-        text-align: center !important;
-    }
+
 }
 </style>
 
@@ -695,26 +650,15 @@ INSTRUCTIONS :
                 this.currentSection = 1;
                 this.animationTimers = [];
                 this.observers = [];
-                this.animationInterval = null;
+                this.continuousIntervals = {};
                 this.init();
             }
             
             init() {
-                this.setupNavigation();
                 this.setupSVGPaths();
                 this.setupScrollObserver();
-                this.showSection(1);
+                this.startSection(1);
                 this.bindEvents();
-            }
-            
-            setupNavigation() {
-                const navBtns = document.querySelectorAll('#stratego-final-map .nav-btn');
-                navBtns.forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        const targetSection = parseInt(btn.dataset.target);
-                        this.showSection(targetSection);
-                    });
-                });
             }
             
             setupScrollObserver() {
@@ -722,8 +666,8 @@ INSTRUCTIONS :
                 
                 const observerOptions = {
                     root: null,
-                    rootMargin: '-20% 0px -20% 0px',
-                    threshold: 0.5
+                    rootMargin: '-30% 0px -30% 0px',
+                    threshold: 0.3
                 };
                 
                 const observer = new IntersectionObserver((entries) => {
@@ -731,7 +675,7 @@ INSTRUCTIONS :
                         if (entry.isIntersecting) {
                             const sectionNumber = parseInt(entry.target.dataset.content);
                             if (sectionNumber !== this.currentSection) {
-                                this.showSection(sectionNumber);
+                                this.startSection(sectionNumber);
                             }
                         }
                     });
@@ -742,46 +686,30 @@ INSTRUCTIONS :
                 });
                 
                 this.observers.push(observer);
-                
-                // Auto-restart animation pour la section courante
-                this.startAutoRestart();
             }
             
-            startAutoRestart() {
-                // Redémarre l'animation toutes les 8 secondes
-                this.animationInterval = setInterval(() => {
-                    this.updateMapForSection(this.currentSection);
-                }, 8000);
-            }
-            
-            stopAutoRestart() {
-                if (this.animationInterval) {
-                    clearInterval(this.animationInterval);
-                    this.animationInterval = null;
-                }
-            }
-            
-            showSection(sectionNumber) {
-                this.currentSection = sectionNumber;
-                
-                document.querySelectorAll('#stratego-final-map .nav-btn').forEach(btn => {
-                    btn.classList.toggle('active', parseInt(btn.dataset.target) === sectionNumber);
-                });
-                
-                document.querySelectorAll('#stratego-final-map .content-block').forEach(block => {
-                    block.classList.toggle('active', parseInt(block.dataset.content) === sectionNumber);
-                });
-                
-                // Restart auto-restart timer
-                this.stopAutoRestart();
-                this.startAutoRestart();
-                
-                this.updateMapForSection(sectionNumber);
-            }
-            
-            updateMapForSection(sectionNumber) {
+            startSection(sectionNumber) {
+                // Arrêter les animations précédentes
+                this.stopAllContinuousAnimations();
                 this.clearAnimationTimers();
                 
+                this.currentSection = sectionNumber;
+                
+                // Réinitialiser toutes les tuiles
+                this.resetAllTiles();
+                
+                // Démarrer les animations continues pour cette section
+                this.startContinuousAnimation(sectionNumber);
+            }
+            
+            stopAllContinuousAnimations() {
+                Object.values(this.continuousIntervals).forEach(interval => {
+                    clearInterval(interval);
+                });
+                this.continuousIntervals = {};
+            }
+            
+            resetAllTiles() {
                 document.querySelectorAll('#stratego-final-map .tile').forEach(tile => {
                     tile.classList.remove('active', 'pulse', 'glow');
                     tile.style.opacity = '';
@@ -790,7 +718,22 @@ INSTRUCTIONS :
                 
                 document.querySelectorAll('#stratego-final-map .connection-line').forEach(line => {
                     line.classList.remove('active', 'solution-line');
+                    line.style.opacity = '';
                 });
+            }
+            
+            startContinuousAnimation(sectionNumber) {
+                // Première animation immédiate
+                this.runSectionAnimation(sectionNumber);
+                
+                // Animation continue toutes les 6 secondes
+                this.continuousIntervals[sectionNumber] = setInterval(() => {
+                    this.runSectionAnimation(sectionNumber);
+                }, 6000);
+            }
+            
+            runSectionAnimation(sectionNumber) {
+                this.resetAllTiles();
                 
                 setTimeout(() => {
                     switch(sectionNumber) {
@@ -798,8 +741,10 @@ INSTRUCTIONS :
                         case 2: this.animateSection2(); break;
                         case 3: this.animateSection3(); break;
                     }
-                }, 300);
+                }, 200);
             }
+            
+
             
             animateSection1() {
                 const tiles = {
@@ -972,7 +917,7 @@ INSTRUCTIONS :
             }
             
             destroy() {
-                this.stopAutoRestart();
+                this.stopAllContinuousAnimations();
                 this.clearAnimationTimers();
                 this.observers.forEach(observer => observer.disconnect());
                 this.observers = [];
