@@ -542,7 +542,7 @@ INSTRUCTIONS :
 
 #stratego-final-map .connection-line.active {
     opacity: 1;
-    animation: drawElbow 1.5s ease forwards;
+    animation: drawElbow 2.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
 #stratego-final-map .connection-line.intervention {
@@ -555,8 +555,14 @@ INSTRUCTIONS :
 }
 
 @keyframes drawElbow {
-    from { stroke-dashoffset: 1000; }
-    to { stroke-dashoffset: 0; }
+    from { 
+        stroke-dashoffset: 1000; 
+        opacity: 0;
+    }
+    to { 
+        stroke-dashoffset: 0; 
+        opacity: 1;
+    }
 }
 
 @keyframes fadeIn {
@@ -731,10 +737,10 @@ INSTRUCTIONS :
                 // Première animation immédiate
                 this.runSectionAnimation(sectionNumber);
                 
-                // Animation continue toutes les 6 secondes
+                // Animation continue toutes les 8 secondes (plus lent comme Stripe)
                 this.continuousIntervals[sectionNumber] = setInterval(() => {
                     this.runSectionAnimation(sectionNumber);
-                }, 6000);
+                }, 8000);
             }
             
             runSectionAnimation(sectionNumber) {
@@ -775,18 +781,18 @@ INSTRUCTIONS :
                 }, 0));
                 this.animationTimers.push(setTimeout(() => {
                     if (tiles.materiaux) tiles.materiaux.classList.add('active');
-                }, 200));
+                }, 600));
                 this.animationTimers.push(setTimeout(() => {
                     if (tiles.temps) tiles.temps.classList.add('active');
-                }, 400));
-                this.animationTimers.push(setTimeout(() => this.activateConnections(['devis', 'materiaux', 'temps'], 'marge'), 1200));
+                }, 1200));
+                this.animationTimers.push(setTimeout(() => this.activateConnections(['devis', 'materiaux', 'temps'], 'marge'), 2000));
                 this.animationTimers.push(setTimeout(() => {
                     if (tiles.marge) tiles.marge.classList.add('active', 'glow');
-                }, 2000));
-                this.animationTimers.push(setTimeout(() => this.activateConnection('marge', 'decisions'), 2800));
+                }, 3500));
+                this.animationTimers.push(setTimeout(() => this.activateConnection('marge', 'decisions'), 4500));
                 this.animationTimers.push(setTimeout(() => {
                     if (tiles.decisions) tiles.decisions.classList.add('active');
-                }, 3200));
+                }, 5200));
             }
             
             animateSection2() {
@@ -911,9 +917,10 @@ INSTRUCTIONS :
                 paths.forEach(path => {
                     const fromTile = path.dataset.from;
                     const toTile = path.dataset.to;
+                    const sectionFilter = path.dataset.section;
                     
-                    const fromElement = container.querySelector(`[data-tile="${fromTile}"]`);
-                    const toElement = container.querySelector(`[data-tile="${toTile}"]`);
+                    const fromElement = container.querySelector(`[data-tile="${fromTile}"][data-section="${sectionFilter}"]`);
+                    const toElement = container.querySelector(`[data-tile="${toTile}"][data-section="${sectionFilter}"]`);
                     
                     if (fromElement && toElement) {
                         const fromRect = fromElement.getBoundingClientRect();
@@ -925,8 +932,8 @@ INSTRUCTIONS :
                         const toX = toRect.left + toRect.width / 2 - containerRect.left;
                         const toY = toRect.top + toRect.height / 2 - containerRect.top;
                         
-                        const midX = fromX + (toX - fromX) * 0.7;
-                        const pathData = `M ${fromX} ${fromY} L ${midX} ${fromY} L ${midX} ${toY} L ${toX} ${toY}`;
+                        // Calcul de chemins courbés intelligents pour éviter les tuiles
+                        const pathData = this.calculateSmartPath(fromX, fromY, toX, toY, container);
                         path.setAttribute('d', pathData);
                         
                         const length = path.getTotalLength();
@@ -934,6 +941,33 @@ INSTRUCTIONS :
                         path.style.strokeDashoffset = length;
                     }
                 });
+            }
+            
+            calculateSmartPath(fromX, fromY, toX, toY, container) {
+                const deltaX = toX - fromX;
+                const deltaY = toY - fromY;
+                
+                // Points de contrôle pour créer des courbes élégantes
+                let controlX1, controlY1, controlX2, controlY2;
+                
+                if (Math.abs(deltaX) > Math.abs(deltaY)) {
+                    // Mouvement principalement horizontal
+                    const midX = fromX + deltaX * 0.6;
+                    controlX1 = midX;
+                    controlY1 = fromY;
+                    controlX2 = midX;
+                    controlY2 = toY;
+                } else {
+                    // Mouvement principalement vertical
+                    const midY = fromY + deltaY * 0.6;
+                    controlX1 = fromX;
+                    controlY1 = midY;
+                    controlX2 = toX;
+                    controlY2 = midY;
+                }
+                
+                // Utiliser des courbes de Bézier pour des transitions douces
+                return `M ${fromX} ${fromY} C ${controlX1} ${controlY1}, ${controlX2} ${controlY2}, ${toX} ${toY}`;
             }
             
             bindEvents() {
