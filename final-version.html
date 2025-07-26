@@ -299,6 +299,20 @@ INSTRUCTIONS :
     width: 100%;
     opacity: 0;
     pointer-events: none;
+}
+
+/* SCROLL SNAP - Force les positions fixes */
+html {
+    scroll-behavior: smooth !important;
+}
+
+.section-content {
+    scroll-snap-type: y mandatory !important;
+}
+
+.content-block {
+    scroll-snap-align: start !important;
+    scroll-snap-stop: always !important;
     line-height: 1.6;
     color: var(--dark-gray);
     position: relative;
@@ -684,39 +698,113 @@ INSTRUCTIONS :
                 this.isAnimating = false; // Verrou global simple
                 this.animationInterval = null; // Une seule animation continue
                 this.observers = [];
+                this.scrollTimeout = null; // Pour détecter la fin de scroll
+                this.sectionPositions = []; // Positions des sections
                 this.init();
             }
             
             init() {
                 this.setupSVGPaths();
                 this.bindEvents();
+                this.calculateSectionPositions();
+                this.setupScrollSnap();
                 this.setupScrollObserver();
                 
                 // Démarrer l'animation de la section 1
                 this.switchToSection(1);
             }
             
+            calculateSectionPositions() {
+                console.log('📐 Calculating section positions for snap scrolling');
+                this.sectionPositions = [];
+                
+                document.querySelectorAll('.content-block').forEach((block, index) => {
+                    const rect = block.getBoundingClientRect();
+                    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                    const position = rect.top + scrollTop;
+                    
+                    this.sectionPositions.push({
+                        section: index + 1,
+                        position: position,
+                        element: block
+                    });
+                    
+                    console.log(`Section ${index + 1} position:`, position);
+                });
+            }
+            
+            setupScrollSnap() {
+                console.log('📌 Setting up scroll snap behavior');
+                
+                let isScrolling = false;
+                
+                window.addEventListener('scroll', () => {
+                    isScrolling = true;
+                    
+                    // Clear le timeout précédent
+                    if (this.scrollTimeout) {
+                        clearTimeout(this.scrollTimeout);
+                    }
+                    
+                    // Déclencher après 150ms de non-scroll
+                    this.scrollTimeout = setTimeout(() => {
+                        if (!this.isAnimating) {
+                            this.snapToNearestSection();
+                        }
+                        isScrolling = false;
+                    }, 150);
+                });
+            }
+            
+            snapToNearestSection() {
+                const currentScroll = window.pageYOffset;
+                let nearestSection = this.sectionPositions[0];
+                let minDistance = Math.abs(currentScroll - nearestSection.position);
+                
+                // Trouver la section la plus proche
+                this.sectionPositions.forEach(section => {
+                    const distance = Math.abs(currentScroll - section.position);
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        nearestSection = section;
+                    }
+                });
+                
+                console.log('🎯 Snapping to section:', nearestSection.section, 'at position:', nearestSection.position);
+                
+                // Scroll en douceur vers la position exacte
+                window.scrollTo({
+                    top: nearestSection.position,
+                    behavior: 'smooth'
+                });
+                
+                // Changer l'animation si nécessaire
+                if (nearestSection.section !== this.currentSection) {
+                    setTimeout(() => {
+                        this.switchToSection(nearestSection.section);
+                    }, 300); // Attendre que le scroll soit terminé
+                }
+            }
+            
             setupScrollObserver() {
-                console.log('🔧 Setting up scroll observer with animation protection');
+                console.log('🔧 Setting up simplified scroll observer');
                 
                 const observer = new IntersectionObserver((entries) => {
                     entries.forEach(entry => {
                         if (entry.isIntersecting) {
                             const sectionNumber = parseInt(entry.target.dataset.content);
-                            console.log('👁️ Section visible:', sectionNumber, 'Current:', this.currentSection, 'Animating:', this.isAnimating);
                             
-                            if (sectionNumber !== this.currentSection && !this.isAnimating) {
-                                console.log('🚀 Switching to section:', sectionNumber);
+                            // Ne changer que si on n'est pas en train d'animer et pas en train de scroller
+                            if (sectionNumber !== this.currentSection && !this.isAnimating && !this.scrollTimeout) {
+                                console.log('👁️ Section fully visible:', sectionNumber);
                                 this.switchToSection(sectionNumber);
-                            } else if (this.isAnimating) {
-                                console.log('⏸️ Animation in progress, ignoring scroll');
                             }
                         }
                     });
                 }, {
                     root: null,
-                    rootMargin: '-30% 0px -30% 0px',
-                    threshold: 0.3
+                    rootMargin: '-10% 0px -10% 0px',
+                    threshold: 0.8 // Section doit être presque entièrement visible
                 });
                 
                 document.querySelectorAll('.content-block').forEach(block => {
@@ -1020,7 +1108,10 @@ INSTRUCTIONS :
             }
             
             bindEvents() {
-                window.addEventListener('resize', this.debounce(() => this.setupSVGPaths(), 250));
+                window.addEventListener('resize', this.debounce(() => {
+                    this.setupSVGPaths();
+                    this.calculateSectionPositions(); // Recalculer les positions
+                }, 250));
                 
                 document.addEventListener('click', (e) => {
                     if (e.target.closest('#stratego-final-map .tile')) {
