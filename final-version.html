@@ -674,7 +674,7 @@ INSTRUCTIONS :
             }
             
             setupScrollObserver() {
-                const contentBlocks = document.querySelectorAll('#stratego-final-map .content-block');
+                const contentBlocks = document.querySelectorAll('.content-block');
                 
                 const observerOptions = {
                     root: null,
@@ -744,7 +744,6 @@ INSTRUCTIONS :
             }
             
             runSectionAnimation(sectionNumber) {
-                console.log('🎯 Running section animation for section:', sectionNumber);
                 this.resetAllTiles();
                 
                 // Masquer toutes les tuiles d'abord
@@ -758,22 +757,10 @@ INSTRUCTIONS :
                 });
                 
                 setTimeout(() => {
-                    console.log('⚡ Switch section:', sectionNumber, typeof sectionNumber);
                     switch(sectionNumber) {
-                        case 1: 
-                            console.log('-> Calling animateSection1');
-                            this.animateSection1(); 
-                            break;
-                        case 2: 
-                            console.log('-> Calling animateSection2');
-                            this.animateSection2(); 
-                            break;
-                        case 3: 
-                            console.log('-> Calling animateSection3');
-                            this.animateSection3(); 
-                            break;
-                        default:
-                            console.log('❌ Unknown section:', sectionNumber);
+                        case 1: this.animateSection1(); break;
+                        case 2: this.animateSection2(); break;
+                        case 3: this.animateSection3(); break;
                     }
                 }, 200);
             }
@@ -809,7 +796,6 @@ INSTRUCTIONS :
             }
             
             animateSection2() {
-                console.log('=== SECTION 2 ANIMATION ===');
                 const tiles = {
                     fournisseurs: document.querySelector('[data-tile="fournisseurs"][data-section="2"]'),
                     charges: document.querySelector('[data-tile="charges"][data-section="2"]'),
@@ -817,8 +803,6 @@ INSTRUCTIONS :
                     previsionnel: document.querySelector('[data-tile="previsionnel"][data-section="2"]'),
                     serenite: document.querySelector('[data-tile="serenite"][data-section="2"]')
                 };
-                
-                console.log('Tuiles trouvées:', tiles);
                 
                 this.animationTimers.push(setTimeout(() => {
                     if (tiles.fournisseurs) tiles.fournisseurs.classList.add('active');
@@ -849,7 +833,6 @@ INSTRUCTIONS :
             }
             
             animateSection3() {
-                console.log('=== SECTION 3 ANIMATION ===');
                 const tiles = {
                     doute: document.querySelector('[data-tile="doute"][data-section="3"]'),
                     investissement: document.querySelector('[data-tile="investissement"][data-section="3"]'),
@@ -857,8 +840,6 @@ INSTRUCTIONS :
                     conseil: document.querySelector('[data-tile="conseil"][data-section="3"]'),
                     croissance: document.querySelector('[data-tile="croissance"][data-section="3"]')
                 };
-                
-                console.log('Tuiles trouvées:', tiles);
                 
                 this.animationTimers.push(setTimeout(() => {
                     if (tiles.doute) tiles.doute.classList.add('active', 'pulse');
