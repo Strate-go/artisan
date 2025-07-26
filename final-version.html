@@ -681,92 +681,88 @@ INSTRUCTIONS :
         class FinalMapController {
             constructor() {
                 this.currentSection = 1;
-                this.animationTimers = [];
+                this.animationIntervals = {}; // Une animation par section qui tourne en continu
                 this.observers = [];
-                this.continuousIntervals = {};
                 this.init();
             }
             
             init() {
                 this.setupSVGPaths();
-                this.setupScrollObserver();
                 this.bindEvents();
                 
-                // Initialisation automatique de la première section avec un délai
-                setTimeout(() => {
-                    this.startSection(1);
-                }, 500);
+                // Démarrer TOUTES les animations en permanence
+                this.startAllContinuousAnimations();
+                
+                // Puis gérer l'affichage par section
+                this.setupScrollObserver();
+                this.showSection(1);
             }
             
             setupScrollObserver() {
-                console.log('🔧 Setting up NEW marker-based scroll observer');
+                console.log('🔧 Setting up simple section visibility observer');
                 
-                // Observer pour les balises de début (entrée dans une section)
-                const startObserver = new IntersectionObserver((entries) => {
+                // Observer simple qui ne fait que changer la visibilité
+                const observer = new IntersectionObserver((entries) => {
                     entries.forEach(entry => {
                         if (entry.isIntersecting) {
-                            const sectionNumber = parseInt(entry.target.dataset.section);
-                            console.log('🚀 ENTERING section:', sectionNumber, 'Current:', this.currentSection);
+                            const sectionNumber = parseInt(entry.target.dataset.content);
+                            console.log('👁️ Section visible:', sectionNumber);
                             if (sectionNumber !== this.currentSection) {
-                                this.startSection(sectionNumber);
+                                this.showSection(sectionNumber);
                             }
                         }
                     });
                 }, {
                     root: null,
-                    rootMargin: '0px',
-                    threshold: 0.1
+                    rootMargin: '-30% 0px -30% 0px',
+                    threshold: 0.3
                 });
                 
-                // Observer pour les balises de fin (sortie d'une section)
-                const endObserver = new IntersectionObserver((entries) => {
-                    entries.forEach(entry => {
-                        if (!entry.isIntersecting) {
-                            const sectionNumber = parseInt(entry.target.dataset.section);
-                            console.log('👋 LEAVING section:', sectionNumber, 'Current:', this.currentSection);
-                            // Ne rien faire ici, on ne change que sur les entrées
-                        }
-                    });
-                }, {
-                    root: null,
-                    rootMargin: '0px',
-                    threshold: 0.1
+                // Observer les blocs de contenu
+                document.querySelectorAll('.content-block').forEach(block => {
+                    observer.observe(block);
                 });
                 
-                // Observer toutes les balises de début
-                document.querySelectorAll('.section-marker.section-start').forEach(marker => {
-                    startObserver.observe(marker);
-                });
-                
-                // Observer toutes les balises de fin
-                document.querySelectorAll('.section-marker.section-end').forEach(marker => {
-                    endObserver.observe(marker);
-                });
-                
-                this.observers.push(startObserver, endObserver);
+                this.observers.push(observer);
             }
             
-            startSection(sectionNumber) {
-                console.log('✨ Starting section:', sectionNumber);
+            startAllContinuousAnimations() {
+                console.log('🎬 Starting ALL continuous animations (never stopping)');
                 
-                // Arrêter les animations précédentes
-                this.stopAllContinuousAnimations();
-                this.clearAnimationTimers();
+                // Animation section 1 - toutes les 8 secondes
+                this.animationIntervals[1] = setInterval(() => {
+                    this.runPermanentSectionAnimation(1);
+                }, 8000);
                 
+                // Animation section 2 - toutes les 8 secondes
+                this.animationIntervals[2] = setInterval(() => {
+                    this.runPermanentSectionAnimation(2);
+                }, 8000);
+                
+                // Animation section 3 - toutes les 8 secondes  
+                this.animationIntervals[3] = setInterval(() => {
+                    this.runPermanentSectionAnimation(3);
+                }, 8000);
+                
+                // Démarrer immédiatement toutes les animations
+                this.runPermanentSectionAnimation(1);
+                this.runPermanentSectionAnimation(2);
+                this.runPermanentSectionAnimation(3);
+            }
+            
+            showSection(sectionNumber) {
+                console.log('👁️ Showing section:', sectionNumber, '(animations continue independently)');
                 this.currentSection = sectionNumber;
                 
-                // Réinitialiser toutes les tuiles
-                this.resetAllTiles();
-                
-                // Démarrer les animations continues pour cette section immédiatement
-                this.startContinuousAnimation(sectionNumber);
-            }
-            
-            stopAllContinuousAnimations() {
-                Object.values(this.continuousIntervals).forEach(interval => {
-                    clearInterval(interval);
+                // Juste gérer la visibilité, pas les animations
+                document.querySelectorAll('#stratego-final-map .tile').forEach(tile => {
+                    const tileSection = tile.dataset.section;
+                    if (parseInt(tileSection) === sectionNumber) {
+                        tile.style.opacity = '1';
+                    } else {
+                        tile.style.opacity = '0.3';
+                    }
                 });
-                this.continuousIntervals = {};
             }
             
             resetAllTiles() {
@@ -782,8 +778,10 @@ INSTRUCTIONS :
                 });
             }
             
-            resetTilesForSection(sectionNumber) {
-                console.log('🧹 Resetting tiles for section only:', sectionNumber);
+            runPermanentSectionAnimation(sectionNumber) {
+                console.log('🎭 PERMANENT animation for section:', sectionNumber, '(unstoppable)');
+                
+                // Reset uniquement cette section sans rien demander à personne
                 document.querySelectorAll(`#stratego-final-map .tile[data-section="${sectionNumber}"]`).forEach(tile => {
                     tile.classList.remove('active', 'pulse', 'glow');
                     tile.style.animation = '';
@@ -793,50 +791,18 @@ INSTRUCTIONS :
                     line.classList.remove('active', 'solution-line');
                     line.style.opacity = '0';
                 });
-            }
-            
-            startContinuousAnimation(sectionNumber) {
-                console.log('🎬 Starting continuous animation for section:', sectionNumber);
                 
-                // S'assurer qu'il n'y a pas déjà une animation en cours pour cette section
-                if (this.continuousIntervals[sectionNumber]) {
-                    clearInterval(this.continuousIntervals[sectionNumber]);
-                }
-                
-                // Première animation immédiate
-                this.runSectionAnimation(sectionNumber);
-                
-                // Animation continue toutes les 8 secondes (plus lent comme Stripe)
-                this.continuousIntervals[sectionNumber] = setInterval(() => {
-                    console.log('🔄 Repeating animation for section:', sectionNumber);
-                    this.runSectionAnimation(sectionNumber);
-                }, 8000);
-            }
-            
-            runSectionAnimation(sectionNumber) {
-                console.log('🎭 Running animation for section:', sectionNumber);
-                
-                // Reset seulement les tuiles de cette section
-                this.resetTilesForSection(sectionNumber);
-                
-                // Masquer toutes les tuiles d'abord
-                document.querySelectorAll('#stratego-final-map .tile').forEach(tile => {
-                    const tileSection = tile.dataset.section;
-                    if (parseInt(tileSection) !== sectionNumber) {
-                        tile.style.opacity = '0.3';
-                    } else {
-                        tile.style.opacity = '1';
-                    }
-                });
-                
+                // Lancer l'animation spécifique à cette section
                 setTimeout(() => {
                     switch(sectionNumber) {
                         case 1: this.animateSection1(); break;
                         case 2: this.animateSection2(); break;
                         case 3: this.animateSection3(); break;
                     }
-                }, 200);
+                }, 100);
             }
+            
+
             
 
             
@@ -849,26 +815,26 @@ INSTRUCTIONS :
                     decisions: document.querySelector('[data-tile="decisions"][data-section="1"]')
                 };
                 
-                this.animationTimers.push(setTimeout(() => {
+                setTimeout(() => {
                     if (tiles.devis) tiles.devis.classList.add('active');
-                }, 0));
-                this.animationTimers.push(setTimeout(() => {
+                }, 0);
+                setTimeout(() => {
                     if (tiles.materiaux) tiles.materiaux.classList.add('active');
-                }, 600));
-                this.animationTimers.push(setTimeout(() => {
+                }, 600);
+                setTimeout(() => {
                     if (tiles.temps) tiles.temps.classList.add('active');
-                }, 1200));
-                this.animationTimers.push(setTimeout(() => this.activateConnections(['devis', 'materiaux', 'temps'], 'marge'), 2000));
-                this.animationTimers.push(setTimeout(() => {
+                }, 1200);
+                setTimeout(() => this.activateConnections(['devis', 'materiaux', 'temps'], 'marge'), 2000);
+                setTimeout(() => {
                     if (tiles.marge) tiles.marge.classList.add('active', 'glow');
-                }, 3500));
-                this.animationTimers.push(setTimeout(() => this.activateConnection('marge', 'decisions'), 4500));
-                this.animationTimers.push(setTimeout(() => {
+                }, 3500);
+                setTimeout(() => this.activateConnection('marge', 'decisions'), 4500);
+                setTimeout(() => {
                     if (tiles.decisions) tiles.decisions.classList.add('active');
-                }, 5200));
+                }, 5200);
             }
             
-            animateSection2() {
+                        animateSection2() {
                 const tiles = {
                     fournisseurs: document.querySelector('[data-tile="fournisseurs"][data-section="2"]'),
                     charges: document.querySelector('[data-tile="charges"][data-section="2"]'),
@@ -877,32 +843,32 @@ INSTRUCTIONS :
                     serenite: document.querySelector('[data-tile="serenite"][data-section="2"]')
                 };
                 
-                this.animationTimers.push(setTimeout(() => {
+                setTimeout(() => {
                     if (tiles.fournisseurs) tiles.fournisseurs.classList.add('active');
                     if (tiles.charges) tiles.charges.classList.add('active');
-                }, 0));
-                
-                this.animationTimers.push(setTimeout(() => {
+                }, 0);
+
+                setTimeout(() => {
                     if (tiles.factures) {
                         tiles.factures.classList.add('active');
                         tiles.factures.style.animation = 'pulse 1.5s infinite';
                     }
-                }, 600));
-                
-                this.animationTimers.push(setTimeout(() => this.activateConnections(['fournisseurs', 'charges', 'factures'], 'previsionnel'), 1400));
-                
-                this.animationTimers.push(setTimeout(() => {
+                }, 600);
+
+                setTimeout(() => this.activateConnections(['fournisseurs', 'charges', 'factures'], 'previsionnel'), 1400);
+
+                setTimeout(() => {
                     if (tiles.previsionnel) {
                         tiles.previsionnel.classList.add('active', 'glow');
                     }
                     if (tiles.factures) tiles.factures.style.animation = '';
                     this.solidifyConnections(['fournisseurs', 'charges', 'factures']);
-                }, 2200));
-                
-                this.animationTimers.push(setTimeout(() => this.activateConnection('previsionnel', 'serenite'), 3000));
-                this.animationTimers.push(setTimeout(() => {
+                }, 2200);
+
+                setTimeout(() => this.activateConnection('previsionnel', 'serenite'), 3000);
+                setTimeout(() => {
                     if (tiles.serenite) tiles.serenite.classList.add('active');
-                }, 3400));
+                }, 3400);
             }
             
             animateSection3() {
@@ -914,35 +880,35 @@ INSTRUCTIONS :
                     croissance: document.querySelector('[data-tile="croissance"][data-section="3"]')
                 };
                 
-                this.animationTimers.push(setTimeout(() => {
+                setTimeout(() => {
                     if (tiles.doute) tiles.doute.classList.add('active', 'pulse');
-                }, 0));
+                }, 0);
                 
-                this.animationTimers.push(setTimeout(() => {
+                setTimeout(() => {
                     this.activateConnection('doute', 'investissement');
                     this.activateConnection('doute', 'recrutement');
-                }, 800));
+                }, 800);
                 
-                this.animationTimers.push(setTimeout(() => {
+                setTimeout(() => {
                     if (tiles.investissement) tiles.investissement.classList.add('active');
                     if (tiles.recrutement) tiles.recrutement.classList.add('active');
-                }, 1200));
+                }, 1200);
                 
-                this.animationTimers.push(setTimeout(() => this.activateInterventionLine('conseil', 'doute'), 2000));
+                setTimeout(() => this.activateInterventionLine('conseil', 'doute'), 2000);
                 
-                this.animationTimers.push(setTimeout(() => {
+                setTimeout(() => {
                     if (tiles.doute) {
                         tiles.doute.classList.remove('active', 'pulse');
                         tiles.doute.style.opacity = '0.3';
                     }
                     if (tiles.conseil) tiles.conseil.classList.add('active', 'glow');
                     this.hideConnections(['doute']);
-                }, 2600));
+                }, 2600);
                 
-                this.animationTimers.push(setTimeout(() => this.activateConnection('conseil', 'croissance'), 3400));
-                this.animationTimers.push(setTimeout(() => {
+                setTimeout(() => this.activateConnection('conseil', 'croissance'), 3400);
+                setTimeout(() => {
                     if (tiles.croissance) tiles.croissance.classList.add('active');
-                }, 3800));
+                }, 3800);
             }
             
             activateConnection(from, to) {
@@ -1055,17 +1021,12 @@ INSTRUCTIONS :
                 });
             }
             
-            clearAnimationTimers() {
-                console.log('🧹 Clearing', this.animationTimers.length, 'animation timers');
-                this.animationTimers.forEach(timer => clearTimeout(timer));
-                this.animationTimers = [];
-            }
+
             
 
             
             destroy() {
-                this.stopAllContinuousAnimations();
-                this.clearAnimationTimers();
+                Object.values(this.animationIntervals).forEach(interval => clearInterval(interval));
                 this.observers.forEach(observer => observer.disconnect());
                 this.observers = [];
             }
