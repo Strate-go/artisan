@@ -681,7 +681,8 @@ INSTRUCTIONS :
         class FinalMapController {
             constructor() {
                 this.currentSection = 1;
-                this.animationIntervals = {}; // Une animation par section qui tourne en continu
+                this.isAnimating = false; // Verrou global simple
+                this.animationInterval = null; // Une seule animation continue
                 this.observers = [];
                 this.init();
             }
@@ -689,26 +690,26 @@ INSTRUCTIONS :
             init() {
                 this.setupSVGPaths();
                 this.bindEvents();
-                
-                // Démarrer TOUTES les animations en permanence
-                this.startAllContinuousAnimations();
-                
-                // Puis gérer l'affichage par section
                 this.setupScrollObserver();
-                this.showSection(1);
+                
+                // Démarrer l'animation de la section 1
+                this.switchToSection(1);
             }
             
             setupScrollObserver() {
-                console.log('🔧 Setting up simple section visibility observer');
+                console.log('🔧 Setting up scroll observer with animation protection');
                 
-                // Observer simple qui ne fait que changer la visibilité
                 const observer = new IntersectionObserver((entries) => {
                     entries.forEach(entry => {
                         if (entry.isIntersecting) {
                             const sectionNumber = parseInt(entry.target.dataset.content);
-                            console.log('👁️ Section visible:', sectionNumber);
-                            if (sectionNumber !== this.currentSection) {
-                                this.showSection(sectionNumber);
+                            console.log('👁️ Section visible:', sectionNumber, 'Current:', this.currentSection, 'Animating:', this.isAnimating);
+                            
+                            if (sectionNumber !== this.currentSection && !this.isAnimating) {
+                                console.log('🚀 Switching to section:', sectionNumber);
+                                this.switchToSection(sectionNumber);
+                            } else if (this.isAnimating) {
+                                console.log('⏸️ Animation in progress, ignoring scroll');
                             }
                         }
                     });
@@ -718,7 +719,6 @@ INSTRUCTIONS :
                     threshold: 0.3
                 });
                 
-                // Observer les blocs de contenu
                 document.querySelectorAll('.content-block').forEach(block => {
                     observer.observe(block);
                 });
@@ -726,35 +726,41 @@ INSTRUCTIONS :
                 this.observers.push(observer);
             }
             
-            startAllContinuousAnimations() {
-                console.log('🎬 Starting ALL continuous animations (never stopping)');
+            switchToSection(sectionNumber) {
+                console.log('🎯 Switching to section:', sectionNumber);
                 
-                // Animation section 1 - toutes les 8 secondes
-                this.animationIntervals[1] = setInterval(() => {
-                    this.runPermanentSectionAnimation(1);
-                }, 8000);
+                // Arrêter l'animation précédente
+                if (this.animationInterval) {
+                    clearInterval(this.animationInterval);
+                    this.animationInterval = null;
+                }
                 
-                // Animation section 2 - toutes les 8 secondes
-                this.animationIntervals[2] = setInterval(() => {
-                    this.runPermanentSectionAnimation(2);
-                }, 8000);
-                
-                // Animation section 3 - toutes les 8 secondes  
-                this.animationIntervals[3] = setInterval(() => {
-                    this.runPermanentSectionAnimation(3);
-                }, 8000);
-                
-                // Démarrer immédiatement toutes les animations
-                this.runPermanentSectionAnimation(1);
-                this.runPermanentSectionAnimation(2);
-                this.runPermanentSectionAnimation(3);
-            }
-            
-            showSection(sectionNumber) {
-                console.log('👁️ Showing section:', sectionNumber, '(animations continue independently)');
                 this.currentSection = sectionNumber;
                 
-                // Juste gérer la visibilité, pas les animations
+                // Reset complet et démarrage propre
+                this.resetAllTiles();
+                
+                // Démarrer immédiatement la première animation
+                this.runSingleAnimation(sectionNumber);
+                
+                // Puis continuer toutes les 8 secondes
+                this.animationInterval = setInterval(() => {
+                    if (!this.isAnimating) { // Ne relancer que si pas en cours
+                        this.runSingleAnimation(sectionNumber);
+                    }
+                }, 8000);
+            }
+            
+            runSingleAnimation(sectionNumber) {
+                if (this.isAnimating) {
+                    console.log('⏸️ Animation already running, skipping');
+                    return;
+                }
+                
+                console.log('🎭 Starting animation for section:', sectionNumber);
+                this.isAnimating = true;
+                
+                // Masquer toutes les sections sauf celle active
                 document.querySelectorAll('#stratego-final-map .tile').forEach(tile => {
                     const tileSection = tile.dataset.section;
                     if (parseInt(tileSection) === sectionNumber) {
@@ -763,6 +769,32 @@ INSTRUCTIONS :
                         tile.style.opacity = '0.3';
                     }
                 });
+                
+                // Reset de la section active uniquement
+                document.querySelectorAll(`#stratego-final-map .tile[data-section="${sectionNumber}"]`).forEach(tile => {
+                    tile.classList.remove('active', 'pulse', 'glow');
+                    tile.style.animation = '';
+                });
+                
+                document.querySelectorAll(`#stratego-final-map .connection-line[data-section="${sectionNumber}"]`).forEach(line => {
+                    line.classList.remove('active', 'solution-line');
+                    line.style.opacity = '0';
+                });
+                
+                // Lancer l'animation
+                setTimeout(() => {
+                    switch(sectionNumber) {
+                        case 1: this.animateSection1(); break;
+                        case 2: this.animateSection2(); break;
+                        case 3: this.animateSection3(); break;
+                    }
+                    
+                    // Déverrouiller après 6 secondes (durée max d'animation)
+                    setTimeout(() => {
+                        this.isAnimating = false;
+                        console.log('🔓 Animation completed for section:', sectionNumber);
+                    }, 6000);
+                }, 100);
             }
             
             resetAllTiles() {
@@ -778,29 +810,7 @@ INSTRUCTIONS :
                 });
             }
             
-            runPermanentSectionAnimation(sectionNumber) {
-                console.log('🎭 PERMANENT animation for section:', sectionNumber, '(unstoppable)');
-                
-                // Reset uniquement cette section sans rien demander à personne
-                document.querySelectorAll(`#stratego-final-map .tile[data-section="${sectionNumber}"]`).forEach(tile => {
-                    tile.classList.remove('active', 'pulse', 'glow');
-                    tile.style.animation = '';
-                });
-                
-                document.querySelectorAll(`#stratego-final-map .connection-line[data-section="${sectionNumber}"]`).forEach(line => {
-                    line.classList.remove('active', 'solution-line');
-                    line.style.opacity = '0';
-                });
-                
-                // Lancer l'animation spécifique à cette section
-                setTimeout(() => {
-                    switch(sectionNumber) {
-                        case 1: this.animateSection1(); break;
-                        case 2: this.animateSection2(); break;
-                        case 3: this.animateSection3(); break;
-                    }
-                }, 100);
-            }
+
             
 
             
@@ -1026,7 +1036,7 @@ INSTRUCTIONS :
 
             
             destroy() {
-                Object.values(this.animationIntervals).forEach(interval => clearInterval(interval));
+                if (this.animationInterval) clearInterval(this.animationInterval);
                 this.observers.forEach(observer => observer.disconnect());
                 this.observers = [];
             }
