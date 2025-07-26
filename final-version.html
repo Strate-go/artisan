@@ -335,14 +335,14 @@ INSTRUCTIONS :
 
 #stratego-final-map .section-content {
     padding-right: 40px;
-    padding-bottom: 100vh;
+    padding-bottom: 50vh;
 }
 
 #stratego-final-map .content-block {
     opacity: 1;
     visibility: visible;
     transition: all 0.6s ease;
-    margin-bottom: 120vh;
+    margin-bottom: 60vh;
     padding: 60px 0;
 }
 
@@ -398,9 +398,11 @@ INSTRUCTIONS :
 /* CARTE INTERACTIVE UNIQUE */
 #stratego-final-map .single-interactive-map {
     position: sticky;
-    top: 80px;
-    height: calc(100vh - 160px);
+    top: 50%;
+    transform: translateY(-50%);
+    height: calc(100vh - 200px);
     min-height: 600px;
+    max-height: 700px;
     background: var(--white) !important;
     border-radius: 20px !important;
     box-shadow: var(--shadow-lg) !important;
@@ -439,12 +441,13 @@ INSTRUCTIONS :
     top: 8px;
     left: 8px;
     right: 8px;
-    bottom: 24px;
+    bottom: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.4s ease;
     color: var(--dark-gray);
+    margin-bottom: 8px;
 }
 
 #stratego-final-map .tile-icon svg {
@@ -455,7 +458,7 @@ INSTRUCTIONS :
 }
 
 #stratego-final-map .tile-title {
-    font-size: 0.75rem !important;
+    font-size: 0.65rem !important;
     font-weight: 600 !important;
     color: var(--dark-gray) !important;
     transition: all 0.4s ease;
@@ -463,7 +466,7 @@ INSTRUCTIONS :
     opacity: 0 !important;
     transform: translateY(10px);
     position: absolute;
-    bottom: 8px;
+    bottom: 6px;
     left: 50%;
     transform: translateX(-50%) translateY(10px);
     width: 90%;
@@ -480,6 +483,10 @@ INSTRUCTIONS :
 
 #stratego-final-map .tile.active.problem {
     border-color: var(--gold) !important;
+}
+
+#stratego-final-map .tile.active.problem .tile-icon {
+    color: var(--gold) !important;
 }
 
 #stratego-final-map .tile.active.solution {
@@ -594,6 +601,7 @@ INSTRUCTIONS :
     #stratego-final-map .single-interactive-map {
         position: relative !important;
         top: auto !important;
+        transform: none !important;
         height: 500px !important;
         padding: 20px !important;
         grid-template-columns: repeat(6, 1fr) !important;
@@ -626,7 +634,7 @@ INSTRUCTIONS :
     }
     
     #stratego-final-map .tile-title {
-        font-size: 0.65rem !important;
+        font-size: 0.6rem !important;
         bottom: 4px !important;
     }
     
