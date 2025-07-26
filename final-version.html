@@ -663,6 +663,7 @@ INSTRUCTIONS :
                 this.animationTimers = [];
                 this.observers = [];
                 this.continuousIntervals = {};
+                this.isAnimating = {}; // Verrouillage pour chaque section
                 this.init();
             }
             
@@ -715,6 +716,9 @@ INSTRUCTIONS :
                 this.stopAllContinuousAnimations();
                 this.clearAnimationTimers();
                 
+                // Réinitialiser tous les verrous d'animation
+                this.isAnimating = {};
+                
                 this.currentSection = sectionNumber;
                 
                 // Réinitialiser toutes les tuiles
@@ -732,6 +736,11 @@ INSTRUCTIONS :
                     clearInterval(interval);
                 });
                 this.continuousIntervals = {};
+                
+                // Nettoyer aussi tous les verrous d'animation
+                Object.keys(this.isAnimating).forEach(section => {
+                    this.clearAnimationLock(parseInt(section));
+                });
             }
             
             resetAllTiles() {
@@ -768,7 +777,15 @@ INSTRUCTIONS :
             }
             
             runSectionAnimation(sectionNumber) {
+                // Vérifier si une animation est déjà en cours pour cette section
+                if (this.isAnimating[sectionNumber]) {
+                    console.log('⏸️ Animation already running for section:', sectionNumber, '- skipping');
+                    return;
+                }
+                
                 console.log('🎭 Running animation for section:', sectionNumber);
+                this.isAnimating[sectionNumber] = true;
+                
                 this.resetAllTiles();
                 
                 // Masquer toutes les tuiles d'abord
@@ -787,6 +804,12 @@ INSTRUCTIONS :
                         case 2: this.animateSection2(); break;
                         case 3: this.animateSection3(); break;
                     }
+                    
+                    // Déverrouiller l'animation après sa completion
+                    setTimeout(() => {
+                        this.isAnimating[sectionNumber] = false;
+                        console.log('🔓 Animation unlocked for section:', sectionNumber);
+                    }, 5500); // 5.5 secondes pour que l'animation se termine complètement
                 }, 200);
             }
             
@@ -1011,6 +1034,13 @@ INSTRUCTIONS :
                 console.log('🧹 Clearing', this.animationTimers.length, 'animation timers');
                 this.animationTimers.forEach(timer => clearTimeout(timer));
                 this.animationTimers = [];
+            }
+            
+            clearAnimationLock(sectionNumber) {
+                if (this.isAnimating[sectionNumber]) {
+                    this.isAnimating[sectionNumber] = false;
+                    console.log('🔓 Force unlocked section:', sectionNumber);
+                }
             }
             
             destroy() {
