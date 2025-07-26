@@ -304,15 +304,17 @@ INSTRUCTIONS :
 /* SCROLL SNAP - Force les positions fixes */
 html {
     scroll-behavior: smooth !important;
+    overflow-x: hidden !important;
 }
 
+body {
+    overflow-x: hidden !important;
+}
+
+/* Désactiver le scroll libre - on gère tout en JavaScript */
 .section-content {
-    scroll-snap-type: y mandatory !important;
+    position: relative !important;
 }
-
-.content-block {
-    scroll-snap-align: start !important;
-    scroll-snap-stop: always !important;
     line-height: 1.6;
     color: var(--dark-gray);
     position: relative;
@@ -698,8 +700,11 @@ html {
                 this.isAnimating = false; // Verrou global simple
                 this.animationInterval = null; // Une seule animation continue
                 this.observers = [];
-                this.scrollTimeout = null; // Pour détecter la fin de scroll
                 this.sectionPositions = []; // Positions des sections
+                this.lastScrollTime = 0;
+                this.scrollDirection = 0;
+                this.isScrolling = false;
+                this.squarespaceHeaderHeight = 80; // Hauteur estimée de la header Squarespace
                 this.init();
             }
             
@@ -707,111 +712,134 @@ html {
                 this.setupSVGPaths();
                 this.bindEvents();
                 this.calculateSectionPositions();
-                this.setupScrollSnap();
-                this.setupScrollObserver();
+                this.setupDiscreteScrolling();
                 
-                // Démarrer l'animation de la section 1
-                this.switchToSection(1);
+                // Aller à la section 1 immédiatement
+                this.goToSection(1, false);
             }
             
             calculateSectionPositions() {
-                console.log('📐 Calculating section positions for snap scrolling');
+                console.log('📐 Calculating section positions with Squarespace header offset');
                 this.sectionPositions = [];
                 
                 document.querySelectorAll('.content-block').forEach((block, index) => {
                     const rect = block.getBoundingClientRect();
                     const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-                    const position = rect.top + scrollTop;
+                    // Ajuster pour la header Squarespace
+                    const position = rect.top + scrollTop - this.squarespaceHeaderHeight;
                     
                     this.sectionPositions.push({
                         section: index + 1,
-                        position: position,
+                        position: Math.max(0, position), // Pas de position négative
                         element: block
                     });
                     
-                    console.log(`Section ${index + 1} position:`, position);
+                    console.log(`Section ${index + 1} position:`, this.sectionPositions[index].position);
                 });
             }
             
-            setupScrollSnap() {
-                console.log('📌 Setting up scroll snap behavior');
+            setupDiscreteScrolling() {
+                console.log('🎮 Setting up discrete scrolling (Instagram Reels style)');
                 
-                let isScrolling = false;
+                let lastWheelTime = 0;
                 
-                window.addEventListener('scroll', () => {
-                    isScrolling = true;
+                // Désactiver le scroll classique et capturer tous les événements
+                window.addEventListener('wheel', (e) => {
+                    e.preventDefault(); // Bloquer le scroll normal
                     
-                    // Clear le timeout précédent
-                    if (this.scrollTimeout) {
-                        clearTimeout(this.scrollTimeout);
+                    const now = Date.now();
+                    
+                    // Debounce rapide - ignorer les événements trop rapprochés
+                    if (now - lastWheelTime < 50) return;
+                    lastWheelTime = now;
+                    
+                    // Détecter la direction
+                    const direction = e.deltaY > 0 ? 'down' : 'up';
+                    console.log('🎯 Scroll direction:', direction);
+                    
+                    this.handleDiscreteScroll(direction);
+                }, { passive: false });
+                
+                // Capturer aussi les touches clavier
+                window.addEventListener('keydown', (e) => {
+                    switch(e.key) {
+                        case 'ArrowDown':
+                        case 'PageDown':
+                        case ' ': // Espace
+                            e.preventDefault();
+                            this.handleDiscreteScroll('down');
+                            break;
+                        case 'ArrowUp':
+                        case 'PageUp':
+                            e.preventDefault();
+                            this.handleDiscreteScroll('up');
+                            break;
                     }
-                    
-                    // Déclencher après 150ms de non-scroll
-                    this.scrollTimeout = setTimeout(() => {
-                        if (!this.isAnimating) {
-                            this.snapToNearestSection();
-                        }
-                        isScrolling = false;
-                    }, 150);
                 });
+                
+                // Capturer les gestes tactiles
+                let startY = 0;
+                window.addEventListener('touchstart', (e) => {
+                    startY = e.touches[0].clientY;
+                }, { passive: true });
+                
+                window.addEventListener('touchend', (e) => {
+                    const endY = e.changedTouches[0].clientY;
+                    const diff = startY - endY;
+                    
+                    if (Math.abs(diff) > 50) { // Seuil minimum de mouvement
+                        const direction = diff > 0 ? 'down' : 'up';
+                        this.handleDiscreteScroll(direction);
+                    }
+                }, { passive: true });
             }
             
-            snapToNearestSection() {
-                const currentScroll = window.pageYOffset;
-                let nearestSection = this.sectionPositions[0];
-                let minDistance = Math.abs(currentScroll - nearestSection.position);
+            handleDiscreteScroll(direction) {
+                if (this.isScrolling || this.isAnimating) {
+                    console.log('⏸️ Already scrolling or animating, ignoring');
+                    return;
+                }
                 
-                // Trouver la section la plus proche
-                this.sectionPositions.forEach(section => {
-                    const distance = Math.abs(currentScroll - section.position);
-                    if (distance < minDistance) {
-                        minDistance = distance;
-                        nearestSection = section;
-                    }
-                });
+                const totalSections = this.sectionPositions.length;
+                let targetSection = this.currentSection;
                 
-                console.log('🎯 Snapping to section:', nearestSection.section, 'at position:', nearestSection.position);
+                if (direction === 'down' && this.currentSection < totalSections) {
+                    targetSection = this.currentSection + 1;
+                } else if (direction === 'up' && this.currentSection > 1) {
+                    targetSection = this.currentSection - 1;
+                }
                 
-                // Scroll en douceur vers la position exacte
-                window.scrollTo({
-                    top: nearestSection.position,
-                    behavior: 'smooth'
-                });
-                
-                // Changer l'animation si nécessaire
-                if (nearestSection.section !== this.currentSection) {
-                    setTimeout(() => {
-                        this.switchToSection(nearestSection.section);
-                    }, 300); // Attendre que le scroll soit terminé
+                if (targetSection !== this.currentSection) {
+                    console.log(`📍 Going from section ${this.currentSection} to ${targetSection}`);
+                    this.goToSection(targetSection, true);
+                } else {
+                    console.log('🛑 Already at boundary section');
                 }
             }
             
-            setupScrollObserver() {
-                console.log('🔧 Setting up simplified scroll observer');
+            goToSection(sectionNumber, animate = true) {
+                if (this.isScrolling) return;
                 
-                const observer = new IntersectionObserver((entries) => {
-                    entries.forEach(entry => {
-                        if (entry.isIntersecting) {
-                            const sectionNumber = parseInt(entry.target.dataset.content);
-                            
-                            // Ne changer que si on n'est pas en train d'animer et pas en train de scroller
-                            if (sectionNumber !== this.currentSection && !this.isAnimating && !this.scrollTimeout) {
-                                console.log('👁️ Section fully visible:', sectionNumber);
-                                this.switchToSection(sectionNumber);
-                            }
-                        }
-                    });
-                }, {
-                    root: null,
-                    rootMargin: '-10% 0px -10% 0px',
-                    threshold: 0.8 // Section doit être presque entièrement visible
+                console.log('🚀 Going to section:', sectionNumber);
+                this.isScrolling = true;
+                
+                const targetPosition = this.sectionPositions[sectionNumber - 1];
+                if (!targetPosition) {
+                    this.isScrolling = false;
+                    return;
+                }
+                
+                // Scroll vers la position
+                window.scrollTo({
+                    top: targetPosition.position,
+                    behavior: animate ? 'smooth' : 'auto'
                 });
                 
-                document.querySelectorAll('.content-block').forEach(block => {
-                    observer.observe(block);
-                });
-                
-                this.observers.push(observer);
+                // Changer l'animation après le scroll
+                setTimeout(() => {
+                    this.switchToSection(sectionNumber);
+                    this.isScrolling = false;
+                }, animate ? 500 : 100);
             }
             
             switchToSection(sectionNumber) {
@@ -1111,6 +1139,11 @@ html {
                 window.addEventListener('resize', this.debounce(() => {
                     this.setupSVGPaths();
                     this.calculateSectionPositions(); // Recalculer les positions
+                    
+                    // Repositionner à la section actuelle après resize
+                    setTimeout(() => {
+                        this.goToSection(this.currentSection, false);
+                    }, 100);
                 }, 250));
                 
                 document.addEventListener('click', (e) => {
