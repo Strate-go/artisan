@@ -718,13 +718,12 @@ INSTRUCTIONS :
             resetAllTiles() {
                 document.querySelectorAll('#stratego-final-map .tile').forEach(tile => {
                     tile.classList.remove('active', 'pulse', 'glow');
-                    tile.style.opacity = '';
                     tile.style.animation = '';
                 });
                 
                 document.querySelectorAll('#stratego-final-map .connection-line').forEach(line => {
                     line.classList.remove('active', 'solution-line');
-                    line.style.opacity = '';
+                    line.style.opacity = '0';
                 });
             }
             
@@ -741,6 +740,16 @@ INSTRUCTIONS :
             runSectionAnimation(sectionNumber) {
                 this.resetAllTiles();
                 
+                // Masquer toutes les tuiles d'abord
+                document.querySelectorAll('#stratego-final-map .tile').forEach(tile => {
+                    const tileSection = tile.dataset.section;
+                    if (parseInt(tileSection) !== sectionNumber) {
+                        tile.style.opacity = '0.3';
+                    } else {
+                        tile.style.opacity = '1';
+                    }
+                });
+                
                 setTimeout(() => {
                     switch(sectionNumber) {
                         case 1: this.animateSection1(); break;
@@ -754,63 +763,81 @@ INSTRUCTIONS :
             
             animateSection1() {
                 const tiles = {
-                    devis: document.querySelector('[data-tile="devis"]'),
-                    materiaux: document.querySelector('[data-tile="materiaux"]'),
-                    temps: document.querySelector('[data-tile="temps"]'),
-                    marge: document.querySelector('[data-tile="marge"]'),
-                    decisions: document.querySelector('[data-tile="decisions"]')
+                    devis: document.querySelector('[data-tile="devis"][data-section="1"]'),
+                    materiaux: document.querySelector('[data-tile="materiaux"][data-section="1"]'),
+                    temps: document.querySelector('[data-tile="temps"][data-section="1"]'),
+                    marge: document.querySelector('[data-tile="marge"][data-section="1"]'),
+                    decisions: document.querySelector('[data-tile="decisions"][data-section="1"]')
                 };
                 
-                this.animationTimers.push(setTimeout(() => tiles.devis.classList.add('active'), 0));
-                this.animationTimers.push(setTimeout(() => tiles.materiaux.classList.add('active'), 200));
-                this.animationTimers.push(setTimeout(() => tiles.temps.classList.add('active'), 400));
+                this.animationTimers.push(setTimeout(() => {
+                    if (tiles.devis) tiles.devis.classList.add('active');
+                }, 0));
+                this.animationTimers.push(setTimeout(() => {
+                    if (tiles.materiaux) tiles.materiaux.classList.add('active');
+                }, 200));
+                this.animationTimers.push(setTimeout(() => {
+                    if (tiles.temps) tiles.temps.classList.add('active');
+                }, 400));
                 this.animationTimers.push(setTimeout(() => this.activateConnections(['devis', 'materiaux', 'temps'], 'marge'), 1200));
-                this.animationTimers.push(setTimeout(() => tiles.marge.classList.add('active', 'glow'), 2000));
+                this.animationTimers.push(setTimeout(() => {
+                    if (tiles.marge) tiles.marge.classList.add('active', 'glow');
+                }, 2000));
                 this.animationTimers.push(setTimeout(() => this.activateConnection('marge', 'decisions'), 2800));
-                this.animationTimers.push(setTimeout(() => tiles.decisions.classList.add('active'), 3200));
+                this.animationTimers.push(setTimeout(() => {
+                    if (tiles.decisions) tiles.decisions.classList.add('active');
+                }, 3200));
             }
             
             animateSection2() {
                 const tiles = {
-                    fournisseurs: document.querySelector('[data-tile="fournisseurs"]'),
-                    charges: document.querySelector('[data-tile="charges"]'),
-                    factures: document.querySelector('[data-tile="factures"]'),
-                    previsionnel: document.querySelector('[data-tile="previsionnel"]'),
-                    serenite: document.querySelector('[data-tile="serenite"]')
+                    fournisseurs: document.querySelector('[data-tile="fournisseurs"][data-section="2"]'),
+                    charges: document.querySelector('[data-tile="charges"][data-section="2"]'),
+                    factures: document.querySelector('[data-tile="factures"][data-section="2"]'),
+                    previsionnel: document.querySelector('[data-tile="previsionnel"][data-section="2"]'),
+                    serenite: document.querySelector('[data-tile="serenite"][data-section="2"]')
                 };
                 
                 this.animationTimers.push(setTimeout(() => {
-                    tiles.fournisseurs.classList.add('active');
-                    tiles.charges.classList.add('active');
+                    if (tiles.fournisseurs) tiles.fournisseurs.classList.add('active');
+                    if (tiles.charges) tiles.charges.classList.add('active');
                 }, 0));
                 
                 this.animationTimers.push(setTimeout(() => {
-                    tiles.factures.classList.add('active');
-                    tiles.factures.style.animation = 'pulse 1.5s infinite';
+                    if (tiles.factures) {
+                        tiles.factures.classList.add('active');
+                        tiles.factures.style.animation = 'pulse 1.5s infinite';
+                    }
                 }, 600));
                 
                 this.animationTimers.push(setTimeout(() => this.activateConnections(['fournisseurs', 'charges', 'factures'], 'previsionnel'), 1400));
                 
                 this.animationTimers.push(setTimeout(() => {
-                    tiles.previsionnel.classList.add('active', 'glow');
-                    tiles.factures.style.animation = '';
+                    if (tiles.previsionnel) {
+                        tiles.previsionnel.classList.add('active', 'glow');
+                    }
+                    if (tiles.factures) tiles.factures.style.animation = '';
                     this.solidifyConnections(['fournisseurs', 'charges', 'factures']);
                 }, 2200));
                 
                 this.animationTimers.push(setTimeout(() => this.activateConnection('previsionnel', 'serenite'), 3000));
-                this.animationTimers.push(setTimeout(() => tiles.serenite.classList.add('active'), 3400));
+                this.animationTimers.push(setTimeout(() => {
+                    if (tiles.serenite) tiles.serenite.classList.add('active');
+                }, 3400));
             }
             
             animateSection3() {
                 const tiles = {
-                    doute: document.querySelector('[data-tile="doute"]'),
-                    investissement: document.querySelector('[data-tile="investissement"]'),
-                    recrutement: document.querySelector('[data-tile="recrutement"]'),
-                    conseil: document.querySelector('[data-tile="conseil"]'),
-                    croissance: document.querySelector('[data-tile="croissance"]')
+                    doute: document.querySelector('[data-tile="doute"][data-section="3"]'),
+                    investissement: document.querySelector('[data-tile="investissement"][data-section="3"]'),
+                    recrutement: document.querySelector('[data-tile="recrutement"][data-section="3"]'),
+                    conseil: document.querySelector('[data-tile="conseil"][data-section="3"]'),
+                    croissance: document.querySelector('[data-tile="croissance"][data-section="3"]')
                 };
                 
-                this.animationTimers.push(setTimeout(() => tiles.doute.classList.add('active', 'pulse'), 0));
+                this.animationTimers.push(setTimeout(() => {
+                    if (tiles.doute) tiles.doute.classList.add('active', 'pulse');
+                }, 0));
                 
                 this.animationTimers.push(setTimeout(() => {
                     this.activateConnection('doute', 'investissement');
@@ -818,21 +845,25 @@ INSTRUCTIONS :
                 }, 800));
                 
                 this.animationTimers.push(setTimeout(() => {
-                    tiles.investissement.classList.add('active');
-                    tiles.recrutement.classList.add('active');
+                    if (tiles.investissement) tiles.investissement.classList.add('active');
+                    if (tiles.recrutement) tiles.recrutement.classList.add('active');
                 }, 1200));
                 
                 this.animationTimers.push(setTimeout(() => this.activateInterventionLine('conseil', 'doute'), 2000));
                 
                 this.animationTimers.push(setTimeout(() => {
-                    tiles.doute.classList.remove('active', 'pulse');
-                    tiles.doute.style.opacity = '0.3';
-                    tiles.conseil.classList.add('active', 'glow');
+                    if (tiles.doute) {
+                        tiles.doute.classList.remove('active', 'pulse');
+                        tiles.doute.style.opacity = '0.3';
+                    }
+                    if (tiles.conseil) tiles.conseil.classList.add('active', 'glow');
                     this.hideConnections(['doute']);
                 }, 2600));
                 
                 this.animationTimers.push(setTimeout(() => this.activateConnection('conseil', 'croissance'), 3400));
-                this.animationTimers.push(setTimeout(() => tiles.croissance.classList.add('active'), 3800));
+                this.animationTimers.push(setTimeout(() => {
+                    if (tiles.croissance) tiles.croissance.classList.add('active');
+                }, 3800));
             }
             
             activateConnection(from, to) {
