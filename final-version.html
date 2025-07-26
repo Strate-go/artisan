@@ -336,25 +336,24 @@ INSTRUCTIONS :
     gap: 80px;
     align-items: start;
     margin-bottom: 120px;
-    min-height: 100vh;
 }
 
 #stratego-final-map .section-content {
     padding-right: 40px;
-    position: sticky;
-    top: 80px;
-    align-self: start;
-    max-height: calc(100vh - 160px);
-    overflow-y: auto;
+    padding-bottom: 200vh;
 }
 
 #stratego-final-map .content-block {
-    display: none;
-    animation: fadeIn 0.6s ease;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.6s ease;
+    margin-bottom: 100vh;
+    padding: 60px 0;
 }
 
 #stratego-final-map .content-block.active {
-    display: block;
+    opacity: 1;
+    visibility: visible;
 }
 
 #stratego-final-map .content-block h2 {
@@ -457,7 +456,7 @@ INSTRUCTIONS :
     background: var(--white) !important;
     border: 2px solid var(--inactive-gray) !important;
     border-radius: 16px !important;
-    padding: 0 !important;
+    padding: 8px !important;
     display: flex !important;
     flex-direction: column;
     align-items: center;
@@ -476,10 +475,10 @@ INSTRUCTIONS :
 
 #stratego-final-map .tile-icon {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: 8px;
+    left: 8px;
+    right: 8px;
+    bottom: 24px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -488,11 +487,10 @@ INSTRUCTIONS :
 }
 
 #stratego-final-map .tile-icon svg {
-    width: 60% !important;
-    height: 60% !important;
+    width: 100% !important;
+    height: 100% !important;
     transition: all 0.4s ease;
-    max-width: 48px;
-    max-height: 48px;
+    object-fit: contain;
 }
 
 #stratego-final-map .tile-title {
@@ -620,15 +618,16 @@ INSTRUCTIONS :
     #stratego-final-map .main-section {
         grid-template-columns: 1fr !important;
         gap: 40px !important;
-        min-height: auto !important;
     }
     
     #stratego-final-map .section-content {
         padding-right: 0 !important;
-        position: relative !important;
-        top: auto !important;
-        max-height: none !important;
-        overflow-y: visible !important;
+        padding-bottom: 40px !important;
+    }
+    
+    #stratego-final-map .content-block {
+        margin-bottom: 40px !important;
+        padding: 20px 0 !important;
     }
     
     #stratego-final-map .single-interactive-map {
@@ -661,10 +660,8 @@ INSTRUCTIONS :
     }
     
     #stratego-final-map .tile-icon svg {
-        width: 50% !important;
-        height: 50% !important;
-        max-width: 32px !important;
-        max-height: 32px !important;
+        width: 100% !important;
+        height: 100% !important;
     }
     
     #stratego-final-map .tile-title {
@@ -697,12 +694,15 @@ INSTRUCTIONS :
             constructor() {
                 this.currentSection = 1;
                 this.animationTimers = [];
+                this.observers = [];
+                this.animationInterval = null;
                 this.init();
             }
             
             init() {
                 this.setupNavigation();
                 this.setupSVGPaths();
+                this.setupScrollObserver();
                 this.showSection(1);
                 this.bindEvents();
             }
@@ -717,6 +717,50 @@ INSTRUCTIONS :
                 });
             }
             
+            setupScrollObserver() {
+                const contentBlocks = document.querySelectorAll('#stratego-final-map .content-block');
+                
+                const observerOptions = {
+                    root: null,
+                    rootMargin: '-20% 0px -20% 0px',
+                    threshold: 0.5
+                };
+                
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const sectionNumber = parseInt(entry.target.dataset.content);
+                            if (sectionNumber !== this.currentSection) {
+                                this.showSection(sectionNumber);
+                            }
+                        }
+                    });
+                }, observerOptions);
+                
+                contentBlocks.forEach(block => {
+                    observer.observe(block);
+                });
+                
+                this.observers.push(observer);
+                
+                // Auto-restart animation pour la section courante
+                this.startAutoRestart();
+            }
+            
+            startAutoRestart() {
+                // Redémarre l'animation toutes les 8 secondes
+                this.animationInterval = setInterval(() => {
+                    this.updateMapForSection(this.currentSection);
+                }, 8000);
+            }
+            
+            stopAutoRestart() {
+                if (this.animationInterval) {
+                    clearInterval(this.animationInterval);
+                    this.animationInterval = null;
+                }
+            }
+            
             showSection(sectionNumber) {
                 this.currentSection = sectionNumber;
                 
@@ -727,6 +771,10 @@ INSTRUCTIONS :
                 document.querySelectorAll('#stratego-final-map .content-block').forEach(block => {
                     block.classList.toggle('active', parseInt(block.dataset.content) === sectionNumber);
                 });
+                
+                // Restart auto-restart timer
+                this.stopAutoRestart();
+                this.startAutoRestart();
                 
                 this.updateMapForSection(sectionNumber);
             }
@@ -921,6 +969,13 @@ INSTRUCTIONS :
             clearAnimationTimers() {
                 this.animationTimers.forEach(timer => clearTimeout(timer));
                 this.animationTimers = [];
+            }
+            
+            destroy() {
+                this.stopAutoRestart();
+                this.clearAnimationTimers();
+                this.observers.forEach(observer => observer.disconnect());
+                this.observers = [];
             }
             
             debounce(func, wait) {
