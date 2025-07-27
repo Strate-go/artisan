@@ -373,31 +373,34 @@ INSTRUCTIONS :
     background: var(--white) !important;
     border-radius: 20px !important;
     box-shadow: var(--shadow-lg) !important;
-    padding: 40px !important;
+    padding: 30px !important;
     display: grid !important;
     grid-template-columns: repeat(8, 1fr) !important;
     grid-template-rows: repeat(6, 1fr) !important;
-    gap: 20px !important;
+    gap: 15px !important;
     overflow: hidden !important;
 }
 
-/* TUILES - État par défaut (grises) */
+/* TUILES - STYLE STRIPE */
 #stratego-final-map .tile {
-    background: var(--inactive-gray) !important;
-    border: 2px solid var(--inactive-gray) !important;
-    border-radius: 16px !important;
-    padding: 20px !important;
+    background: var(--light-gray) !important;
+    border: 1px solid transparent !important;
+    border-radius: 12px !important;
+    padding: 12px !important;
     display: flex !important;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     text-align: center;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
     cursor: pointer;
     position: relative;
     z-index: 2;
     min-height: 80px;
-    opacity: 0.5;
+    max-height: 80px;
+    min-width: 80px;
+    max-width: 100%;
+    overflow: hidden;
 }
 
 #stratego-final-map .tile-icon {
@@ -405,50 +408,66 @@ INSTRUCTIONS :
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 60%;
-    height: 60%;
+    width: 70%;
+    height: 70%;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 8px !important;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    color: var(--inactive-gray);
+    opacity: 0.7;
 }
 
 #stratego-final-map .tile-icon svg {
     width: 100% !important;
     height: 100% !important;
+    transition: all 0.4s ease;
     object-fit: contain;
-    color: inherit;
 }
 
 #stratego-final-map .tile-title {
+    font-size: 0.7rem !important;
+    font-weight: 600 !important;
+    color: var(--dark-blue) !important;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    margin: 0 !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    transform: translateY(10px);
     position: absolute;
     bottom: 8px;
     left: 50%;
-    transform: translateX(-50%);
-    font-weight: 600 !important;
-    font-size: 0.65rem !important;
-    color: inherit;
-    white-space: nowrap;
-    opacity: 0;
-    transition: opacity 0.3s ease;
+    transform: translateX(-50%) translateY(10px);
     width: 90%;
-    text-align: center;
+    line-height: 1.1;
+    z-index: 3;
 }
 
-/* TUILES ACTIVES */
+/* TUILES ACTIVES - STYLE STRIPE */
 #stratego-final-map .tile.active {
     background: var(--white) !important;
-    border-color: var(--light-blue) !important;
-    color: var(--dark-blue) !important;
-    box-shadow: var(--shadow) !important;
-    opacity: 1 !important;
-    transform: scale(1.02) !important;
+    border: 1px solid var(--inactive-gray) !important;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12) !important;
+    transform: translateY(-2px) !important;
 }
 
-#stratego-final-map .tile.active .tile-title {
+/* Icône se réduit et remonte quand active */
+#stratego-final-map .tile.active .tile-icon {
+    top: 25%;
+    transform: translate(-50%, -50%);
+    width: 40%;
+    height: 40%;
     opacity: 1;
 }
 
+/* Titre apparaît quand active */
+#stratego-final-map .tile.active .tile-title {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateX(-50%) translateY(0) !important;
+}
+
+/* Styles spécifiques par type */
 #stratego-final-map .tile.active.problem {
     border-color: var(--gold) !important;
 }
@@ -459,10 +478,33 @@ INSTRUCTIONS :
 
 #stratego-final-map .tile.active.solution {
     border-color: var(--light-blue) !important;
+    background: linear-gradient(135deg, var(--light-blue) 0%, #60a5fa 100%) !important;
+}
+
+#stratego-final-map .tile.active.solution .tile-icon {
+    color: var(--white) !important;
+}
+
+#stratego-final-map .tile.active.solution .tile-title {
+    color: var(--white) !important;
 }
 
 #stratego-final-map .tile.active.benefit {
     border-color: var(--light-blue) !important;
+    background: linear-gradient(135deg, var(--light-blue) 0%, #2563eb 100%) !important;
+}
+
+#stratego-final-map .tile.active.benefit .tile-icon {
+    color: var(--white) !important;
+}
+
+#stratego-final-map .tile.active.benefit .tile-title {
+    color: var(--white) !important;
+}
+
+#stratego-final-map .tile:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: var(--shadow) !important;
 }
 
 /* ANIMATIONS DES TUILES */
@@ -601,15 +643,24 @@ INSTRUCTIONS :
         setupScrollObserver() {
             const options = {
                 root: null,
-                rootMargin: '-20% 0px -20% 0px',
-                threshold: 0.6
+                rootMargin: '-30% 0px -30% 0px',
+                threshold: 0.8
             };
             
+            let lastTriggerTime = 0;
+            
             const observer = new IntersectionObserver((entries) => {
+                const now = Date.now();
+                
+                // Debounce pour éviter les triggers trop fréquents
+                if (now - lastTriggerTime < 1000) return;
+                
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
                         const sectionNumber = parseInt(entry.target.dataset.content);
-                        if (sectionNumber && sectionNumber !== this.currentSection) {
+                        if (sectionNumber && sectionNumber !== this.currentSection && !this.isAnimating) {
+                            console.log('📍 Section detected:', sectionNumber);
+                            lastTriggerTime = now;
                             this.switchToSection(sectionNumber);
                         }
                     }
@@ -658,6 +709,9 @@ INSTRUCTIONS :
             console.log('🎭 Starting animation for section:', sectionNumber);
             this.isAnimating = true;
             
+            // Reset COMPLET de toutes les tuiles et connexions
+            this.resetAllTiles();
+            
             // Masquer toutes les sections sauf celle active
             document.querySelectorAll('#stratego-final-map .tile').forEach(tile => {
                 const tileSection = tile.dataset.section;
@@ -668,26 +722,16 @@ INSTRUCTIONS :
                 }
             });
             
-            // Reset de la section active uniquement
-            document.querySelectorAll(`#stratego-final-map .tile[data-section="${sectionNumber}"]`).forEach(tile => {
-                tile.classList.remove('active', 'pulse', 'glow');
-            });
-            
-            document.querySelectorAll(`#stratego-final-map .connection-line[data-section="${sectionNumber}"]`).forEach(line => {
-                line.classList.remove('active');
-                line.style.strokeDasharray = '';
-                line.style.strokeDashoffset = '';
-                line.style.opacity = '0';
-            });
-            
-            // Lancer l'animation appropriée
-            if (sectionNumber === 1) {
-                this.animateSection1();
-            } else if (sectionNumber === 2) {
-                this.animateSection2();
-            } else if (sectionNumber === 3) {
-                this.animateSection3();
-            }
+            // Lancer l'animation appropriée après un petit délai
+            setTimeout(() => {
+                if (sectionNumber === 1) {
+                    this.animateSection1();
+                } else if (sectionNumber === 2) {
+                    this.animateSection2();
+                } else if (sectionNumber === 3) {
+                    this.animateSection3();
+                }
+            }, 200);
             
             // Débloquer après 6 secondes
             setTimeout(() => {
@@ -699,12 +743,13 @@ INSTRUCTIONS :
             // Reset toutes les tuiles
             document.querySelectorAll('#stratego-final-map .tile').forEach(tile => {
                 tile.classList.remove('active', 'pulse', 'glow');
-                tile.style.opacity = '0.5';
+                tile.style.opacity = '';
+                tile.style.animation = '';
             });
             
             // Reset toutes les connexions
             document.querySelectorAll('#stratego-final-map .connection-line').forEach(line => {
-                line.classList.remove('active');
+                line.classList.remove('active', 'dashed', 'intervention');
                 line.style.strokeDasharray = '';
                 line.style.strokeDashoffset = '';
                 line.style.opacity = '0';
