@@ -383,11 +383,11 @@ INSTRUCTIONS :
     background: var(--white) !important;
     border-radius: 20px !important;
     box-shadow: var(--shadow-lg) !important;
-    padding: 10px !important;
+    padding: 8px !important;
     display: grid !important;
     grid-template-columns: repeat(4, 1fr) !important;
     grid-template-rows: repeat(6, 1fr) !important;
-    gap: 5px !important;
+    gap: 4px !important;
     overflow: hidden !important;
 }
 
@@ -395,8 +395,8 @@ INSTRUCTIONS :
 #stratego-final-map .tile {
     background: var(--white) !important;
     border: 1px solid var(--inactive-gray) !important;
-    border-radius: 6px !important;
-    padding: 8px !important;
+    border-radius: 4px !important;
+    padding: 6px !important;
     display: flex !important;
     flex-direction: column;
     align-items: center;
@@ -406,19 +406,19 @@ INSTRUCTIONS :
     cursor: pointer;
     position: relative;
     z-index: 2;
-    aspect-ratio: 3/4 !important;
+    aspect-ratio: 5/6 !important;
     opacity: 0.6;
 }
 
 #stratego-final-map .tile-icon {
-    width: 32px !important;
-    height: 32px !important;
+    width: 24px !important;
+    height: 24px !important;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     color: var(--inactive-gray);
-    margin-bottom: 4px !important;
+    margin-bottom: 3px !important;
 }
 
 #stratego-final-map .tile-icon svg {
@@ -430,13 +430,13 @@ INSTRUCTIONS :
 
 #stratego-final-map .tile-title {
     font-weight: 600 !important;
-    font-size: 0.65rem !important;
+    font-size: 0.55rem !important;
     color: inherit;
     opacity: 0;
     transition: all 0.3s ease;
     text-align: center;
     line-height: 1.1;
-    margin-top: 2px;
+    margin-top: 1px;
 }
 
 /* TUILES ACTIVES */
@@ -452,8 +452,8 @@ INSTRUCTIONS :
 #stratego-final-map .tile.active .tile-icon {
     color: inherit;
     opacity: 1;
-    width: 28px !important;
-    height: 28px !important;
+    width: 20px !important;
+    height: 20px !important;
 }
 
 #stratego-final-map .tile.active .tile-title {
