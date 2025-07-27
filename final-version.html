@@ -396,7 +396,7 @@ INSTRUCTIONS :
     background: var(--white) !important;
     border: 1px solid var(--inactive-gray) !important;
     border-radius: 6px !important;
-    padding: 4px !important;
+    padding: 8px !important;
     display: flex !important;
     flex-direction: column;
     align-items: center;
@@ -406,36 +406,37 @@ INSTRUCTIONS :
     cursor: pointer;
     position: relative;
     z-index: 2;
-    aspect-ratio: 4/5 !important;
+    min-height: 60px !important;
     opacity: 0.6;
 }
 
 #stratego-final-map .tile-icon {
-    width: 70% !important;
-    height: 70% !important;
+    width: 32px !important;
+    height: 32px !important;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     color: var(--inactive-gray);
+    margin-bottom: 4px !important;
 }
 
 #stratego-final-map .tile-icon svg {
     width: 100% !important;
     height: 100% !important;
     transition: all 0.4s ease;
+    object-fit: contain;
 }
 
 #stratego-final-map .tile-title {
     font-weight: 600 !important;
-    font-size: 0.6rem !important;
+    font-size: 0.65rem !important;
     color: inherit;
     opacity: 0;
     transition: all 0.3s ease;
     text-align: center;
     line-height: 1.1;
-    margin-top: auto;
-    padding-top: 2px;
+    margin-top: 2px;
 }
 
 /* TUILES ACTIVES */
@@ -451,8 +452,8 @@ INSTRUCTIONS :
 #stratego-final-map .tile.active .tile-icon {
     color: inherit;
     opacity: 1;
-    width: 40% !important;
-    height: 40% !important;
+    width: 28px !important;
+    height: 28px !important;
 }
 
 #stratego-final-map .tile.active .tile-title {
