@@ -406,7 +406,7 @@ INSTRUCTIONS :
     cursor: pointer;
     position: relative;
     z-index: 2;
-    min-height: 60px !important;
+    aspect-ratio: 3/4 !important;
     opacity: 0.6;
 }
 
@@ -534,24 +534,29 @@ INSTRUCTIONS :
 #stratego-final-map .connection-line {
     fill: none !important;
     stroke: var(--light-blue) !important;
-    stroke-width: 3 !important;
+    stroke-width: 4 !important;
     opacity: 0 !important;
     transition: all 0.4s ease !important;
+    filter: drop-shadow(0 2px 4px rgba(58, 143, 255, 0.3)) !important;
 }
 
 #stratego-final-map .connection-line.dashed {
     stroke: var(--gold) !important;
-    stroke-dasharray: 8 4 !important;
+    stroke-width: 4 !important;
+    stroke-dasharray: 10 6 !important;
+    filter: drop-shadow(0 2px 4px rgba(191, 155, 48, 0.3)) !important;
 }
 
 #stratego-final-map .connection-line.intervention {
     stroke: var(--light-blue) !important;
-    stroke-width: 4 !important;
+    stroke-width: 5 !important;
+    filter: drop-shadow(0 3px 6px rgba(58, 143, 255, 0.4)) !important;
 }
 
 #stratego-final-map .connection-line.active {
     opacity: 1 !important;
     animation: drawElbow 2s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+    stroke-width: 5 !important;
 }
 
 @keyframes drawElbow {
