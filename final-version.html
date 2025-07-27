@@ -378,16 +378,16 @@ INSTRUCTIONS :
 #stratego-final-map .single-interactive-map {
     position: sticky !important;
     top: 100px !important;
-    height: 750px !important;
-    max-height: 80vh !important;
+    width: 650px !important;
+    height: 650px !important;
     background: var(--white) !important;
     border-radius: 20px !important;
     box-shadow: var(--shadow-lg) !important;
-    padding: 20px !important;
+    padding: 15px !important;
     display: grid !important;
     grid-template-columns: repeat(4, 1fr) !important;
     grid-template-rows: repeat(6, 1fr) !important;
-    gap: 10px !important;
+    gap: 8px !important;
     overflow: hidden !important;
 }
 
@@ -395,8 +395,8 @@ INSTRUCTIONS :
 #stratego-final-map .tile {
     background: var(--white) !important;
     border: 2px solid var(--inactive-gray) !important;
-    border-radius: 12px !important;
-    padding: 12px !important;
+    border-radius: 8px !important;
+    padding: 8px !important;
     display: flex !important;
     flex-direction: column;
     align-items: center;
@@ -421,7 +421,7 @@ INSTRUCTIONS :
     justify-content: center;
     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     color: var(--inactive-gray);
-    padding: 12px;
+    padding: 8px;
     box-sizing: border-box;
 }
 
@@ -459,11 +459,11 @@ INSTRUCTIONS :
 #stratego-final-map .tile.active .tile-icon {
     color: inherit;
     opacity: 1;
-    top: 6px;
-    left: 6px;
-    width: calc(100% - 24px) !important;
-    height: calc(100% - 24px) !important;
-    padding: 6px;
+    top: 4px;
+    left: 4px;
+    width: calc(100% - 20px) !important;
+    height: calc(100% - 20px) !important;
+    padding: 4px;
 }
 
 #stratego-final-map .tile.active .tile-title {
