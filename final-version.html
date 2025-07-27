@@ -379,50 +379,52 @@ INSTRUCTIONS :
     position: sticky !important;
     top: 100px !important;
     width: 650px !important;
-    height: 650px !important;
+    height: 800px !important;
     background: var(--white) !important;
     border-radius: 20px !important;
     box-shadow: var(--shadow-lg) !important;
-    padding: 5px !important;
+    padding: 12px !important;
     display: grid !important;
     grid-template-columns: repeat(6, 1fr) !important;
     grid-template-rows: repeat(6, 1fr) !important;
-    gap: 2px !important;
+    gap: 8px !important;
     overflow: hidden !important;
 }
 
 /* TUILES - État par défaut (blanches avec bordure grise) */
 #stratego-final-map .tile {
     background: var(--white) !important;
-    border: 1px solid var(--inactive-gray) !important;
-    border-radius: 3px !important;
-    padding: 3px !important;
+    border: 2px solid var(--inactive-gray) !important;
+    border-radius: 12px !important;
+    padding: 16px !important;
     display: flex !important;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     text-align: center;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
     cursor: pointer;
     position: relative;
     z-index: 2;
     aspect-ratio: 5/6 !important;
-    opacity: 0.6;
+    opacity: 0.8;
+}
+
+#stratego-final-map .tile:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12) !important;
+    border-color: var(--light-blue) !important;
 }
 
 #stratego-final-map .tile-icon {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100% !important;
-    height: 100% !important;
+    width: 70% !important;
+    height: 70% !important;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     color: var(--inactive-gray);
-    padding: 3px;
-    box-sizing: border-box;
+    margin-bottom: 8px !important;
 }
 
 #stratego-final-map .tile-icon svg {
@@ -434,38 +436,32 @@ INSTRUCTIONS :
 
 #stratego-final-map .tile-title {
     font-weight: 600 !important;
-    font-size: 0.5rem !important;
+    font-size: 0.75rem !important;
     color: inherit;
     opacity: 0;
     transition: all 0.3s ease;
     text-align: center;
-    line-height: 1.1;
-    position: absolute;
-    bottom: 2px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 90%;
-    z-index: 1;
+    line-height: 1.2;
+    margin-top: auto;
 }
 
 /* TUILES ACTIVES */
 #stratego-final-map .tile.active {
     background: var(--white) !important;
     border-color: var(--light-blue) !important;
+    border-width: 3px !important;
     color: var(--dark-blue) !important;
-    box-shadow: var(--shadow) !important;
+    box-shadow: 0 12px 32px rgba(58, 143, 255, 0.25) !important;
     opacity: 1 !important;
-    transform: scale(1.02) !important;
+    transform: translateY(-4px) !important;
 }
 
 #stratego-final-map .tile.active .tile-icon {
     color: inherit;
     opacity: 1;
-    top: 2px;
-    left: 2px;
-    width: calc(100% - 16px) !important;
-    height: calc(100% - 16px) !important;
-    padding: 2px;
+    width: 50% !important;
+    height: 50% !important;
+    margin-bottom: 4px !important;
 }
 
 #stratego-final-map .tile.active .tile-title {
@@ -475,6 +471,8 @@ INSTRUCTIONS :
 /* Styles spécifiques par type */
 #stratego-final-map .tile.active.problem {
     border-color: var(--gold) !important;
+    border-width: 3px !important;
+    box-shadow: 0 12px 32px rgba(191, 155, 48, 0.25) !important;
 }
 
 #stratego-final-map .tile.active.problem .tile-icon {
@@ -483,8 +481,9 @@ INSTRUCTIONS :
 
 #stratego-final-map .tile.active.solution {
     border-color: var(--light-blue) !important;
+    border-width: 3px !important;
     background: linear-gradient(135deg, var(--light-blue) 0%, #60a5fa 100%) !important;
-    box-shadow: 0 0 20px rgba(58, 143, 255, 0.6) !important;
+    box-shadow: 0 16px 40px rgba(58, 143, 255, 0.4) !important;
 }
 
 #stratego-final-map .tile.active.solution .tile-icon {
