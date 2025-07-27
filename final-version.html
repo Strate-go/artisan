@@ -301,10 +301,8 @@ INSTRUCTIONS :
     pointer-events: none;
 }
 
-/* SCROLL SNAP - Force les positions fixes */
 html {
     scroll-behavior: smooth !important;
-    overflow-x: hidden !important;
 }
 
 body {
@@ -351,9 +349,9 @@ body {
     opacity: 1;
     visibility: visible;
     transition: all 0.6s ease;
-    margin-bottom: 50vh; /* Espacement pour permettre le scroll discret */
+    margin-bottom: 40px;
     padding: 40px 0;
-    min-height: 80vh; /* Hauteur minimum pour chaque section */
+    min-height: 60vh;
 }
 
 #stratego-final-map .content-block:first-child {
@@ -711,11 +709,10 @@ body {
             init() {
                 this.setupSVGPaths();
                 this.bindEvents();
-                this.calculateSectionPositions();
-                this.setupDiscreteScrolling();
+                this.setupScrollObserver();
                 
-                // Aller à la section 1 immédiatement
-                this.goToSection(1, false);
+                // Démarrer avec la section 1
+                this.switchToSection(1);
             }
             
             calculateSectionPositions() {
@@ -738,119 +735,30 @@ body {
                 });
             }
             
-            setupDiscreteScrolling() {
-                console.log('🎮 Setting up discrete scrolling (Instagram Reels style)');
+            setupScrollObserver() {
+                const options = {
+                    root: null,
+                    rootMargin: '-20% 0px -20% 0px',
+                    threshold: 0.6
+                };
                 
-                let lastWheelTime = 0;
-                
-                // Désactiver le scroll classique et capturer tous les événements
-                window.addEventListener('wheel', (e) => {
-                    e.preventDefault(); // Bloquer le scroll normal
-                    
-                    const now = Date.now();
-                    
-                    // Debounce plus court pour être plus réactif
-                    if (now - lastWheelTime < 100) return;
-                    lastWheelTime = now;
-                    
-                    // Détecter la direction
-                    const direction = e.deltaY > 0 ? 'down' : 'up';
-                    console.log('🎯 Scroll direction:', direction);
-                    
-                    this.handleDiscreteScroll(direction);
-                }, { passive: false });
-                
-                // Capturer aussi les touches clavier
-                window.addEventListener('keydown', (e) => {
-                    switch(e.key) {
-                        case 'ArrowDown':
-                        case 'PageDown':
-                        case ' ': // Espace
-                            e.preventDefault();
-                            this.handleDiscreteScroll('down');
-                            break;
-                        case 'ArrowUp':
-                        case 'PageUp':
-                            e.preventDefault();
-                            this.handleDiscreteScroll('up');
-                            break;
-                    }
-                });
-                
-                // Capturer les gestes tactiles
-                let startY = 0;
-                window.addEventListener('touchstart', (e) => {
-                    startY = e.touches[0].clientY;
-                }, { passive: true });
-                
-                window.addEventListener('touchend', (e) => {
-                    const endY = e.changedTouches[0].clientY;
-                    const diff = startY - endY;
-                    
-                    if (Math.abs(diff) > 30) { // Seuil plus bas pour être plus réactif
-                        const direction = diff > 0 ? 'down' : 'up';
-                        this.handleDiscreteScroll(direction);
-                    }
-                }, { passive: true });
-            }
-            
-            handleDiscreteScroll(direction) {
-                // Ne bloquer que si on est déjà en train de scroller, PAS si on anime
-                if (this.isScrolling) {
-                    console.log('⏸️ Already scrolling, ignoring');
-                    return;
-                }
-                
-                const totalSections = this.sectionPositions.length;
-                let targetSection = this.currentSection;
-                
-                if (direction === 'down' && this.currentSection < totalSections) {
-                    targetSection = this.currentSection + 1;
-                } else if (direction === 'up' && this.currentSection > 1) {
-                    targetSection = this.currentSection - 1;
-                }
-                
-                if (targetSection !== this.currentSection) {
-                    console.log(`📍 Going from section ${this.currentSection} to ${targetSection}`);
-                    
-                    // Interrompre l'animation en cours si nécessaire
-                    if (this.isAnimating) {
-                        console.log('🔄 Interrupting current animation for new section');
-                        this.isAnimating = false;
-                        if (this.animationInterval) {
-                            clearInterval(this.animationInterval);
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const sectionNumber = parseInt(entry.target.dataset.content);
+                            if (sectionNumber && sectionNumber !== this.currentSection) {
+                                this.switchToSection(sectionNumber);
+                            }
                         }
-                    }
-                    
-                    this.goToSection(targetSection, true);
-                } else {
-                    console.log('🛑 Already at boundary section');
-                }
-            }
-            
-            goToSection(sectionNumber, animate = true) {
-                if (this.isScrolling) return;
+                    });
+                }, options);
                 
-                console.log('🚀 Going to section:', sectionNumber);
-                this.isScrolling = true;
-                
-                const targetPosition = this.sectionPositions[sectionNumber - 1];
-                if (!targetPosition) {
-                    this.isScrolling = false;
-                    return;
-                }
-                
-                // Scroll vers la position
-                window.scrollTo({
-                    top: targetPosition.position,
-                    behavior: animate ? 'smooth' : 'auto'
+                // Observer tous les content-blocks
+                document.querySelectorAll('#stratego-final-map .content-block').forEach(block => {
+                    observer.observe(block);
                 });
                 
-                // Changer l'animation après le scroll
-                setTimeout(() => {
-                    this.switchToSection(sectionNumber);
-                    this.isScrolling = false;
-                }, animate ? 300 : 50); // Plus rapide pour être plus réactif
+                this.scrollObserver = observer;
             }
             
             switchToSection(sectionNumber) {
