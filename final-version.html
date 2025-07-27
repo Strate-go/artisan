@@ -384,7 +384,7 @@ INSTRUCTIONS :
     box-shadow: var(--shadow-lg) !important;
     padding: 25px !important;
     display: grid !important;
-    grid-template-columns: repeat(8, 1fr) !important;
+    grid-template-columns: repeat(7, 1fr) !important;
     grid-template-rows: repeat(6, 1fr) !important;
     gap: 12px !important;
     overflow: hidden !important;
@@ -410,19 +410,18 @@ INSTRUCTIONS :
 }
 
 #stratego-final-map .tile-icon {
-    width: 32px !important;
-    height: 32px !important;
+    width: 70% !important;
+    height: 70% !important;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     color: var(--inactive-gray);
-    margin-bottom: 8px !important;
 }
 
 #stratego-final-map .tile-icon svg {
-    width: 32px !important;
-    height: 32px !important;
+    width: 100% !important;
+    height: 100% !important;
     transition: all 0.4s ease;
 }
 
@@ -431,10 +430,14 @@ INSTRUCTIONS :
     font-size: 0.65rem !important;
     color: inherit;
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transition: all 0.3s ease;
     text-align: center;
     line-height: 1.1;
-    margin-top: 4px;
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
 }
 
 /* TUILES ACTIVES */
@@ -450,6 +453,8 @@ INSTRUCTIONS :
 #stratego-final-map .tile.active .tile-icon {
     color: inherit;
     opacity: 1;
+    width: 50% !important;
+    height: 50% !important;
 }
 
 #stratego-final-map .tile.active .tile-title {
