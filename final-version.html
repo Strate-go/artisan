@@ -102,7 +102,7 @@ INSTRUCTIONS :
                 <div class="tile-title">Devis</div>
             </div>
 
-            <div class="tile problem" data-tile="materiaux" data-section="1" style="grid-column: 2; grid-row: 2;">
+            <div class="tile problem" data-tile="materiaux" data-section="1" style="grid-column: 2; grid-row: 1;">
                 <div class="tile-icon">
                     <svg width="32" height="32" viewBox="0 0 340 340" fill="currentColor">
                         <path d="M168 271.938C168 274.93 166.32 277.529 163.76 278.867L100.56 313.832C99.28 314.777 97.68 315.25 96 315.25C94.32 315.25 92.72 314.777 91.44 313.832L28.24 278.867C26.9568 278.205 25.883 277.208 25.1354 275.986C24.3878 274.764 23.9951 273.364 24 271.938V201.062C24 198.07 25.68 195.471 28.24 194.132L91.44 159.168C92.72 158.223 94.32 157.75 96 157.75C97.68 157.75 99.28 158.223 100.56 159.168L163.76 194.132C166.32 195.471 168 198.07 168 201.062V271.938ZM96 174.681L48.32 201.062L96 227.444L143.68 201.062L96 174.681ZM40 267.291L88 293.909V241.067L40 214.529V267.291ZM152 267.291V214.529L104 241.067V293.909L152 267.291Z"/>
@@ -113,7 +113,7 @@ INSTRUCTIONS :
                 <div class="tile-title">Matières Premières</div>
             </div>
 
-            <div class="tile problem" data-tile="temps" data-section="1" style="grid-column: 3; grid-row: 1;">
+            <div class="tile problem" data-tile="temps" data-section="1" style="grid-column: 3; grid-row: 2;">
                 <div class="tile-icon">
                     <svg width="32" height="32" viewBox="0 0 334 334" fill="currentColor">
                         <path fill-rule="evenodd" clip-rule="evenodd" d="M131.042 28.3333C131.042 25.5154 132.161 22.8129 134.154 20.8203C136.146 18.8278 138.849 17.7083 141.667 17.7083H198.333C201.151 17.7083 203.854 18.8278 205.846 20.8203C207.839 22.8129 208.958 25.5154 208.958 28.3333C208.958 31.1513 207.839 33.8538 205.846 35.8464C203.854 37.8389 201.151 38.9583 198.333 38.9583H141.667C138.849 38.9583 136.146 37.8389 134.154 35.8464C132.161 33.8538 131.042 31.1513 131.042 28.3333ZM170 67.2917C139.003 67.2917 109.275 79.6053 87.3569 101.524C65.4386 123.442 53.125 153.17 53.125 184.167C53.125 215.164 65.4386 244.891 87.3569 266.81C109.275 288.728 139.003 301.042 170 301.042C200.997 301.042 230.725 288.728 252.643 266.81C274.561 244.891 286.875 215.164 286.875 184.167C286.875 153.17 274.561 123.442 252.643 101.524C230.725 79.6053 200.997 67.2917 170 67.2917ZM31.875 184.167C31.875 107.879 93.7125 46.0417 170 46.0417C246.288 46.0417 308.125 107.879 308.125 184.167C308.125 260.454 246.288 322.292 170 322.292C93.7125 322.292 31.875 260.454 31.875 184.167ZM170 116.875C172.818 116.875 175.52 117.994 177.513 119.987C179.506 121.98 180.625 124.682 180.625 127.5V184.167C180.625 186.985 179.506 189.687 177.513 191.68C175.52 193.672 172.818 194.792 170 194.792C167.182 194.792 164.48 193.672 162.487 191.68C160.494 189.687 159.375 186.985 159.375 184.167V127.5C159.375 124.682 160.494 121.98 162.487 119.987C164.48 117.994 167.182 116.875 170 116.875Z"/>
@@ -384,7 +384,7 @@ INSTRUCTIONS :
     box-shadow: var(--shadow-lg) !important;
     padding: 25px !important;
     display: grid !important;
-    grid-template-columns: repeat(7, 1fr) !important;
+    grid-template-columns: repeat(5, 1fr) !important;
     grid-template-rows: repeat(6, 1fr) !important;
     gap: 12px !important;
     overflow: hidden !important;
@@ -410,13 +410,18 @@ INSTRUCTIONS :
 }
 
 #stratego-final-map .tile-icon {
-    width: 70% !important;
-    height: 70% !important;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100% !important;
+    height: 100% !important;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     color: var(--inactive-gray);
+    padding: 16px;
+    box-sizing: border-box;
 }
 
 #stratego-final-map .tile-icon svg {
@@ -453,8 +458,11 @@ INSTRUCTIONS :
 #stratego-final-map .tile.active .tile-icon {
     color: inherit;
     opacity: 1;
-    width: 50% !important;
-    height: 50% !important;
+    top: 8px;
+    left: 8px;
+    width: calc(100% - 32px) !important;
+    height: calc(100% - 32px) !important;
+    padding: 8px;
 }
 
 #stratego-final-map .tile.active .tile-title {
