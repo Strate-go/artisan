@@ -718,9 +718,22 @@ INSTRUCTIONS :
         }
         
         init() {
-            this.setupSVGPaths();
+            console.log('🚀 Initialisation de Stratégo Map');
+            
             this.bindEvents();
             this.setupScrollObserver();
+            
+            // Attendre que tous les éléments soient rendus avant de configurer les SVG
+            setTimeout(() => {
+                console.log('🔧 Configuration des chemins SVG...');
+                this.setupSVGPaths();
+            }, 100);
+            
+            // Recalculer après un délai plus long pour être sûr
+            setTimeout(() => {
+                console.log('🔧 Recalcul des chemins SVG...');
+                this.setupSVGPaths();
+            }, 500);
             
             // Démarrer avec la section 1
             this.switchToSection(1);
@@ -859,8 +872,13 @@ INSTRUCTIONS :
             // 2. Connexions vers la solution (doré → bleu clair → doré)
             setTimeout(() => {
                 const connections = document.querySelectorAll('#stratego-final-map .connection-line[data-to="marge"][data-section="1"]');
-                connections.forEach(line => {
+                console.log(`🔗 Activation de ${connections.length} connexions vers marge`);
+                
+                connections.forEach((line, index) => {
+                    console.log(`  - Activating: ${line.dataset.from} → ${line.dataset.to}`);
                     line.classList.add('active', 'gradient-gold-blue');
+                    line.style.opacity = '1'; // Force la visibilité
+                    
                     // Démarrer le dégradé après le tracé
                     setTimeout(() => {
                         line.classList.add('start-gradient');
@@ -1007,13 +1025,23 @@ INSTRUCTIONS :
         }
         
         setupSVGPaths() {
-            const svg = document.querySelector('#stratego-final-map .connections');
-            if (!svg) return;
+            const svg = document.querySelector('#stratego-final-map svg');
+            if (!svg) {
+                console.warn('❌ SVG non trouvé');
+                return;
+            }
             
-            const paths = svg.querySelectorAll('path[data-from][data-to]');
+            const paths = svg.querySelectorAll('.connection-line');
+            console.log(`🔍 Trouvé ${paths.length} chemins de connexion`);
+            
             paths.forEach(path => {
                 const fromTile = document.querySelector(`#stratego-final-map .tile[data-tile="${path.dataset.from}"][data-section="${path.dataset.section}"]`);
                 const toTile = document.querySelector(`#stratego-final-map .tile[data-tile="${path.dataset.to}"][data-section="${path.dataset.section}"]`);
+                
+                console.log(`🔗 Connexion ${path.dataset.from} → ${path.dataset.to} (section ${path.dataset.section}):`, {
+                    fromTile: !!fromTile,
+                    toTile: !!toTile
+                });
                 
                 if (fromTile && toTile) {
                     const pathString = this.calculateSmartPath(fromTile, toTile, svg);
@@ -1029,13 +1057,19 @@ INSTRUCTIONS :
                                 path.style.strokeDasharray = `${pathLength}`;
                                 path.style.strokeDashoffset = `${pathLength}`;
                                 
-                                // Debug : vérifier que les valeurs sont appliquées (désactivé en production)
-                                // console.log(`Path ${path.dataset.from} → ${path.dataset.to}: length=${pathLength}`);
+                                console.log(`✅ Path ${path.dataset.from} → ${path.dataset.to}: length=${pathLength}`);
                             }
                         } catch (error) {
-                            console.warn('Erreur lors du calcul de la longueur du path SVG:', error);
+                            console.warn('❌ Erreur getTotalLength:', error);
                         }
+                    } else {
+                        console.warn(`❌ Path invalide pour ${path.dataset.from} → ${path.dataset.to}:`, pathString);
                     }
+                } else {
+                    console.warn(`❌ Éléments manquants pour ${path.dataset.from} → ${path.dataset.to}`, {
+                        fromSelector: `#stratego-final-map .tile[data-tile="${path.dataset.from}"][data-section="${path.dataset.section}"]`,
+                        toSelector: `#stratego-final-map .tile[data-tile="${path.dataset.to}"][data-section="${path.dataset.section}"]`
+                    });
                 }
             });
         }
