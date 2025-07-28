@@ -589,11 +589,19 @@ INSTRUCTIONS :
 
 /* DÉGRADÉS ANIMÉS STYLE STRIPE */
 #stratego-final-map .connection-line.gradient-gold-blue {
+    stroke: var(--gold) !important;
+    opacity: 0 !important;
+    stroke-dasharray: 1000 !important;
+    stroke-dashoffset: 1000 !important;
     animation: drawElbow 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards,
                flowGradientGoldBlue 3s ease-in-out 2s infinite !important;
 }
 
 #stratego-final-map .connection-line.gradient-blue-flow {
+    stroke: var(--light-blue) !important;
+    opacity: 0 !important;
+    stroke-dasharray: 1000 !important;
+    stroke-dashoffset: 1000 !important;
     animation: drawElbow 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards,
                flowGradientBlue 3s ease-in-out 2s infinite !important;
 }
