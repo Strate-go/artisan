@@ -397,7 +397,9 @@ INSTRUCTIONS :
     background: var(--white) !important;
     border: 1px solid #e6e6e6 !important;
     border-radius: 20px !important;
-    padding: 9px !important;
+    width: 78px !important;
+    height: 78px !important;
+    padding: 8px !important;
     display: flex !important;
     flex-direction: column;
     align-items: center;
@@ -407,7 +409,6 @@ INSTRUCTIONS :
     cursor: pointer;
     position: relative;
     z-index: 2;
-    aspect-ratio: 5/6 !important;
     opacity: 0.9;
 }
 
@@ -418,14 +419,14 @@ INSTRUCTIONS :
 }
 
 #stratego-final-map .tile-icon {
-    width: 64% !important;
-    height: 64% !important;
+    width: 48px !important;
+    height: 48px !important;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     color: var(--inactive-gray);
-    margin-bottom: 6px !important;
+    margin-bottom: 4px !important;
 }
 
 #stratego-final-map .tile-icon svg {
@@ -437,7 +438,7 @@ INSTRUCTIONS :
 
 #stratego-final-map .tile-title {
     font-weight: 600 !important;
-    font-size: 0.64rem !important;
+    font-size: 0.55rem !important;
     color: inherit;
     opacity: 0;
     transition: all 0.3s ease;
@@ -460,9 +461,9 @@ INSTRUCTIONS :
 #stratego-final-map .tile.active .tile-icon {
     color: inherit;
     opacity: 1;
-    width: 45% !important;
-    height: 45% !important;
-    margin-bottom: 4px !important;
+    width: 32px !important;
+    height: 32px !important;
+    margin-bottom: 3px !important;
 }
 
 #stratego-final-map .tile.active .tile-title {
