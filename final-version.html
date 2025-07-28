@@ -838,10 +838,10 @@ INSTRUCTIONS :
                 if (temps) temps.classList.add('active');
             }, 500);
             
-            // 2. Connexions vers la solution (or → bleu)
+            // 2. Connexions vers la solution (dorées)
             setTimeout(() => {
                 const connections = document.querySelectorAll('#stratego-final-map .connection-line[data-to="marge"][data-section="1"]');
-                connections.forEach(line => line.classList.add('active', 'gradient-gold-blue'));
+                connections.forEach(line => line.classList.add('active'));
             }, 1500);
             
             // 3. Solution s'allume
@@ -877,10 +877,10 @@ INSTRUCTIONS :
                 if (factures) factures.classList.add('active');
             }, 500);
             
-            // 2. Connexions en pointillés (or → bleu)
+            // 2. Connexions en pointillés (dorées)
             setTimeout(() => {
                 const connections = document.querySelectorAll('#stratego-final-map .connection-line[data-to="previsionnel"][data-section="2"]');
-                connections.forEach(line => line.classList.add('active', 'gradient-gold-blue'));
+                connections.forEach(line => line.classList.add('active'));
             }, 1500);
             
             // 3. Solution s'allume
@@ -913,10 +913,10 @@ INSTRUCTIONS :
                 }
             }, 500);
             
-            // 2. Connexions vers autres problèmes (or → bleu)
+            // 2. Connexions vers autres problèmes (dorées)
             setTimeout(() => {
                 const connections = document.querySelectorAll('#stratego-final-map .connection-line[data-from="doute"][data-section="3"]');
-                connections.forEach(line => line.classList.add('active', 'gradient-gold-blue'));
+                connections.forEach(line => line.classList.add('active'));
                 
                 const investissement = document.querySelector('#stratego-final-map .tile[data-tile="investissement"][data-section="3"]');
                 const recrutement = document.querySelector('#stratego-final-map .tile[data-tile="recrutement"][data-section="3"]');
