@@ -671,19 +671,26 @@ INSTRUCTIONS :
                 if (now - lastTriggerTime < 1000) return;
                 
                 entries.forEach(entry => {
+                    console.log(`🔍 Observer trigger: isIntersecting=${entry.isIntersecting}, target data-content="${entry.target.dataset.content}"`);
                     if (entry.isIntersecting) {
                         const sectionNumber = parseInt(entry.target.dataset.content);
+                        console.log(`📍 Section detected: ${sectionNumber}, current: ${this.currentSection}, animating: ${this.isAnimating}`);
                         if (sectionNumber && sectionNumber !== this.currentSection && !this.isAnimating) {
-                            console.log('📍 Section detected:', sectionNumber);
+                            console.log('✅ Switching to section:', sectionNumber);
                             lastTriggerTime = now;
                             this.switchToSection(sectionNumber);
+                        } else {
+                            console.log('❌ Section switch blocked - same section or animating');
                         }
                     }
                 });
             }, options);
             
             // Observer tous les content-blocks
-            document.querySelectorAll('#stratego-final-map .content-block').forEach(block => {
+            const blocks = document.querySelectorAll('#stratego-final-map .content-block');
+            console.log(`🔍 ${blocks.length} content-blocks trouvés pour observation:`);
+            blocks.forEach((block, index) => {
+                console.log(`  - Block ${index + 1}: data-content="${block.dataset.content}"`);
                 observer.observe(block);
             });
             
