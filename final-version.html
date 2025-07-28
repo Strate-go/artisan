@@ -680,14 +680,26 @@ INSTRUCTIONS :
                     const blockHeight = rect.height;
                     const blockCenter = blockTop + (blockHeight / 2);
                     const viewportCenter = scrollTop + (viewportHeight / 2);
+                    const sectionNumber = parseInt(block.dataset.content);
                     
-                    // Si le centre de la section est proche du centre de l'écran
-                    if (Math.abs(blockCenter - viewportCenter) < viewportHeight / 3) {
-                        const sectionNumber = parseInt(block.dataset.content);
-                        if (sectionNumber) {
-                            activeSection = sectionNumber;
+                    // Logique différente pour Section 3 (plus permissive)
+                    let isActive = false;
+                    if (sectionNumber === 3) {
+                        // Pour section 3 : se déclenche quand elle est dans les 50% du haut de l'écran
+                        isActive = rect.top < viewportHeight * 0.5 && rect.bottom > 0;
+                        if (isActive) {
+                            console.log(`🔍 Section 3 détectée (top: ${rect.top}px, seuil: ${viewportHeight * 0.5}px)`);
+                        }
+                    } else {
+                        // Pour sections 1 et 2 : logique normale (centre)
+                        isActive = Math.abs(blockCenter - viewportCenter) < viewportHeight / 3;
+                        if (isActive) {
                             console.log(`🔍 Section ${sectionNumber} détectée au centre (distance: ${Math.abs(blockCenter - viewportCenter)}px)`);
                         }
+                    }
+                    
+                    if (isActive && sectionNumber) {
+                        activeSection = sectionNumber;
                     }
                 });
                 
