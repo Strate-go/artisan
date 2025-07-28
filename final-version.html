@@ -295,6 +295,7 @@ INSTRUCTIONS :
     transition: all 0.6s ease;
     margin-bottom: 80px;
     padding: 40px 0;
+    min-height: 600px; /* Hauteur minimale pour scroll observer */
 }
 
 #stratego-final-map .content-block:first-child {
@@ -658,8 +659,8 @@ INSTRUCTIONS :
         setupScrollObserver() {
             const options = {
                 root: null,
-                rootMargin: '-20% 0px -20% 0px',
-                threshold: 0.6
+                rootMargin: '-10% 0px -10% 0px', // Moins restrictif
+                threshold: 0.3 // Plus bas = plus facile à déclencher
             };
             
             let lastTriggerTime = 0;
@@ -668,7 +669,7 @@ INSTRUCTIONS :
                 const now = Date.now();
                 
                 // Debounce pour éviter les triggers trop fréquents
-                if (now - lastTriggerTime < 1000) return;
+                if (now - lastTriggerTime < 500) return; // Réduit à 500ms
                 
                 entries.forEach(entry => {
                     console.log(`🔍 Observer trigger: isIntersecting=${entry.isIntersecting}, target data-content="${entry.target.dataset.content}"`);
