@@ -238,7 +238,8 @@ INSTRUCTIONS :
 
             <!-- SVG pour les connexions futures -->
             <svg class="connections-svg" width="100%" height="100%">
-                <!-- Paths seront ajoutés ici -->
+                <!-- Test : 1 seule connexion -->
+                <path class="connection-path" id="test-devis-marge" d=""></path>
             </svg>
         </div>
     </section>
@@ -649,7 +650,10 @@ INSTRUCTIONS :
             this.bindEvents();
             this.setupScrollObserver();
             
-            // Connexions SVG supprimées
+            // ÉTAPE 2 : Test connexion après que tout soit chargé
+            setTimeout(() => {
+                this.testSingleConnection();
+            }, 1000);
             
             // Démarrer avec la section 1
             this.switchToSection(1);
@@ -874,6 +878,41 @@ INSTRUCTIONS :
             if (this.scrollObserver) {
                 this.scrollObserver.disconnect();
             }
+        }
+        
+        // ÉTAPE 2 : Test d'une seule connexion
+        testSingleConnection() {
+            console.log('🔧 Test connexion devis → marge');
+            
+            const devis = document.querySelector('#stratego-final-map .tile[data-tile="devis"]');
+            const marge = document.querySelector('#stratego-final-map .tile[data-tile="marge"]');
+            const path = document.getElementById('test-devis-marge');
+            
+            if (!devis || !marge || !path) {
+                console.warn('❌ Éléments manquants pour le test');
+                return;
+            }
+            
+            // Calculer positions simples
+            const container = document.querySelector('#stratego-final-map .interactive-map');
+            const containerRect = container.getBoundingClientRect();
+            const devisRect = devis.getBoundingClientRect();
+            const margeRect = marge.getBoundingClientRect();
+            
+            // Coordonnées relatives au container
+            const x1 = devisRect.left + devisRect.width/2 - containerRect.left;
+            const y1 = devisRect.top + devisRect.height/2 - containerRect.top;
+            const x2 = margeRect.left + margeRect.width/2 - containerRect.left;
+            const y2 = margeRect.top + margeRect.height/2 - containerRect.top;
+            
+            // Ligne droite simple pour le test
+            const pathData = `M ${x1} ${y1} L ${x2} ${y2}`;
+            path.setAttribute('d', pathData);
+            
+            console.log(`📍 Connexion tracée: (${x1}, ${y1}) → (${x2}, ${y2})`);
+            
+            // Rendre visible pour le test
+            path.style.opacity = '1';
         }
     }
     
