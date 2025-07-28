@@ -418,10 +418,14 @@ INSTRUCTIONS :
     top: 50% !important;
     left: 50% !important;
     transform: translate(-50%, -50%) !important;
+    z-index: 10 !important;
 }
 
 #stratego-final-map .tile:not(.active) .tile-title {
-    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    position: absolute !important;
+    z-index: 1 !important;
 }
 
 
