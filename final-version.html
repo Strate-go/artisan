@@ -238,6 +238,47 @@ INSTRUCTIONS :
 
             <!-- SVG pour les connexions -->
             <svg class="connections" width="100%" height="100%">
+                <!-- Définition des dégradés animés -->
+                <defs>
+                    <!-- Dégradé or → bleu clair → or (pour problèmes → solutions) -->
+                    <linearGradient id="gradientGoldBlue" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="#BF9B30">
+                            <animate attributeName="stop-color" 
+                                values="#BF9B30;#3a8eff;#BF9B30;#3a8eff;#BF9B30" 
+                                dur="3s" 
+                                repeatCount="indefinite"/>
+                        </stop>
+                        <stop offset="50%" stop-color="#3a8eff">
+                            <animate attributeName="stop-color" 
+                                values="#3a8eff;#BF9B30;#3a8eff;#BF9B30;#3a8eff" 
+                                dur="3s" 
+                                repeatCount="indefinite"/>
+                        </stop>
+                        <stop offset="100%" stop-color="#BF9B30">
+                            <animate attributeName="stop-color" 
+                                values="#BF9B30;#3a8eff;#BF9B30;#3a8eff;#BF9B30" 
+                                dur="3s" 
+                                repeatCount="indefinite"/>
+                        </stop>
+                    </linearGradient>
+                    
+                    <!-- Dégradé bleu foncé → bleu clair (pour solutions → bénéfices) -->
+                    <linearGradient id="gradientBlueFlow" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="#0B2957">
+                            <animate attributeName="stop-color" 
+                                values="#0B2957;#3a8eff;#0B2957" 
+                                dur="3s" 
+                                repeatCount="indefinite"/>
+                        </stop>
+                        <stop offset="100%" stop-color="#3a8eff">
+                            <animate attributeName="stop-color" 
+                                values="#3a8eff;#0B2957;#3a8eff" 
+                                dur="3s" 
+                                repeatCount="indefinite"/>
+                        </stop>
+                    </linearGradient>
+                </defs>
+                
                 <!-- Section 1 : Rentabilité -->
                 <path class="connection-line elbow" data-from="devis" data-to="marge" data-section="1"></path>
                 <path class="connection-line elbow" data-from="materiaux" data-to="marge" data-section="1"></path>
@@ -587,7 +628,7 @@ INSTRUCTIONS :
     stroke-width: 2 !important;
 }
 
-/* LIGNES AVEC DÉGRADÉS - D'ABORD TRACER, PUIS ANIMER */
+/* LIGNES AVEC DÉGRADÉS SVG */
 #stratego-final-map .connection-line.gradient-gold-blue {
     stroke: var(--gold) !important;
 }
@@ -596,53 +637,16 @@ INSTRUCTIONS :
     stroke: var(--light-blue) !important;
 }
 
-/* Animation de tracé puis dégradé en séquence */
-#stratego-final-map .connection-line.gradient-gold-blue.active {
-    animation: drawElbow 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
-}
-
-#stratego-final-map .connection-line.gradient-blue-flow.active {
-    animation: drawElbow 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
-}
-
-/* Dégradés appliqués après le tracé */
+/* Application des dégradés après le tracé */
 #stratego-final-map .connection-line.gradient-gold-blue.start-gradient {
-    animation: flowGradientGoldBlue 3s ease-in-out infinite !important;
+    stroke: url(#gradientGoldBlue) !important;
 }
 
 #stratego-final-map .connection-line.gradient-blue-flow.start-gradient {
-    animation: flowGradientBlue 3s ease-in-out infinite !important;
+    stroke: url(#gradientBlueFlow) !important;
 }
 
-@keyframes flowGradientGoldBlue {
-    0% {
-        stroke: var(--gold);
-    }
-    25% {
-        stroke: #3a8eff;
-    }
-    50% {
-        stroke: var(--gold);
-    }
-    75% {
-        stroke: #3a8eff;
-    }
-    100% {
-        stroke: var(--gold);
-    }
-}
 
-@keyframes flowGradientBlue {
-    0% {
-        stroke: #0B2957;
-    }
-    50% {
-        stroke: #3a8eff;
-    }
-    100% {
-        stroke: #0B2957;
-    }
-}
 
 @keyframes drawElbow {
     from {
