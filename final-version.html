@@ -600,13 +600,14 @@ INSTRUCTIONS :
     z-index: 1 !important;
 }
 
+/* SOLUTION TEMPORAIRE - Force l'affichage des connexions */
 #stratego-final-map .connection-line {
     fill: none !important;
-    stroke: var(--light-blue) !important;
+    stroke: #bf9b30 !important;
     stroke-width: 2 !important;
-    opacity: 0 !important;
+    opacity: 1 !important;
     transition: all 0.4s ease !important;
-    filter: drop-shadow(0 1px 2px rgba(58, 143, 255, 0.2)) !important;
+    filter: drop-shadow(0 1px 2px rgba(191, 155, 48, 0.2)) !important;
 }
 
 #stratego-final-map .connection-line.dashed {
@@ -1044,6 +1045,13 @@ INSTRUCTIONS :
             const paths = svg.querySelectorAll('.connection-line');
             console.log(`🔍 Chemins avec classe .connection-line: ${paths.length}`);
             
+            // Si aucun chemin avec la bonne classe, créer les chemins manquants
+            if (paths.length === 0) {
+                console.log('🛠️ Aucun chemin trouvé, création automatique...');
+                this.createConnectionPaths(svg);
+                return; // Sortir et relancer après création
+            }
+            
             paths.forEach(path => {
                 const fromTile = document.querySelector(`#stratego-final-map .tile[data-tile="${path.dataset.from}"][data-section="${path.dataset.section}"]`);
                 const toTile = document.querySelector(`#stratego-final-map .tile[data-tile="${path.dataset.to}"][data-section="${path.dataset.section}"]`);
@@ -1125,6 +1133,12 @@ INSTRUCTIONS :
                 console.log('✅ SVG créé');
             }
             
+            this.createConnectionPaths(svg);
+        }
+        
+        createConnectionPaths(svg) {
+            console.log('🔧 Création des chemins de connexion...');
+            
             // Définir les connexions à créer
             const connections = [
                 { from: 'devis', to: 'marge', section: '1' },
@@ -1142,20 +1156,34 @@ INSTRUCTIONS :
             ];
             
             connections.forEach(conn => {
-                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                path.classList.add('connection-line', 'elbow');
-                path.setAttribute('data-from', conn.from);
-                path.setAttribute('data-to', conn.to);
-                path.setAttribute('data-section', conn.section);
-                svg.appendChild(path);
+                // Vérifier si le chemin existe déjà
+                const existingPath = svg.querySelector(`path[data-from="${conn.from}"][data-to="${conn.to}"][data-section="${conn.section}"]`);
+                if (!existingPath) {
+                    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    path.classList.add('connection-line', 'elbow');
+                    path.setAttribute('data-from', conn.from);
+                    path.setAttribute('data-to', conn.to);
+                    path.setAttribute('data-section', conn.section);
+                    
+                    // Styles de base
+                    path.style.fill = 'none';
+                    path.style.stroke = '#bf9b30';
+                    path.style.strokeWidth = '2';
+                    path.style.opacity = '0';
+                    path.style.transition = 'all 0.4s ease';
+                    
+                    svg.appendChild(path);
+                    console.log(`✅ Créé: ${conn.from} → ${conn.to} (section ${conn.section})`);
+                }
             });
             
-            console.log(`✅ ${connections.length} chemins créés manuellement`);
+            console.log(`✅ ${connections.length} chemins vérifiés/créés`);
             
-            // Recalculer après création
+            // Recalculer après création avec un délai
             setTimeout(() => {
+                console.log('🔄 Relance de setupSVGPaths après création...');
                 this.setupSVGPaths();
-            }, 100);
+            }, 200);
         }
         
         bindEvents() {
