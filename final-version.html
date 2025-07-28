@@ -771,7 +771,7 @@ INSTRUCTIONS :
         showConnections(connectionIds) {
             connectionIds.forEach(id => {
                 // ✅ Sélection optimisée par ID unique
-                const connectionId = `connection-${id.replace('-', '-')}`;
+                const connectionId = `connection-${id}`;
                 const path = document.getElementById(connectionId);
                 if (path) {
                     path.style.opacity = '0.8';
