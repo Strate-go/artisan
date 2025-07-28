@@ -924,10 +924,16 @@ INSTRUCTIONS :
             console.log('🎨 Path data:', pathData);
             console.log('🎨 Path opacity avant:', path.style.opacity);
             
-            // Rendre visible pour le test
+            // Rendre visible pour le test - FORCE BRUTALE
             path.style.opacity = '1';
             path.style.stroke = '#ff0000'; // Rouge vif pour bien voir
-            path.style.strokeWidth = '5px'; // Plus épais
+            path.style.strokeWidth = '10px'; // Très épais
+            path.style.fill = 'none';
+            path.style.pointerEvents = 'none';
+            path.style.zIndex = '9999';
+            path.setAttribute('stroke', '#ff0000');
+            path.setAttribute('stroke-width', '10');
+            path.setAttribute('opacity', '1');
             
             console.log('🎨 Path opacity après:', path.style.opacity);
             console.log('✅ Test de connexion terminé');
