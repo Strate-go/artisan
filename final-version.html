@@ -236,67 +236,7 @@ INSTRUCTIONS :
                 <div class="tile-title">Croissance Sereine</div>
             </div>
 
-            <!-- SVG pour les connexions -->
-            <svg class="connections" width="100%" height="100%">
-                <!-- Définition des dégradés animés -->
-                <defs>
-                    <!-- Dégradé or → bleu vif → or (pour problèmes → solutions) -->
-                    <linearGradient id="gradientGoldBlue" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stop-color="#D4AF37">
-                            <animate attributeName="stop-color" 
-                                values="#D4AF37;#0066FF;#D4AF37;#0066FF;#D4AF37" 
-                                dur="1.5s" 
-                                repeatCount="indefinite"/>
-                        </stop>
-                        <stop offset="50%" stop-color="#0066FF">
-                            <animate attributeName="stop-color" 
-                                values="#0066FF;#D4AF37;#0066FF;#D4AF37;#0066FF" 
-                                dur="1.5s" 
-                                repeatCount="indefinite"/>
-                        </stop>
-                        <stop offset="100%" stop-color="#D4AF37">
-                            <animate attributeName="stop-color" 
-                                values="#D4AF37;#0066FF;#D4AF37;#0066FF;#D4AF37" 
-                                dur="1.5s" 
-                                repeatCount="indefinite"/>
-                        </stop>
-                    </linearGradient>
-                    
-                    <!-- Dégradé bleu foncé → bleu vif (pour solutions → bénéfices) -->
-                    <linearGradient id="gradientBlueFlow" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stop-color="#003366">
-                            <animate attributeName="stop-color" 
-                                values="#003366;#0099FF;#003366" 
-                                dur="1.5s" 
-                                repeatCount="indefinite"/>
-                        </stop>
-                        <stop offset="100%" stop-color="#0099FF">
-                            <animate attributeName="stop-color" 
-                                values="#0099FF;#003366;#0099FF" 
-                                dur="1.5s" 
-                                repeatCount="indefinite"/>
-                        </stop>
-                    </linearGradient>
-                </defs>
-                
-                <!-- Section 1 : Rentabilité -->
-                <path class="connection-line elbow" data-from="devis" data-to="marge" data-section="1"></path>
-                <path class="connection-line elbow" data-from="materiaux" data-to="marge" data-section="1"></path>
-                <path class="connection-line elbow" data-from="temps" data-to="marge" data-section="1"></path>
-                <path class="connection-line elbow" data-from="marge" data-to="decisions" data-section="1"></path>
 
-                <!-- Section 2 : Trésorerie -->
-                <path class="connection-line elbow dashed" data-from="fournisseurs" data-to="previsionnel" data-section="2"></path>
-                <path class="connection-line elbow dashed" data-from="charges" data-to="previsionnel" data-section="2"></path>
-                <path class="connection-line elbow dashed" data-from="factures" data-to="previsionnel" data-section="2"></path>
-                <path class="connection-line elbow" data-from="previsionnel" data-to="serenite" data-section="2"></path>
-
-                <!-- Section 3 : Croissance -->
-                <path class="connection-line elbow dashed" data-from="doute" data-to="investissement" data-section="3"></path>
-                <path class="connection-line elbow dashed" data-from="doute" data-to="recrutement" data-section="3"></path>
-                <path class="connection-line elbow intervention" data-from="conseil" data-to="doute" data-section="3"></path>
-                <path class="connection-line elbow" data-from="conseil" data-to="croissance" data-section="3"></path>
-            </svg>
         </div>
     </section>
 </div>
@@ -615,72 +555,11 @@ INSTRUCTIONS :
     pointer-events: none !important;
 }
 
-#stratego-final-map .connection-line {
-    fill: none !important;
-    stroke: #bf9b30 !important;
-    stroke-width: 5px !important;
-    opacity: 1 !important;
-    transition: none !important;
-    filter: none !important;
-}
-
-/* DEBUG : Forcer l'affichage de TOUTES les connexions */
-#stratego-final-map svg path {
-    fill: none !important;
-    stroke: #bf9b30 !important;
-    stroke-width: 5px !important;
-    opacity: 1 !important;
-}
-
-#stratego-final-map .connection-line.dashed {
-    stroke: var(--gold) !important;
-    stroke-width: 2 !important;
-    stroke-dasharray: 10 6 !important;
-    filter: drop-shadow(0 1px 2px rgba(191, 155, 48, 0.2)) !important;
-}
-
-#stratego-final-map .connection-line.intervention {
-    stroke: var(--light-blue) !important;
-    stroke-width: 2 !important;
-    filter: drop-shadow(0 1px 2px rgba(58, 143, 255, 0.2)) !important;
-}
-
-#stratego-final-map .connection-line.active {
-    opacity: 1 !important;
-    animation: drawElbow 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
-    stroke-width: 2 !important;
-}
-
-/* LIGNES AVEC DÉGRADÉS SVG */
-#stratego-final-map .connection-line.gradient-gold-blue {
-    stroke: var(--gold) !important;
-}
-
-#stratego-final-map .connection-line.gradient-blue-flow {
-    stroke: var(--light-blue) !important;
-}
-
-/* Application des dégradés après le tracé */
-#stratego-final-map .connection-line.gradient-gold-blue.start-gradient {
-    stroke: url(#gradientGoldBlue) !important;
-}
-
-#stratego-final-map .connection-line.gradient-blue-flow.start-gradient {
-    stroke: url(#gradientBlueFlow) !important;
-}
 
 
 
-@keyframes drawElbow {
-    0% {
-        stroke-dashoffset: inherit;
-        opacity: 1;
-    }
-    100% {
-        stroke-dashoffset: 0;
-        opacity: 1;
-    }
-}
+
+
 
 /* RESPONSIVE */
 @media (max-width: 1024px) {
@@ -746,17 +625,7 @@ INSTRUCTIONS :
             this.bindEvents();
             this.setupScrollObserver();
             
-            // Attendre que tous les éléments soient rendus avant de configurer les SVG
-            setTimeout(() => {
-                console.log('🔧 Configuration des chemins SVG...');
-                this.setupSVGPaths();
-            }, 100);
-            
-            // Recalculer après un délai plus long pour être sûr
-            setTimeout(() => {
-                console.log('🔧 Recalcul des chemins SVG...');
-                this.setupSVGPaths();
-            }, 500);
+            // Connexions SVG supprimées
             
             // Démarrer avec la section 1
             this.switchToSection(1);
@@ -869,13 +738,7 @@ INSTRUCTIONS :
                 tile.style.animation = '';
             });
             
-            // Reset toutes les connexions
-            document.querySelectorAll('#stratego-final-map .connection-line').forEach(line => {
-                line.classList.remove('active', 'dashed', 'intervention');
-                line.style.strokeDasharray = '';
-                line.style.strokeDashoffset = '';
-                line.style.opacity = '0';
-            });
+            // Reset des connexions supprimé
         }
         
         animateSection1() {
@@ -892,22 +755,7 @@ INSTRUCTIONS :
                 if (temps) temps.classList.add('active');
             }, 500);
             
-            // 2. Connexions vers la solution (doré → bleu clair → doré)
-            setTimeout(() => {
-                const connections = document.querySelectorAll('#stratego-final-map .connection-line[data-to="marge"][data-section="1"]');
-                console.log(`🔗 Activation de ${connections.length} connexions vers marge`);
-                
-                connections.forEach((line, index) => {
-                    console.log(`  - Activating: ${line.dataset.from} → ${line.dataset.to}`);
-                    line.classList.add('active', 'gradient-gold-blue');
-                    line.style.opacity = '1'; // Force la visibilité
-                    
-                    // Démarrer le dégradé après le tracé
-                    setTimeout(() => {
-                        line.classList.add('start-gradient');
-                    }, 1500);
-                });
-            }, 1500);
+            // Connexions supprimées
             
             // 3. Solution s'allume
             setTimeout(() => {
@@ -915,17 +763,7 @@ INSTRUCTIONS :
                 if (marge) marge.classList.add('active');
             }, 3000);
             
-            // 4. Connexion finale (bleu foncé → bleu clair)
-            setTimeout(() => {
-                const finalConnection = document.querySelector('#stratego-final-map .connection-line[data-from="marge"][data-to="decisions"][data-section="1"]');
-                if (finalConnection) {
-                    finalConnection.classList.add('active', 'gradient-blue-flow');
-                    // Démarrer le dégradé après le tracé
-                    setTimeout(() => {
-                        finalConnection.classList.add('start-gradient');
-                    }, 1500);
-                }
-            }, 4000);
+            // Connexion finale supprimée
             
             // 5. Bénéfice final
             setTimeout(() => {
@@ -948,17 +786,7 @@ INSTRUCTIONS :
                 if (factures) factures.classList.add('active');
             }, 500);
             
-            // 2. Connexions en pointillés (doré → bleu clair → doré)
-            setTimeout(() => {
-                const connections = document.querySelectorAll('#stratego-final-map .connection-line[data-to="previsionnel"][data-section="2"]');
-                connections.forEach(line => {
-                    line.classList.add('active', 'gradient-gold-blue');
-                    // Démarrer le dégradé après le tracé
-                    setTimeout(() => {
-                        line.classList.add('start-gradient');
-                    }, 1500);
-                });
-            }, 1500);
+            // Connexions supprimées
             
             // 3. Solution s'allume
             setTimeout(() => {
@@ -966,17 +794,7 @@ INSTRUCTIONS :
                 if (previsionnel) previsionnel.classList.add('active');
             }, 3000);
             
-            // 4. Connexion finale (bleu foncé → bleu clair)
-            setTimeout(() => {
-                const finalConnection = document.querySelector('#stratego-final-map .connection-line[data-from="previsionnel"][data-to="serenite"][data-section="2"]');
-                if (finalConnection) {
-                    finalConnection.classList.add('active', 'gradient-blue-flow');
-                    // Démarrer le dégradé après le tracé
-                    setTimeout(() => {
-                        finalConnection.classList.add('start-gradient');
-                    }, 1500);
-                }
-            }, 4000);
+            // Connexion finale supprimée
             
             // 5. Bénéfice final
             setTimeout(() => {
@@ -996,49 +814,21 @@ INSTRUCTIONS :
                 }
             }, 500);
             
-            // 2. Connexions vers autres problèmes (doré → bleu clair → doré)
+            // Connexions supprimées
             setTimeout(() => {
-                const connections = document.querySelectorAll('#stratego-final-map .connection-line[data-from="doute"][data-section="3"]');
-                connections.forEach(line => {
-                    line.classList.add('active', 'gradient-gold-blue');
-                    // Démarrer le dégradé après le tracé
-                    setTimeout(() => {
-                        line.classList.add('start-gradient');
-                    }, 1500);
-                });
-                
                 const investissement = document.querySelector('#stratego-final-map .tile[data-tile="investissement"][data-section="3"]');
                 const recrutement = document.querySelector('#stratego-final-map .tile[data-tile="recrutement"][data-section="3"]');
                 if (investissement) investissement.classList.add('active');
                 if (recrutement) recrutement.classList.add('active');
             }, 1500);
             
-            // 3. Intervention conseil (bleu foncé → bleu clair)
+            // Intervention conseil (connexions supprimées)
             setTimeout(() => {
-                const interventionLine = document.querySelector('#stratego-final-map .connection-line[data-from="conseil"][data-to="doute"][data-section="3"]');
-                if (interventionLine) {
-                    interventionLine.classList.add('active', 'gradient-blue-flow');
-                    // Démarrer le dégradé après le tracé
-                    setTimeout(() => {
-                        interventionLine.classList.add('start-gradient');
-                    }, 1500);
-                }
-                
                 const conseil = document.querySelector('#stratego-final-map .tile[data-tile="conseil"][data-section="3"]');
                 if (conseil) conseil.classList.add('active');
             }, 3000);
             
-            // 4. Connexion finale (bleu foncé → bleu clair)
-            setTimeout(() => {
-                const finalConnection = document.querySelector('#stratego-final-map .connection-line[data-from="conseil"][data-to="croissance"][data-section="3"]');
-                if (finalConnection) {
-                    finalConnection.classList.add('active', 'gradient-blue-flow');
-                    // Démarrer le dégradé après le tracé
-                    setTimeout(() => {
-                        finalConnection.classList.add('start-gradient');
-                    }, 1500);
-                }
-            }, 4000);
+            // Connexion finale supprimée
             
             // 5. Bénéfice final
             setTimeout(() => {
@@ -1047,225 +837,10 @@ INSTRUCTIONS :
             }, 5000);
         }
         
-        setupSVGPaths() {
-            const container = document.querySelector('#stratego-final-map');
-            console.log('🔍 Container trouvé:', !!container);
-            
-            const svg = document.querySelector('#stratego-final-map svg');
-            console.log('🔍 SVG trouvé:', !!svg);
-            
-            if (!svg) {
-                console.warn('❌ SVG non trouvé');
-                // Essayons de créer les chemins manuellement
-                this.createMissingPaths();
-                return;
-            }
-            
-            const allPaths = svg.querySelectorAll('path');
-            console.log(`🔍 Tous les paths dans SVG: ${allPaths.length}`);
-            
-            const paths = svg.querySelectorAll('.connection-line');
-            console.log(`🔍 Chemins avec classe .connection-line: ${paths.length}`);
-            
-            // Si aucun chemin avec la bonne classe, créer les chemins manquants
-            if (paths.length === 0) {
-                console.log('🛠️ Aucun chemin trouvé, création automatique...');
-                this.createConnectionPaths(svg);
-                return; // Sortir et relancer après création
-            }
-            
-            paths.forEach(path => {
-                const fromTile = document.querySelector(`#stratego-final-map .tile[data-tile="${path.dataset.from}"][data-section="${path.dataset.section}"]`);
-                const toTile = document.querySelector(`#stratego-final-map .tile[data-tile="${path.dataset.to}"][data-section="${path.dataset.section}"]`);
-                
-                console.log(`🔗 Connexion ${path.dataset.from} → ${path.dataset.to} (section ${path.dataset.section}):`, {
-                    fromTile: !!fromTile,
-                    toTile: !!toTile
-                });
-                
-                if (fromTile && toTile) {
-                    const pathString = this.calculateSmartPath(fromTile, toTile, svg);
-                    
-                    // Validation du path SVG
-                    if (pathString && !pathString.includes('NaN') && !pathString.includes('undefined')) {
-                        path.setAttribute('d', pathString);
-                        
-                        try {
-                            // Calculer la longueur réelle du path pour l'animation de tracé
-                            const pathLength = path.getTotalLength();
-                            if (pathLength && pathLength > 0) {
-                                path.style.strokeDasharray = `${pathLength}`;
-                                path.style.strokeDashoffset = `${pathLength}`;
-                                
-                                console.log(`✅ Path ${path.dataset.from} → ${path.dataset.to}: length=${pathLength}`);
-                            }
-                        } catch (error) {
-                            console.warn('❌ Erreur getTotalLength:', error);
-                        }
-                    } else {
-                        console.warn(`❌ Path invalide pour ${path.dataset.from} → ${path.dataset.to}:`, pathString);
-                    }
-                } else {
-                    console.warn(`❌ Éléments manquants pour ${path.dataset.from} → ${path.dataset.to}`, {
-                        fromSelector: `#stratego-final-map .tile[data-tile="${path.dataset.from}"][data-section="${path.dataset.section}"]`,
-                        toSelector: `#stratego-final-map .tile[data-tile="${path.dataset.to}"][data-section="${path.dataset.section}"]`
-                    });
-                }
-            });
-        }
-        
-        calculateSmartPath(fromElement, toElement, svg) {
-            // Utiliser les positions CSS fixes au lieu de getBoundingClientRect
-            const coords = this.getFixedCoordinates();
-            
-            const fromKey = `${fromElement.dataset.tile}-${fromElement.dataset.section}`;
-            const toKey = `${toElement.dataset.tile}-${toElement.dataset.section}`;
-            
-            const fromCoords = coords[fromKey];
-            const toCoords = coords[toKey];
-            
-            if (!fromCoords || !toCoords) {
-                console.warn(`❌ Coordonnées manquantes pour ${fromKey} ou ${toKey}`);
-                return '';
-            }
-            
-            // Convertir les pourcentages en coordonnées réelles du SVG
-            const svgRect = svg.getBoundingClientRect();
-            const fromX = (fromCoords.x / 100) * svgRect.width;
-            const fromY = (fromCoords.y / 100) * svgRect.height;
-            const toX = (toCoords.x / 100) * svgRect.width;
-            const toY = (toCoords.y / 100) * svgRect.height;
-            
-            console.log(`📍 ${fromKey} (${fromX.toFixed(1)}, ${fromY.toFixed(1)}) → ${toKey} (${toX.toFixed(1)}, ${toY.toFixed(1)})`);
-            
-            // Connexion avec courbe Bézier simple
-            const midX = (fromX + toX) / 2;
-            const controlPoint1X = fromX + (midX - fromX) * 0.5;
-            const controlPoint1Y = fromY;
-            const controlPoint2X = toX - (toX - midX) * 0.5;
-            const controlPoint2Y = toY;
-            
-            return `M ${fromX} ${fromY} C ${controlPoint1X} ${controlPoint1Y}, ${controlPoint2X} ${controlPoint2Y}, ${toX} ${toY}`;
-        }
-        
-        getFixedCoordinates() {
-            // Coordonnées fixes en pourcentages basées sur votre layout
-            return {
-                // Section 1 - Rentabilité (positions approximatives de votre grid)
-                'devis-1': { x: 15, y: 25 },        // Gauche-haut
-                'materiaux-1': { x: 50, y: 15 },    // Centre-haut
-                'temps-1': { x: 85, y: 25 },        // Droite-haut
-                'marge-1': { x: 50, y: 45 },        // Centre-milieu
-                'decisions-1': { x: 50, y: 75 },    // Centre-bas
-                
-                // Section 2 - Trésorerie  
-                'fournisseurs-2': { x: 15, y: 25 },
-                'charges-2': { x: 15, y: 45 },
-                'factures-2': { x: 85, y: 35 },
-                'previsionnel-2': { x: 50, y: 45 },
-                'serenite-2': { x: 50, y: 75 },
-                
-                // Section 3 - Croissance
-                'conseil-3': { x: 15, y: 35 },
-                'doute-3': { x: 50, y: 35 },
-                'investissement-3': { x: 85, y: 25 },
-                'recrutement-3': { x: 85, y: 45 },
-                'croissance-3': { x: 50, y: 65 }
-            };
-        }
-        
-        createMissingPaths() {
-            console.log('🛠️ Création manuelle des chemins SVG...');
-            
-            const container = document.querySelector('#stratego-final-map');
-            if (!container) return;
-            
-            // Créer le SVG s'il n'existe pas ou le reconfigurer
-            let svg = container.querySelector('svg');
-            if (!svg) {
-                svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-                container.appendChild(svg);
-                console.log('✅ SVG créé');
-            }
-            
-            // S'assurer que le SVG a les bonnes propriétés
-            svg.style.position = 'absolute';
-            svg.style.top = '0';
-            svg.style.left = '0';
-            svg.style.width = '100%';
-            svg.style.height = '100%';
-            svg.style.zIndex = '5';
-            svg.style.pointerEvents = 'none';
-            
-            // Configuration ViewBox pour coordonnées en pourcentages
-            const rect = container.getBoundingClientRect();
-            svg.setAttribute('viewBox', `0 0 ${rect.width} ${rect.height}`);
-            svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
-            
-            console.log('✅ SVG configuré:', {
-                width: rect.width,
-                height: rect.height,
-                viewBox: svg.getAttribute('viewBox')
-            });
-            
-            this.createConnectionPaths(svg);
-        }
-        
-        createConnectionPaths(svg) {
-            console.log('🔧 Création des chemins de connexion...');
-            
-            // Définir les connexions à créer
-            const connections = [
-                { from: 'devis', to: 'marge', section: '1' },
-                { from: 'materiaux', to: 'marge', section: '1' },
-                { from: 'temps', to: 'marge', section: '1' },
-                { from: 'marge', to: 'decisions', section: '1' },
-                { from: 'fournisseurs', to: 'previsionnel', section: '2' },
-                { from: 'charges', to: 'previsionnel', section: '2' },
-                { from: 'factures', to: 'previsionnel', section: '2' },
-                { from: 'previsionnel', to: 'serenite', section: '2' },
-                { from: 'doute', to: 'investissement', section: '3' },
-                { from: 'doute', to: 'recrutement', section: '3' },
-                { from: 'conseil', to: 'doute', section: '3' },
-                { from: 'conseil', to: 'croissance', section: '3' }
-            ];
-            
-            connections.forEach(conn => {
-                // Vérifier si le chemin existe déjà
-                const existingPath = svg.querySelector(`path[data-from="${conn.from}"][data-to="${conn.to}"][data-section="${conn.section}"]`);
-                if (!existingPath) {
-                    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                    path.classList.add('connection-line', 'elbow');
-                    path.setAttribute('data-from', conn.from);
-                    path.setAttribute('data-to', conn.to);
-                    path.setAttribute('data-section', conn.section);
-                    
-                    // Styles de base
-                    path.style.fill = 'none';
-                    path.style.stroke = '#bf9b30';
-                    path.style.strokeWidth = '3';
-                    path.style.opacity = '1';
-                    path.style.transition = 'all 0.4s ease';
-                    path.style.pointerEvents = 'none';
-                    
-                    svg.appendChild(path);
-                    console.log(`✅ Créé: ${conn.from} → ${conn.to} (section ${conn.section})`);
-                }
-            });
-            
-            console.log(`✅ ${connections.length} chemins vérifiés/créés`);
-            
-            // Recalculer après création avec un délai
-            setTimeout(() => {
-                console.log('🔄 Relance de setupSVGPaths après création...');
-                this.setupSVGPaths();
-            }, 200);
-        }
+
         
         bindEvents() {
-            window.addEventListener('resize', () => {
-                this.setupSVGPaths();
-            });
+            // Événements supprimés avec les connexions
         }
         
         destroy() {
