@@ -1108,23 +1108,63 @@ INSTRUCTIONS :
         }
         
         calculateSmartPath(fromElement, toElement, svg) {
+            // Utiliser les positions CSS fixes au lieu de getBoundingClientRect
+            const coords = this.getFixedCoordinates();
+            
+            const fromKey = `${fromElement.dataset.tile}-${fromElement.dataset.section}`;
+            const toKey = `${toElement.dataset.tile}-${toElement.dataset.section}`;
+            
+            const fromCoords = coords[fromKey];
+            const toCoords = coords[toKey];
+            
+            if (!fromCoords || !toCoords) {
+                console.warn(`❌ Coordonnées manquantes pour ${fromKey} ou ${toKey}`);
+                return '';
+            }
+            
+            // Convertir les pourcentages en coordonnées réelles du SVG
             const svgRect = svg.getBoundingClientRect();
-            const fromRect = fromElement.getBoundingClientRect();
-            const toRect = toElement.getBoundingClientRect();
+            const fromX = (fromCoords.x / 100) * svgRect.width;
+            const fromY = (fromCoords.y / 100) * svgRect.height;
+            const toX = (toCoords.x / 100) * svgRect.width;
+            const toY = (toCoords.y / 100) * svgRect.height;
             
-            const fromX = fromRect.left + fromRect.width / 2 - svgRect.left;
-            const fromY = fromRect.top + fromRect.height / 2 - svgRect.top;
-            const toX = toRect.left + toRect.width / 2 - svgRect.left;
-            const toY = toRect.top + toRect.height / 2 - svgRect.top;
+            console.log(`📍 ${fromKey} (${fromX.toFixed(1)}, ${fromY.toFixed(1)}) → ${toKey} (${toX.toFixed(1)}, ${toY.toFixed(1)})`);
             
-            // Connexion avec courbe Bézier cubique pour un rendu fluide
+            // Connexion avec courbe Bézier simple
             const midX = (fromX + toX) / 2;
-            const controlPoint1X = fromX + (midX - fromX) * 0.7;
+            const controlPoint1X = fromX + (midX - fromX) * 0.5;
             const controlPoint1Y = fromY;
-            const controlPoint2X = toX - (toX - midX) * 0.7;
+            const controlPoint2X = toX - (toX - midX) * 0.5;
             const controlPoint2Y = toY;
             
             return `M ${fromX} ${fromY} C ${controlPoint1X} ${controlPoint1Y}, ${controlPoint2X} ${controlPoint2Y}, ${toX} ${toY}`;
+        }
+        
+        getFixedCoordinates() {
+            // Coordonnées fixes en pourcentages basées sur votre layout
+            return {
+                // Section 1 - Rentabilité (positions approximatives de votre grid)
+                'devis-1': { x: 15, y: 25 },        // Gauche-haut
+                'materiaux-1': { x: 50, y: 15 },    // Centre-haut
+                'temps-1': { x: 85, y: 25 },        // Droite-haut
+                'marge-1': { x: 50, y: 45 },        // Centre-milieu
+                'decisions-1': { x: 50, y: 75 },    // Centre-bas
+                
+                // Section 2 - Trésorerie  
+                'fournisseurs-2': { x: 15, y: 25 },
+                'charges-2': { x: 15, y: 45 },
+                'factures-2': { x: 85, y: 35 },
+                'previsionnel-2': { x: 50, y: 45 },
+                'serenite-2': { x: 50, y: 75 },
+                
+                // Section 3 - Croissance
+                'conseil-3': { x: 15, y: 35 },
+                'doute-3': { x: 50, y: 35 },
+                'investissement-3': { x: 85, y: 25 },
+                'recrutement-3': { x: 85, y: 45 },
+                'croissance-3': { x: 50, y: 65 }
+            };
         }
         
         createMissingPaths() {
@@ -1149,10 +1189,17 @@ INSTRUCTIONS :
             svg.style.height = '100%';
             svg.style.zIndex = '5';
             svg.style.pointerEvents = 'none';
-            svg.setAttribute('viewBox', '0 0 100 100');
-            svg.setAttribute('preserveAspectRatio', 'none');
             
-            console.log('✅ SVG configuré:', svg.getBoundingClientRect());
+            // Configuration ViewBox pour coordonnées en pourcentages
+            const rect = container.getBoundingClientRect();
+            svg.setAttribute('viewBox', `0 0 ${rect.width} ${rect.height}`);
+            svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+            
+            console.log('✅ SVG configuré:', {
+                width: rect.width,
+                height: rect.height,
+                viewBox: svg.getAttribute('viewBox')
+            });
             
             this.createConnectionPaths(svg);
         }
