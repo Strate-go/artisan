@@ -762,7 +762,7 @@ INSTRUCTIONS :
         }
         
         switchToSection(sectionNumber) {
-            console.log('🎯 Switching to section:', sectionNumber);
+            // console.log('🎯 Switching to section:', sectionNumber); // Debug désactivé
             
             // Arrêter l'animation précédente
             if (this.animationInterval) {
@@ -778,21 +778,21 @@ INSTRUCTIONS :
             // Démarrer immédiatement la première animation
             this.runSingleAnimation(sectionNumber);
             
-            // Puis continuer toutes les 8 secondes
+            // Puis continuer toutes les 12 secondes (optimisé pour la performance)
             this.animationInterval = setInterval(() => {
-                if (!this.isAnimating) { // Ne relancer que si pas en cours
+                if (!this.isAnimating && document.visibilityState === 'visible') { // Ne relancer que si visible et pas en cours
                     this.runSingleAnimation(sectionNumber);
                 }
-            }, 8000);
+            }, 12000);
         }
         
         runSingleAnimation(sectionNumber) {
             if (this.isAnimating) {
-                console.log('⏸️ Animation already running, skipping');
+                // console.log('⏸️ Animation already running, skipping'); // Debug désactivé
                 return;
             }
             
-            console.log('🎭 Starting animation for section:', sectionNumber);
+            // console.log('🎭 Starting animation for section:', sectionNumber); // Debug désactivé
             this.isAnimating = true;
             
             // Reset COMPLET de toutes les tuiles et connexions
@@ -843,7 +843,7 @@ INSTRUCTIONS :
         }
         
         animateSection1() {
-            console.log('🎨 Section 1 animation');
+            // console.log('🎨 Section 1 animation'); // Debug désactivé
             
             // 1. Problèmes s'allument
             setTimeout(() => {
@@ -1017,15 +1017,25 @@ INSTRUCTIONS :
                 
                 if (fromTile && toTile) {
                     const pathString = this.calculateSmartPath(fromTile, toTile, svg);
-                    path.setAttribute('d', pathString);
                     
-                    // Calculer la longueur réelle du path pour l'animation de tracé
-                    const pathLength = path.getTotalLength();
-                    path.style.strokeDasharray = `${pathLength}`;
-                    path.style.strokeDashoffset = `${pathLength}`;
-                    
-                    // Debug : vérifier que les valeurs sont appliquées
-                    console.log(`Path ${path.dataset.from} → ${path.dataset.to}: length=${pathLength}`);
+                    // Validation du path SVG
+                    if (pathString && !pathString.includes('NaN') && !pathString.includes('undefined')) {
+                        path.setAttribute('d', pathString);
+                        
+                        try {
+                            // Calculer la longueur réelle du path pour l'animation de tracé
+                            const pathLength = path.getTotalLength();
+                            if (pathLength && pathLength > 0) {
+                                path.style.strokeDasharray = `${pathLength}`;
+                                path.style.strokeDashoffset = `${pathLength}`;
+                                
+                                // Debug : vérifier que les valeurs sont appliquées (désactivé en production)
+                                // console.log(`Path ${path.dataset.from} → ${path.dataset.to}: length=${pathLength}`);
+                            }
+                        } catch (error) {
+                            console.warn('Erreur lors du calcul de la longueur du path SVG:', error);
+                        }
+                    }
                 }
             });
         }
