@@ -67,7 +67,7 @@ INSTRUCTIONS :
             </div>
 
             <!-- Section 3 : Croissance -->
-            <div class="content-block" data-content="3">
+            <div class="content-block" data-content="3" style="min-height: 800px;">
                 <h2>Investir, recruter : seul face aux grandes <span class="highlight">décisions</span>.</h2>
                 <p class="section-description">
                     Votre carnet de commandes se remplit, votre réputation grandit. Viennent alors les grandes décisions qui peuvent faire passer votre entreprise à l'étape supérieure.
@@ -882,7 +882,7 @@ INSTRUCTIONS :
             
             // 2. Connexions vers solution
             setTimeout(() => {
-                this.showConnections(['fournisseurs-previsionnel', 'charges-previsionnel', 'factures-previsionnel']);
+                this.showConnectionsWithDelay(['fournisseurs-previsionnel', 'charges-previsionnel', 'factures-previsionnel'], 200);
             }, 1500);
             
             // 3. Solution s'allume
@@ -893,7 +893,7 @@ INSTRUCTIONS :
             
             // 4. Connexion finale
             setTimeout(() => {
-                this.showConnections(['previsionnel-serenite']);
+                this.showConnectionsWithDelay(['previsionnel-serenite'], 200);
             }, 4000);
             
             // 5. Bénéfice final
@@ -932,7 +932,7 @@ INSTRUCTIONS :
             
             // 4. Connexion finale
             setTimeout(() => {
-                this.showConnections(['conseil-croissance']);
+                this.showConnectionsWithDelay(['conseil-croissance'], 200);
             }, 4000);
             
             // 5. Bénéfice final
