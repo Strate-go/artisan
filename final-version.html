@@ -657,45 +657,57 @@ INSTRUCTIONS :
         }
         
         setupScrollObserver() {
-            const options = {
-                root: null,
-                rootMargin: '-10% 0px -10% 0px', // Moins restrictif
-                threshold: 0.2 // Encore plus bas pour écrans étroits
-            };
+            console.log('🔍 Configuration du scroll listener simple');
             
             let lastTriggerTime = 0;
             
-            const observer = new IntersectionObserver((entries) => {
+            const handleScroll = () => {
                 const now = Date.now();
                 
-                // Debounce pour éviter les triggers trop fréquents
-                if (now - lastTriggerTime < 500) return; // Réduit à 500ms
+                // Debounce
+                if (now - lastTriggerTime < 500) return;
                 
-                entries.forEach(entry => {
-                    console.log(`🔍 Observer trigger: isIntersecting=${entry.isIntersecting}, target data-content="${entry.target.dataset.content}"`);
-                    if (entry.isIntersecting) {
-                        const sectionNumber = parseInt(entry.target.dataset.content);
-                        console.log(`📍 Section detected: ${sectionNumber}, current: ${this.currentSection}, animating: ${this.isAnimating}`);
-                        if (sectionNumber && sectionNumber !== this.currentSection && !this.isAnimating) {
-                            console.log('✅ Switching to section:', sectionNumber);
-                            lastTriggerTime = now;
-                            this.switchToSection(sectionNumber);
-                        } else {
-                            console.log('❌ Section switch blocked - same section or animating');
+                // Calculer quelle section est visible
+                const blocks = document.querySelectorAll('#stratego-final-map .content-block');
+                const viewportHeight = window.innerHeight;
+                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                
+                let activeSection = 1; // Par défaut section 1
+                
+                blocks.forEach(block => {
+                    const rect = block.getBoundingClientRect();
+                    const blockTop = rect.top + scrollTop;
+                    const blockHeight = rect.height;
+                    const blockCenter = blockTop + (blockHeight / 2);
+                    const viewportCenter = scrollTop + (viewportHeight / 2);
+                    
+                    // Si le centre de la section est proche du centre de l'écran
+                    if (Math.abs(blockCenter - viewportCenter) < viewportHeight / 3) {
+                        const sectionNumber = parseInt(block.dataset.content);
+                        if (sectionNumber) {
+                            activeSection = sectionNumber;
+                            console.log(`🔍 Section ${sectionNumber} détectée au centre (distance: ${Math.abs(blockCenter - viewportCenter)}px)`);
                         }
                     }
                 });
-            }, options);
+                
+                // Changer de section si nécessaire
+                if (activeSection !== this.currentSection && !this.isAnimating) {
+                    console.log(`✅ Changement de section: ${this.currentSection} → ${activeSection}`);
+                    lastTriggerTime = now;
+                    this.switchToSection(activeSection);
+                }
+            };
             
-            // Observer tous les content-blocks
-            const blocks = document.querySelectorAll('#stratego-final-map .content-block');
-            console.log(`🔍 ${blocks.length} content-blocks trouvés pour observation:`);
-            blocks.forEach((block, index) => {
-                console.log(`  - Block ${index + 1}: data-content="${block.dataset.content}"`);
-                observer.observe(block);
-            });
+            // Écouter le scroll
+            window.addEventListener('scroll', handleScroll, { passive: true });
             
-            this.scrollObserver = observer;
+            // Test initial
+            setTimeout(() => {
+                handleScroll();
+            }, 1000);
+            
+            console.log('✅ Scroll listener configuré');
         }
         
         switchToSection(sectionNumber) {
@@ -952,9 +964,7 @@ INSTRUCTIONS :
             if (this.animationInterval) {
                 clearInterval(this.animationInterval);
             }
-            if (this.scrollObserver) {
-                this.scrollObserver.disconnect();
-            }
+            // Plus de scroll observer à nettoyer
         }
         
         // CRÉATION AUTOMATIQUE DES CONNEXIONS
