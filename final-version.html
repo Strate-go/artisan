@@ -562,29 +562,70 @@ INSTRUCTIONS :
 #stratego-final-map .connection-line {
     fill: none !important;
     stroke: var(--light-blue) !important;
-    stroke-width: 4 !important;
+    stroke-width: 2 !important;
     opacity: 0 !important;
     transition: all 0.4s ease !important;
-    filter: drop-shadow(0 2px 4px rgba(58, 143, 255, 0.3)) !important;
+    filter: drop-shadow(0 1px 2px rgba(58, 143, 255, 0.2)) !important;
 }
 
 #stratego-final-map .connection-line.dashed {
     stroke: var(--gold) !important;
-    stroke-width: 4 !important;
+    stroke-width: 2 !important;
     stroke-dasharray: 10 6 !important;
-    filter: drop-shadow(0 2px 4px rgba(191, 155, 48, 0.3)) !important;
+    filter: drop-shadow(0 1px 2px rgba(191, 155, 48, 0.2)) !important;
 }
 
 #stratego-final-map .connection-line.intervention {
     stroke: var(--light-blue) !important;
-    stroke-width: 5 !important;
-    filter: drop-shadow(0 3px 6px rgba(58, 143, 255, 0.4)) !important;
+    stroke-width: 2 !important;
+    filter: drop-shadow(0 1px 2px rgba(58, 143, 255, 0.2)) !important;
 }
 
 #stratego-final-map .connection-line.active {
     opacity: 1 !important;
-    animation: drawElbow 2s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
-    stroke-width: 5 !important;
+    animation: drawElbow 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+    stroke-width: 2 !important;
+}
+
+/* DÉGRADÉS ANIMÉS STYLE STRIPE */
+#stratego-final-map .connection-line.gradient-gold-blue {
+    animation: drawElbow 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards,
+               flowGradientGoldBlue 3s ease-in-out 2s infinite !important;
+}
+
+#stratego-final-map .connection-line.gradient-blue-flow {
+    animation: drawElbow 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards,
+               flowGradientBlue 3s ease-in-out 2s infinite !important;
+}
+
+@keyframes flowGradientGoldBlue {
+    0% {
+        stroke: var(--gold);
+    }
+    25% {
+        stroke: #3a8eff;
+    }
+    50% {
+        stroke: var(--gold);
+    }
+    75% {
+        stroke: #3a8eff;
+    }
+    100% {
+        stroke: var(--gold);
+    }
+}
+
+@keyframes flowGradientBlue {
+    0% {
+        stroke: #0B2957;
+    }
+    50% {
+        stroke: #3a8eff;
+    }
+    100% {
+        stroke: #0B2957;
+    }
 }
 
 @keyframes drawElbow {
@@ -797,10 +838,10 @@ INSTRUCTIONS :
                 if (temps) temps.classList.add('active');
             }, 500);
             
-            // 2. Connexions vers la solution
+            // 2. Connexions vers la solution (or → bleu)
             setTimeout(() => {
                 const connections = document.querySelectorAll('#stratego-final-map .connection-line[data-to="marge"][data-section="1"]');
-                connections.forEach(line => line.classList.add('active'));
+                connections.forEach(line => line.classList.add('active', 'gradient-gold-blue'));
             }, 1500);
             
             // 3. Solution s'allume
@@ -809,10 +850,10 @@ INSTRUCTIONS :
                 if (marge) marge.classList.add('active');
             }, 3000);
             
-            // 4. Connexion finale
+            // 4. Connexion finale (bleu foncé → bleu clair)
             setTimeout(() => {
                 const finalConnection = document.querySelector('#stratego-final-map .connection-line[data-from="marge"][data-to="decisions"][data-section="1"]');
-                if (finalConnection) finalConnection.classList.add('active');
+                if (finalConnection) finalConnection.classList.add('active', 'gradient-blue-flow');
             }, 4000);
             
             // 5. Bénéfice final
@@ -836,10 +877,10 @@ INSTRUCTIONS :
                 if (factures) factures.classList.add('active');
             }, 500);
             
-            // 2. Connexions en pointillés
+            // 2. Connexions en pointillés (or → bleu)
             setTimeout(() => {
                 const connections = document.querySelectorAll('#stratego-final-map .connection-line[data-to="previsionnel"][data-section="2"]');
-                connections.forEach(line => line.classList.add('active'));
+                connections.forEach(line => line.classList.add('active', 'gradient-gold-blue'));
             }, 1500);
             
             // 3. Solution s'allume
@@ -848,10 +889,10 @@ INSTRUCTIONS :
                 if (previsionnel) previsionnel.classList.add('active');
             }, 3000);
             
-            // 4. Connexion finale
+            // 4. Connexion finale (bleu foncé → bleu clair)
             setTimeout(() => {
                 const finalConnection = document.querySelector('#stratego-final-map .connection-line[data-from="previsionnel"][data-to="serenite"][data-section="2"]');
-                if (finalConnection) finalConnection.classList.add('active');
+                if (finalConnection) finalConnection.classList.add('active', 'gradient-blue-flow');
             }, 4000);
             
             // 5. Bénéfice final
@@ -872,10 +913,10 @@ INSTRUCTIONS :
                 }
             }, 500);
             
-            // 2. Connexions vers autres problèmes
+            // 2. Connexions vers autres problèmes (or → bleu)
             setTimeout(() => {
                 const connections = document.querySelectorAll('#stratego-final-map .connection-line[data-from="doute"][data-section="3"]');
-                connections.forEach(line => line.classList.add('active'));
+                connections.forEach(line => line.classList.add('active', 'gradient-gold-blue'));
                 
                 const investissement = document.querySelector('#stratego-final-map .tile[data-tile="investissement"][data-section="3"]');
                 const recrutement = document.querySelector('#stratego-final-map .tile[data-tile="recrutement"][data-section="3"]');
@@ -883,19 +924,19 @@ INSTRUCTIONS :
                 if (recrutement) recrutement.classList.add('active');
             }, 1500);
             
-            // 3. Intervention conseil
+            // 3. Intervention conseil (bleu foncé → bleu clair)
             setTimeout(() => {
                 const interventionLine = document.querySelector('#stratego-final-map .connection-line[data-from="conseil"][data-to="doute"][data-section="3"]');
-                if (interventionLine) interventionLine.classList.add('active');
+                if (interventionLine) interventionLine.classList.add('active', 'gradient-blue-flow');
                 
                 const conseil = document.querySelector('#stratego-final-map .tile[data-tile="conseil"][data-section="3"]');
                 if (conseil) conseil.classList.add('active');
             }, 3000);
             
-            // 4. Connexion finale
+            // 4. Connexion finale (bleu foncé → bleu clair)
             setTimeout(() => {
                 const finalConnection = document.querySelector('#stratego-final-map .connection-line[data-from="conseil"][data-to="croissance"][data-section="3"]');
-                if (finalConnection) finalConnection.classList.add('active');
+                if (finalConnection) finalConnection.classList.add('active', 'gradient-blue-flow');
             }, 4000);
             
             // 5. Bénéfice final
