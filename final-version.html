@@ -888,6 +888,10 @@ INSTRUCTIONS :
             const marge = document.querySelector('#stratego-final-map .tile[data-tile="marge"]');
             const path = document.getElementById('test-devis-marge');
             
+            console.log('🔍 Devis trouvé:', !!devis);
+            console.log('🔍 Marge trouvée:', !!marge);
+            console.log('🔍 Path trouvé:', !!path);
+            
             if (!devis || !marge || !path) {
                 console.warn('❌ Éléments manquants pour le test');
                 return;
@@ -895,9 +899,15 @@ INSTRUCTIONS :
             
             // Calculer positions simples
             const container = document.querySelector('#stratego-final-map .interactive-map');
+            console.log('🔍 Container trouvé:', !!container);
+            
             const containerRect = container.getBoundingClientRect();
             const devisRect = devis.getBoundingClientRect();
             const margeRect = marge.getBoundingClientRect();
+            
+            console.log('📦 Container rect:', containerRect);
+            console.log('📦 Devis rect:', devisRect);
+            console.log('📦 Marge rect:', margeRect);
             
             // Coordonnées relatives au container
             const x1 = devisRect.left + devisRect.width/2 - containerRect.left;
@@ -905,14 +915,22 @@ INSTRUCTIONS :
             const x2 = margeRect.left + margeRect.width/2 - containerRect.left;
             const y2 = margeRect.top + margeRect.height/2 - containerRect.top;
             
+            console.log(`📍 Coordonnées calculées: (${x1}, ${y1}) → (${x2}, ${y2})`);
+            
             // Ligne droite simple pour le test
             const pathData = `M ${x1} ${y1} L ${x2} ${y2}`;
             path.setAttribute('d', pathData);
             
-            console.log(`📍 Connexion tracée: (${x1}, ${y1}) → (${x2}, ${y2})`);
+            console.log('🎨 Path data:', pathData);
+            console.log('🎨 Path opacity avant:', path.style.opacity);
             
             // Rendre visible pour le test
             path.style.opacity = '1';
+            path.style.stroke = '#ff0000'; // Rouge vif pour bien voir
+            path.style.strokeWidth = '5px'; // Plus épais
+            
+            console.log('🎨 Path opacity après:', path.style.opacity);
+            console.log('✅ Test de connexion terminé');
         }
     }
     
