@@ -570,7 +570,7 @@ INSTRUCTIONS :
     left: 0 !important;
     width: 100% !important;
     height: 100% !important;
-    z-index: 5 !important;
+    z-index: 999 !important;
     pointer-events: none !important;
     overflow: visible !important;
 }
@@ -898,22 +898,22 @@ INSTRUCTIONS :
             }
             
             // Calculer positions simples
-            const container = document.querySelector('#stratego-final-map .single-interactive-map');
-            console.log('🔍 Container trouvé:', !!container);
+            const svg = document.querySelector('#stratego-final-map .connections-svg');
+            console.log('🔍 SVG trouvé:', !!svg);
             
-            const containerRect = container.getBoundingClientRect();
+            const svgRect = svg.getBoundingClientRect();
             const devisRect = devis.getBoundingClientRect();
             const margeRect = marge.getBoundingClientRect();
             
-            console.log('📦 Container rect:', containerRect);
+            console.log('📦 SVG rect:', svgRect);
             console.log('📦 Devis rect:', devisRect);
             console.log('📦 Marge rect:', margeRect);
             
-            // Coordonnées relatives au container
-            const x1 = devisRect.left + devisRect.width/2 - containerRect.left;
-            const y1 = devisRect.top + devisRect.height/2 - containerRect.top;
-            const x2 = margeRect.left + margeRect.width/2 - containerRect.left;
-            const y2 = margeRect.top + margeRect.height/2 - containerRect.top;
+            // Coordonnées relatives au SVG
+            const x1 = devisRect.left + devisRect.width/2 - svgRect.left;
+            const y1 = devisRect.top + devisRect.height/2 - svgRect.top;
+            const x2 = margeRect.left + margeRect.width/2 - svgRect.left;
+            const y2 = margeRect.top + margeRect.height/2 - svgRect.top;
             
             console.log(`📍 Coordonnées calculées: (${x1}, ${y1}) → (${x2}, ${y2})`);
             
