@@ -294,8 +294,8 @@ INSTRUCTIONS :
     visibility: visible;
     transition: all 0.6s ease;
     margin-bottom: 80px;
-    padding: 40px 0;
-    min-height: 600px; /* Hauteur minimale pour scroll observer */
+    padding: 40px 0 120px 0; /* Plus de padding en bas */
+    min-height: 800px; /* Hauteur minimale pour scroll observer */
 }
 
 #stratego-final-map .content-block:first-child {
@@ -660,7 +660,7 @@ INSTRUCTIONS :
             const options = {
                 root: null,
                 rootMargin: '-10% 0px -10% 0px', // Moins restrictif
-                threshold: 0.3 // Plus bas = plus facile à déclencher
+                threshold: 0.2 // Encore plus bas pour écrans étroits
             };
             
             let lastTriggerTime = 0;
