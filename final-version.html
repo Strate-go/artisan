@@ -762,7 +762,7 @@ INSTRUCTIONS :
                 tile.style.animation = '';
             });
             
-            // Masquer toutes les connexions
+            // Masquer toutes les connexions (sélection optimisée)
             document.querySelectorAll('#stratego-final-map .auto-connection').forEach(path => {
                 path.style.opacity = '0';
             });
@@ -770,13 +770,14 @@ INSTRUCTIONS :
         
         showConnections(connectionIds) {
             connectionIds.forEach(id => {
-                const [from, to] = id.split('-');
-                const path = document.querySelector(`#stratego-final-map .auto-connection[data-from="${from}"][data-to="${to}"]`);
+                // ✅ Sélection optimisée par ID unique
+                const connectionId = `connection-${id.replace('-', '-')}`;
+                const path = document.getElementById(connectionId);
                 if (path) {
                     path.style.opacity = '0.8';
-                    console.log(`🔗 Connexion ${from} → ${to} affichée`);
+                    console.log(`🔗 Connexion ${id} affichée (ID: ${connectionId})`);
                 } else {
-                    console.warn(`❌ Connexion ${id} non trouvée`);
+                    console.warn(`❌ Connexion ${id} non trouvée (ID: ${connectionId})`);
                 }
             });
         }
@@ -936,6 +937,7 @@ INSTRUCTIONS :
             svg.style.height = '100%';
             svg.style.zIndex = '999';
             svg.style.pointerEvents = 'none';
+            svg.style.overflow = 'visible'; // ✅ Correction overflow
             container.appendChild(svg);
             console.log('✅ SVG créé');
             
@@ -990,15 +992,17 @@ INSTRUCTIONS :
             const x2 = toRect.left + toRect.width/2 - svgRect.left;
             const y2 = toRect.top + toRect.height/2 - svgRect.top;
             
-            // Créer le path
+            // Créer le path avec ID unique
+            const connectionId = `connection-${fromTile}-${toTile}`;
             const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.id = connectionId; // ✅ ID unique
             path.setAttribute('d', `M ${x1} ${y1} L ${x2} ${y2}`);
             path.setAttribute('stroke', color);
             path.setAttribute('stroke-width', width);
             path.setAttribute('fill', 'none');
             path.setAttribute('opacity', '0'); // Masqué par défaut
             path.classList.add('auto-connection');
-            path.dataset.from = fromTile;
+            path.dataset.from = fromTile; // Gardé pour compatibilité
             path.dataset.to = toTile;
             
             svg.appendChild(path);
