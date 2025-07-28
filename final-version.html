@@ -413,8 +413,11 @@ INSTRUCTIONS :
 }
 
 /* Tuiles inactives : icône parfaitement centrée */
-#stratego-final-map .tile:not(.active) {
-    justify-content: center !important;
+#stratego-final-map .tile:not(.active) .tile-icon {
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
 }
 
 #stratego-final-map .tile:not(.active) .tile-title {
@@ -468,6 +471,10 @@ INSTRUCTIONS :
     opacity: 1;
     width: 32px !important;
     height: 32px !important;
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    transform: none !important;
 }
 
 #stratego-final-map .tile.active .tile-title {
