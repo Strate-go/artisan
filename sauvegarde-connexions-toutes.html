@@ -658,8 +658,8 @@ INSTRUCTIONS :
         setupScrollObserver() {
             const options = {
                 root: null,
-                rootMargin: '-20% 0px -20% 0px',
-                threshold: 0.6
+                rootMargin: '-30% 0px -30% 0px',
+                threshold: 0.8
             };
             
             let lastTriggerTime = 0;
@@ -762,27 +762,11 @@ INSTRUCTIONS :
                 tile.style.animation = '';
             });
             
-            // Masquer toutes les connexions
-            document.querySelectorAll('#stratego-final-map .auto-connection').forEach(path => {
-                path.style.opacity = '0';
-            });
-        }
-        
-        showConnections(connectionIds) {
-            connectionIds.forEach(id => {
-                const [from, to] = id.split('-');
-                const path = document.querySelector(`#stratego-final-map .auto-connection[data-from="${from}"][data-to="${to}"]`);
-                if (path) {
-                    path.style.opacity = '0.8';
-                    console.log(`🔗 Connexion ${from} → ${to} affichée`);
-                } else {
-                    console.warn(`❌ Connexion ${id} non trouvée`);
-                }
-            });
+            // Reset des connexions supprimé
         }
         
         animateSection1() {
-            console.log('🎨 Section 1 animation avec connexions');
+            // console.log('🎨 Section 1 animation'); // Debug désactivé
             
             // 1. Problèmes s'allument
             setTimeout(() => {
@@ -795,10 +779,7 @@ INSTRUCTIONS :
                 if (temps) temps.classList.add('active');
             }, 500);
             
-            // 2. Connexions vers solution
-            setTimeout(() => {
-                this.showConnections(['devis-marge', 'materiaux-marge', 'temps-marge']);
-            }, 1500);
+            // Connexions supprimées
             
             // 3. Solution s'allume
             setTimeout(() => {
@@ -806,10 +787,7 @@ INSTRUCTIONS :
                 if (marge) marge.classList.add('active');
             }, 3000);
             
-            // 4. Connexion finale
-            setTimeout(() => {
-                this.showConnections(['marge-decisions']);
-            }, 4000);
+            // Connexion finale supprimée
             
             // 5. Bénéfice final
             setTimeout(() => {
@@ -819,7 +797,7 @@ INSTRUCTIONS :
         }
         
         animateSection2() {
-            console.log('🎨 Section 2 animation avec connexions');
+            console.log('🎨 Section 2 animation');
             
             // 1. Problèmes s'allument
             setTimeout(() => {
@@ -832,10 +810,7 @@ INSTRUCTIONS :
                 if (factures) factures.classList.add('active');
             }, 500);
             
-            // 2. Connexions vers solution
-            setTimeout(() => {
-                this.showConnections(['fournisseurs-previsionnel', 'charges-previsionnel', 'factures-previsionnel']);
-            }, 1500);
+            // Connexions supprimées
             
             // 3. Solution s'allume
             setTimeout(() => {
@@ -843,10 +818,7 @@ INSTRUCTIONS :
                 if (previsionnel) previsionnel.classList.add('active');
             }, 3000);
             
-            // 4. Connexion finale
-            setTimeout(() => {
-                this.showConnections(['previsionnel-serenite']);
-            }, 4000);
+            // Connexion finale supprimée
             
             // 5. Bénéfice final
             setTimeout(() => {
@@ -856,7 +828,7 @@ INSTRUCTIONS :
         }
         
         animateSection3() {
-            console.log('🎨 Section 3 animation avec connexions');
+            console.log('🎨 Section 3 animation');
             
             // 1. Problème central pulse
             setTimeout(() => {
@@ -866,26 +838,21 @@ INSTRUCTIONS :
                 }
             }, 500);
             
-            // 2. Connexions depuis le doute
+            // Connexions supprimées
             setTimeout(() => {
-                this.showConnections(['doute-investissement', 'doute-recrutement']);
                 const investissement = document.querySelector('#stratego-final-map .tile[data-tile="investissement"][data-section="3"]');
                 const recrutement = document.querySelector('#stratego-final-map .tile[data-tile="recrutement"][data-section="3"]');
                 if (investissement) investissement.classList.add('active');
                 if (recrutement) recrutement.classList.add('active');
             }, 1500);
             
-            // 3. Intervention conseil
+            // Intervention conseil (connexions supprimées)
             setTimeout(() => {
                 const conseil = document.querySelector('#stratego-final-map .tile[data-tile="conseil"][data-section="3"]');
                 if (conseil) conseil.classList.add('active');
-                this.showConnections(['conseil-doute']);
             }, 3000);
             
-            // 4. Connexion finale
-            setTimeout(() => {
-                this.showConnections(['conseil-croissance']);
-            }, 4000);
+            // Connexion finale supprimée
             
             // 5. Bénéfice final
             setTimeout(() => {
@@ -996,7 +963,7 @@ INSTRUCTIONS :
             path.setAttribute('stroke', color);
             path.setAttribute('stroke-width', width);
             path.setAttribute('fill', 'none');
-            path.setAttribute('opacity', '0'); // Masqué par défaut
+            path.setAttribute('opacity', '0.8');
             path.classList.add('auto-connection');
             path.dataset.from = fromTile;
             path.dataset.to = toTile;
