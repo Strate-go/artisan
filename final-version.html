@@ -240,40 +240,40 @@ INSTRUCTIONS :
             <svg class="connections" width="100%" height="100%">
                 <!-- Définition des dégradés animés -->
                 <defs>
-                    <!-- Dégradé or → bleu clair → or (pour problèmes → solutions) -->
+                    <!-- Dégradé or → bleu vif → or (pour problèmes → solutions) -->
                     <linearGradient id="gradientGoldBlue" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stop-color="#BF9B30">
+                        <stop offset="0%" stop-color="#D4AF37">
                             <animate attributeName="stop-color" 
-                                values="#BF9B30;#3a8eff;#BF9B30;#3a8eff;#BF9B30" 
-                                dur="3s" 
+                                values="#D4AF37;#0066FF;#D4AF37;#0066FF;#D4AF37" 
+                                dur="1.5s" 
                                 repeatCount="indefinite"/>
                         </stop>
-                        <stop offset="50%" stop-color="#3a8eff">
+                        <stop offset="50%" stop-color="#0066FF">
                             <animate attributeName="stop-color" 
-                                values="#3a8eff;#BF9B30;#3a8eff;#BF9B30;#3a8eff" 
-                                dur="3s" 
+                                values="#0066FF;#D4AF37;#0066FF;#D4AF37;#0066FF" 
+                                dur="1.5s" 
                                 repeatCount="indefinite"/>
                         </stop>
-                        <stop offset="100%" stop-color="#BF9B30">
+                        <stop offset="100%" stop-color="#D4AF37">
                             <animate attributeName="stop-color" 
-                                values="#BF9B30;#3a8eff;#BF9B30;#3a8eff;#BF9B30" 
-                                dur="3s" 
+                                values="#D4AF37;#0066FF;#D4AF37;#0066FF;#D4AF37" 
+                                dur="1.5s" 
                                 repeatCount="indefinite"/>
                         </stop>
                     </linearGradient>
                     
-                    <!-- Dégradé bleu foncé → bleu clair (pour solutions → bénéfices) -->
+                    <!-- Dégradé bleu foncé → bleu vif (pour solutions → bénéfices) -->
                     <linearGradient id="gradientBlueFlow" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stop-color="#0B2957">
+                        <stop offset="0%" stop-color="#003366">
                             <animate attributeName="stop-color" 
-                                values="#0B2957;#3a8eff;#0B2957" 
-                                dur="3s" 
+                                values="#003366;#0099FF;#003366" 
+                                dur="1.5s" 
                                 repeatCount="indefinite"/>
                         </stop>
-                        <stop offset="100%" stop-color="#3a8eff">
+                        <stop offset="100%" stop-color="#0099FF">
                             <animate attributeName="stop-color" 
-                                values="#3a8eff;#0B2957;#3a8eff" 
-                                dur="3s" 
+                                values="#0099FF;#003366;#0099FF" 
+                                dur="1.5s" 
                                 repeatCount="indefinite"/>
                         </stop>
                     </linearGradient>
@@ -649,11 +649,11 @@ INSTRUCTIONS :
 
 
 @keyframes drawElbow {
-    from {
-        stroke-dashoffset: var(--path-length, 1000);
+    0% {
+        stroke-dashoffset: inherit;
         opacity: 1;
     }
-    to {
+    100% {
         stroke-dashoffset: 0;
         opacity: 1;
     }
@@ -1021,8 +1021,11 @@ INSTRUCTIONS :
                     
                     // Calculer la longueur réelle du path pour l'animation de tracé
                     const pathLength = path.getTotalLength();
-                    path.style.strokeDasharray = pathLength;
-                    path.style.strokeDashoffset = pathLength;
+                    path.style.strokeDasharray = `${pathLength}`;
+                    path.style.strokeDashoffset = `${pathLength}`;
+                    
+                    // Debug : vérifier que les valeurs sont appliquées
+                    console.log(`Path ${path.dataset.from} → ${path.dataset.to}: length=${pathLength}`);
                 }
             });
         }
