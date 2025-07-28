@@ -412,6 +412,15 @@ INSTRUCTIONS :
     opacity: 0.9;
 }
 
+/* Tuiles inactives : icône parfaitement centrée */
+#stratego-final-map .tile:not(.active) {
+    justify-content: center !important;
+}
+
+#stratego-final-map .tile:not(.active) .tile-title {
+    display: none !important;
+}
+
 
 
 #stratego-final-map .tile-icon {
@@ -451,6 +460,7 @@ INSTRUCTIONS :
     box-shadow: 0 12px 32px rgba(58, 143, 255, 0.25) !important;
     opacity: 1 !important;
     transform: translateY(-4px) !important;
+    justify-content: space-between !important;
 }
 
 #stratego-final-map .tile.active .tile-icon {
