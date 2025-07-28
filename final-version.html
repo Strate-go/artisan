@@ -691,7 +691,7 @@ INSTRUCTIONS :
         }
         
         switchToSection(sectionNumber) {
-            // console.log('🎯 Switching to section:', sectionNumber); // Debug désactivé
+            console.log('🎯 Switching to section:', sectionNumber); // Debug activé
             
             // Arrêter l'animation précédente
             if (this.animationInterval) {
@@ -717,11 +717,11 @@ INSTRUCTIONS :
         
         runSingleAnimation(sectionNumber) {
             if (this.isAnimating) {
-                // console.log('⏸️ Animation already running, skipping'); // Debug désactivé
+                console.log('⏸️ Animation already running, skipping'); // Debug activé
                 return;
             }
             
-            // console.log('🎭 Starting animation for section:', sectionNumber); // Debug désactivé
+            console.log('🎭 Starting animation for section:', sectionNumber); // Debug activé
             this.isAnimating = true;
             
             // Reset COMPLET de toutes les tuiles et connexions
@@ -820,7 +820,7 @@ INSTRUCTIONS :
         }
         
         animateSection2() {
-            console.log('🎨 Section 2 animation avec connexions');
+            console.log('🎨 Section 2 animation avec connexions - DÉMARRAGE');
             
             // 1. Problèmes s'allument
             setTimeout(() => {
@@ -857,7 +857,7 @@ INSTRUCTIONS :
         }
         
         animateSection3() {
-            console.log('🎨 Section 3 animation avec connexions');
+            console.log('🎨 Section 3 animation avec connexions - DÉMARRAGE');
             
             // 1. Problème central pulse
             setTimeout(() => {
