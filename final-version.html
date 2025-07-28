@@ -691,7 +691,7 @@ INSTRUCTIONS :
         }
         
         switchToSection(sectionNumber) {
-            // console.log('🎯 Switching to section:', sectionNumber); // Debug désactivé
+            console.log('🎯 Switching to section:', sectionNumber); // Debug activé
             
             // Arrêter l'animation précédente
             if (this.animationInterval) {
@@ -780,6 +780,7 @@ INSTRUCTIONS :
         }
         
         showConnectionsWithDelay(connectionIds, delayBetween = 200) {
+            console.log(`🔍 showConnectionsWithDelay appelé avec:`, connectionIds);
             connectionIds.forEach((id, index) => {
                 setTimeout(() => {
                     this.showConnections([id]);
@@ -788,10 +789,12 @@ INSTRUCTIONS :
         }
         
         showConnections(connectionIds) {
+            console.log(`🔍 showConnections appelé avec:`, connectionIds);
             connectionIds.forEach(id => {
                 // ✅ Sélection optimisée par ID unique
                 const connectionId = `connection-${id}`;
                 const path = document.getElementById(connectionId);
+                console.log(`🔍 Recherche connexion ID: ${connectionId}, trouvé:`, !!path);
                 
                 if (path) {
                     // 1. RESET obligatoire pour re-animation
@@ -856,7 +859,7 @@ INSTRUCTIONS :
         }
         
         animateSection2() {
-            // console.log('🎨 Section 2 animation avec connexions - DÉMARRAGE');
+            console.log('🎨 Section 2 animation avec connexions - DÉMARRAGE');
             
             // 1. Problèmes s'allument
             setTimeout(() => {
@@ -893,7 +896,7 @@ INSTRUCTIONS :
         }
         
         animateSection3() {
-            // console.log('🎨 Section 3 animation avec connexions - DÉMARRAGE');
+            console.log('🎨 Section 3 animation avec connexions - DÉMARRAGE');
             
             // 1. Problème central pulse
             setTimeout(() => {
@@ -1007,6 +1010,12 @@ INSTRUCTIONS :
             });
             
             console.log(`✅ ${successCount}/${connections.length} connexions créées avec succès`);
+            
+            // DEBUG : Lister tous les IDs créés
+            console.log('🔍 IDs de connexions créés:');
+            document.querySelectorAll('#stratego-final-map .auto-connection').forEach(path => {
+                console.log(`  - ${path.id} (${path.dataset.from} → ${path.dataset.to})`);
+            });
         }
         
         createSingleConnection(svg, fromTile, toTile, color = '#bf9b30', width = '3') {
