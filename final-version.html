@@ -600,14 +600,29 @@ INSTRUCTIONS :
     z-index: 1 !important;
 }
 
-/* SOLUTION TEMPORAIRE - Force l'affichage des connexions */
+/* FIX SVG ET CONNEXIONS */
+#stratego-final-map {
+    position: relative !important;
+}
+
+#stratego-final-map svg {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    z-index: 5 !important;
+    pointer-events: none !important;
+}
+
 #stratego-final-map .connection-line {
     fill: none !important;
     stroke: #bf9b30 !important;
-    stroke-width: 2 !important;
+    stroke-width: 3px !important;
     opacity: 1 !important;
     transition: all 0.4s ease !important;
-    filter: drop-shadow(0 1px 2px rgba(191, 155, 48, 0.2)) !important;
+    filter: drop-shadow(0 1px 2px rgba(191, 155, 48, 0.3)) !important;
+    vector-effect: non-scaling-stroke !important;
 }
 
 #stratego-final-map .connection-line.dashed {
@@ -1118,20 +1133,26 @@ INSTRUCTIONS :
             const container = document.querySelector('#stratego-final-map');
             if (!container) return;
             
-            // Créer le SVG s'il n'existe pas
+            // Créer le SVG s'il n'existe pas ou le reconfigurer
             let svg = container.querySelector('svg');
             if (!svg) {
                 svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-                svg.style.position = 'absolute';
-                svg.style.top = '0';
-                svg.style.left = '0';
-                svg.style.width = '100%';
-                svg.style.height = '100%';
-                svg.style.zIndex = '1';
-                svg.style.pointerEvents = 'none';
                 container.appendChild(svg);
                 console.log('✅ SVG créé');
             }
+            
+            // S'assurer que le SVG a les bonnes propriétés
+            svg.style.position = 'absolute';
+            svg.style.top = '0';
+            svg.style.left = '0';
+            svg.style.width = '100%';
+            svg.style.height = '100%';
+            svg.style.zIndex = '5';
+            svg.style.pointerEvents = 'none';
+            svg.setAttribute('viewBox', '0 0 100 100');
+            svg.setAttribute('preserveAspectRatio', 'none');
+            
+            console.log('✅ SVG configuré:', svg.getBoundingClientRect());
             
             this.createConnectionPaths(svg);
         }
@@ -1168,9 +1189,10 @@ INSTRUCTIONS :
                     // Styles de base
                     path.style.fill = 'none';
                     path.style.stroke = '#bf9b30';
-                    path.style.strokeWidth = '2';
-                    path.style.opacity = '0';
+                    path.style.strokeWidth = '3';
+                    path.style.opacity = '1';
                     path.style.transition = 'all 0.4s ease';
+                    path.style.pointerEvents = 'none';
                     
                     svg.appendChild(path);
                     console.log(`✅ Créé: ${conn.from} → ${conn.to} (section ${conn.section})`);
