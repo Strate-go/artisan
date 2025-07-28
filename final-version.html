@@ -1025,14 +1025,24 @@ INSTRUCTIONS :
         }
         
         setupSVGPaths() {
+            const container = document.querySelector('#stratego-final-map');
+            console.log('🔍 Container trouvé:', !!container);
+            
             const svg = document.querySelector('#stratego-final-map svg');
+            console.log('🔍 SVG trouvé:', !!svg);
+            
             if (!svg) {
                 console.warn('❌ SVG non trouvé');
+                // Essayons de créer les chemins manuellement
+                this.createMissingPaths();
                 return;
             }
             
+            const allPaths = svg.querySelectorAll('path');
+            console.log(`🔍 Tous les paths dans SVG: ${allPaths.length}`);
+            
             const paths = svg.querySelectorAll('.connection-line');
-            console.log(`🔍 Trouvé ${paths.length} chemins de connexion`);
+            console.log(`🔍 Chemins avec classe .connection-line: ${paths.length}`);
             
             paths.forEach(path => {
                 const fromTile = document.querySelector(`#stratego-final-map .tile[data-tile="${path.dataset.from}"][data-section="${path.dataset.section}"]`);
@@ -1092,6 +1102,60 @@ INSTRUCTIONS :
             const controlPoint2Y = toY;
             
             return `M ${fromX} ${fromY} C ${controlPoint1X} ${controlPoint1Y}, ${controlPoint2X} ${controlPoint2Y}, ${toX} ${toY}`;
+        }
+        
+        createMissingPaths() {
+            console.log('🛠️ Création manuelle des chemins SVG...');
+            
+            const container = document.querySelector('#stratego-final-map');
+            if (!container) return;
+            
+            // Créer le SVG s'il n'existe pas
+            let svg = container.querySelector('svg');
+            if (!svg) {
+                svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                svg.style.position = 'absolute';
+                svg.style.top = '0';
+                svg.style.left = '0';
+                svg.style.width = '100%';
+                svg.style.height = '100%';
+                svg.style.zIndex = '1';
+                svg.style.pointerEvents = 'none';
+                container.appendChild(svg);
+                console.log('✅ SVG créé');
+            }
+            
+            // Définir les connexions à créer
+            const connections = [
+                { from: 'devis', to: 'marge', section: '1' },
+                { from: 'materiaux', to: 'marge', section: '1' },
+                { from: 'temps', to: 'marge', section: '1' },
+                { from: 'marge', to: 'decisions', section: '1' },
+                { from: 'fournisseurs', to: 'previsionnel', section: '2' },
+                { from: 'charges', to: 'previsionnel', section: '2' },
+                { from: 'factures', to: 'previsionnel', section: '2' },
+                { from: 'previsionnel', to: 'serenite', section: '2' },
+                { from: 'doute', to: 'investissement', section: '3' },
+                { from: 'doute', to: 'recrutement', section: '3' },
+                { from: 'conseil', to: 'doute', section: '3' },
+                { from: 'conseil', to: 'croissance', section: '3' }
+            ];
+            
+            connections.forEach(conn => {
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.classList.add('connection-line', 'elbow');
+                path.setAttribute('data-from', conn.from);
+                path.setAttribute('data-to', conn.to);
+                path.setAttribute('data-section', conn.section);
+                svg.appendChild(path);
+            });
+            
+            console.log(`✅ ${connections.length} chemins créés manuellement`);
+            
+            // Recalculer après création
+            setTimeout(() => {
+                this.setupSVGPaths();
+            }, 100);
         }
         
         bindEvents() {
