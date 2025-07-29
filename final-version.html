@@ -931,116 +931,187 @@ INSTRUCTIONS :
         }
         
         animateSection1() {
-            // console.log('🎨 Section 1 animation avec connexions');
+            console.log('🎨 Section 1 animation séquentielle - DÉMARRAGE');
             
-            // 1. Problèmes s'allument
+            // 1. PROBLÈMES s'allument UNE PAR UNE
             setTimeout(() => {
                 const devis = document.querySelector('#stratego-final-map .tile[data-tile="devis"][data-section="1"]');
-                const materiaux = document.querySelector('#stratego-final-map .tile[data-tile="materiaux"][data-section="1"]');
-                const temps = document.querySelector('#stratego-final-map .tile[data-tile="temps"][data-section="1"]');
-                
-                if (devis) devis.classList.add('active');
-                if (materiaux) materiaux.classList.add('active');
-                if (temps) temps.classList.add('active');
+                if (devis) {
+                    devis.classList.add('active');
+                    console.log('✨ Tuile DEVIS activée');
+                }
             }, 500);
             
-            // 2. Connexions vers solution (avec délai pour effet cascade)
             setTimeout(() => {
-                this.showConnectionsWithDelay(['devis-marge', 'materiaux-marge', 'temps-marge'], 200);
+                const materiaux = document.querySelector('#stratego-final-map .tile[data-tile="materiaux"][data-section="1"]');
+                if (materiaux) {
+                    materiaux.classList.add('active');
+                    console.log('✨ Tuile MATERIAUX activée');
+                }
+            }, 800);
+            
+            setTimeout(() => {
+                const temps = document.querySelector('#stratego-final-map .tile[data-tile="temps"][data-section="1"]');
+                if (temps) {
+                    temps.classList.add('active');
+                    console.log('✨ Tuile TEMPS activée');
+                }
+            }, 1100);
+            
+            // 2. CONNEXIONS vers solution (avec délai cascade)
+            setTimeout(() => {
+                console.log('🔗 Connexions problèmes → solution');
+                this.showConnectionsWithDelay(['devis-marge', 'materiaux-marge', 'temps-marge'], 150);
             }, 1500);
             
-            // 3. Solution s'allume
+            // 3. SOLUTION s'allume
             setTimeout(() => {
                 const marge = document.querySelector('#stratego-final-map .tile[data-tile="marge"][data-section="1"]');
-                if (marge) marge.classList.add('active');
-            }, 3000);
+                if (marge) {
+                    marge.classList.add('active');
+                    console.log('✨ Tuile SOLUTION (marge) activée');
+                }
+            }, 2200);
             
-            // 4. Connexion finale
+            // 4. CONNEXION finale
             setTimeout(() => {
+                console.log('🔗 Connexion solution → bénéfice');
                 this.showConnections(['marge-decisions']);
-            }, 4000);
+            }, 2600);
             
-            // 5. Bénéfice final
+            // 5. BÉNÉFICE final
             setTimeout(() => {
                 const decisions = document.querySelector('#stratego-final-map .tile[data-tile="decisions"][data-section="1"]');
-                if (decisions) decisions.classList.add('active');
-            }, 5000);
+                if (decisions) {
+                    decisions.classList.add('active');
+                    console.log('✨ Tuile BÉNÉFICE (decisions) activée');
+                }
+            }, 3000);
         }
         
         animateSection2() {
-            console.log('🎨 Section 2 animation avec connexions - DÉMARRAGE');
+            console.log('🎨 Section 2 animation séquentielle - DÉMARRAGE');
             
-            // 1. Problèmes s'allument
+            // 1. PROBLÈMES s'allument UNE PAR UNE
             setTimeout(() => {
                 const fournisseurs = document.querySelector('#stratego-final-map .tile[data-tile="fournisseurs"][data-section="2"]');
-                const charges = document.querySelector('#stratego-final-map .tile[data-tile="charges"][data-section="2"]');
-                const factures = document.querySelector('#stratego-final-map .tile[data-tile="factures"][data-section="2"]');
-                
-                if (fournisseurs) fournisseurs.classList.add('active');
-                if (charges) charges.classList.add('active');
-                if (factures) factures.classList.add('active');
+                if (fournisseurs) {
+                    fournisseurs.classList.add('active');
+                    console.log('✨ Tuile FOURNISSEURS activée');
+                }
             }, 500);
             
-            // 2. Connexions vers solution
             setTimeout(() => {
-                this.showConnectionsWithDelay(['fournisseurs-previsionnel', 'charges-previsionnel', 'factures-previsionnel'], 200);
+                const charges = document.querySelector('#stratego-final-map .tile[data-tile="charges"][data-section="2"]');
+                if (charges) {
+                    charges.classList.add('active');
+                    console.log('✨ Tuile CHARGES activée');
+                }
+            }, 800);
+            
+            setTimeout(() => {
+                const factures = document.querySelector('#stratego-final-map .tile[data-tile="factures"][data-section="2"]');
+                if (factures) {
+                    factures.classList.add('active');
+                    console.log('✨ Tuile FACTURES activée');
+                }
+            }, 1100);
+            
+            // 2. CONNEXIONS vers solution
+            setTimeout(() => {
+                console.log('🔗 Connexions problèmes → solution');
+                this.showConnectionsWithDelay(['fournisseurs-previsionnel', 'charges-previsionnel', 'factures-previsionnel'], 150);
             }, 1500);
             
-            // 3. Solution s'allume
+            // 3. SOLUTION s'allume
             setTimeout(() => {
                 const previsionnel = document.querySelector('#stratego-final-map .tile[data-tile="previsionnel"][data-section="2"]');
-                if (previsionnel) previsionnel.classList.add('active');
-            }, 3000);
+                if (previsionnel) {
+                    previsionnel.classList.add('active');
+                    console.log('✨ Tuile SOLUTION (previsionnel) activée');
+                }
+            }, 2200);
             
-            // 4. Connexion finale
+            // 4. CONNEXION finale
             setTimeout(() => {
-                this.showConnectionsWithDelay(['previsionnel-serenite'], 200);
-            }, 4000);
+                console.log('🔗 Connexion solution → bénéfice');
+                this.showConnectionsWithDelay(['previsionnel-serenite'], 150);
+            }, 2600);
             
-            // 5. Bénéfice final
+            // 5. BÉNÉFICE final
             setTimeout(() => {
                 const serenite = document.querySelector('#stratego-final-map .tile[data-tile="serenite"][data-section="2"]');
-                if (serenite) serenite.classList.add('active');
-            }, 5000);
+                if (serenite) {
+                    serenite.classList.add('active');
+                    console.log('✨ Tuile BÉNÉFICE (serenite) activée');
+                }
+            }, 3000);
         }
         
         animateSection3() {
-            console.log('🎨 Section 3 animation avec connexions - DÉMARRAGE');
+            console.log('🎨 Section 3 animation séquentielle - DÉMARRAGE');
             
-            // 1. Problème central pulse
+            // 1. PROBLÈME central avec pulse
             setTimeout(() => {
                 const doute = document.querySelector('#stratego-final-map .tile[data-tile="doute"][data-section="3"]');
                 if (doute) {
                     doute.classList.add('active', 'pulse');
+                    console.log('✨ Tuile DOUTE activée (avec pulse)');
                 }
             }, 500);
             
-            // 2. Connexions depuis le doute
+            // 2. CONNEXIONS depuis le doute
             setTimeout(() => {
-                this.showConnections(['doute-investissement', 'doute-recrutement']);
-                const investissement = document.querySelector('#stratego-final-map .tile[data-tile="investissement"][data-section="3"]');
-                const recrutement = document.querySelector('#stratego-final-map .tile[data-tile="recrutement"][data-section="3"]');
-                if (investissement) investissement.classList.add('active');
-                if (recrutement) recrutement.classList.add('active');
-            }, 1500);
+                console.log('🔗 Connexions doute → problèmes');
+                this.showConnectionsWithDelay(['doute-investissement', 'doute-recrutement'], 150);
+            }, 900);
             
-            // 3. Intervention conseil
+            // 3. PROBLÈMES résultants (une par une)
+            setTimeout(() => {
+                const investissement = document.querySelector('#stratego-final-map .tile[data-tile="investissement"][data-section="3"]');
+                if (investissement) {
+                    investissement.classList.add('active');
+                    console.log('✨ Tuile INVESTISSEMENT activée');
+                }
+            }, 1400);
+            
+            setTimeout(() => {
+                const recrutement = document.querySelector('#stratego-final-map .tile[data-tile="recrutement"][data-section="3"]');
+                if (recrutement) {
+                    recrutement.classList.add('active');
+                    console.log('✨ Tuile RECRUTEMENT activée');
+                }
+            }, 1700);
+            
+            // 4. SOLUTION conseil
             setTimeout(() => {
                 const conseil = document.querySelector('#stratego-final-map .tile[data-tile="conseil"][data-section="3"]');
-                if (conseil) conseil.classList.add('active');
+                if (conseil) {
+                    conseil.classList.add('active');
+                    console.log('✨ Tuile SOLUTION (conseil) activée');
+                }
+            }, 2200);
+            
+            // 5. CONNEXION solution → doute
+            setTimeout(() => {
+                console.log('🔗 Connexion conseil → doute');
                 this.showConnections(['conseil-doute']);
+            }, 2600);
+            
+            // 6. CONNEXION finale vers bénéfice
+            setTimeout(() => {
+                console.log('🔗 Connexion conseil → croissance');
+                this.showConnectionsWithDelay(['conseil-croissance'], 150);
             }, 3000);
             
-            // 4. Connexion finale
-            setTimeout(() => {
-                this.showConnectionsWithDelay(['conseil-croissance'], 200);
-            }, 4000);
-            
-            // 5. Bénéfice final
+            // 7. BÉNÉFICE final
             setTimeout(() => {
                 const croissance = document.querySelector('#stratego-final-map .tile[data-tile="croissance"][data-section="3"]');
-                if (croissance) croissance.classList.add('active');
-            }, 5000);
+                if (croissance) {
+                    croissance.classList.add('active');
+                    console.log('✨ Tuile BÉNÉFICE (croissance) activée');
+                }
+            }, 3400);
         }
         
 
