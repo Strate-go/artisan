@@ -800,14 +800,14 @@ INSTRUCTIONS :
             // Reset COMPLET de toutes les tuiles et connexions
             this.resetAllTiles();
             
-            // Masquer toutes les sections sauf celle active
+            // Masquer les autres sections, la section active sera gérée par l'animation séquentielle
             document.querySelectorAll('#stratego-final-map .tile').forEach(tile => {
                 const tileSection = tile.dataset.section;
-                if (parseInt(tileSection) === sectionNumber) {
-                    tile.style.opacity = '1';
-                } else {
+                if (parseInt(tileSection) !== sectionNumber) {
                     tile.style.opacity = '0.3';
+                    tile.classList.remove('active');
                 }
+                // Ne pas toucher à l'opacité de la section active - laissons l'animation le faire
             });
             
             // Lancer l'animation appropriée après un petit délai
@@ -937,6 +937,7 @@ INSTRUCTIONS :
             setTimeout(() => {
                 const devis = document.querySelector('#stratego-final-map .tile[data-tile="devis"][data-section="1"]');
                 if (devis) {
+                    devis.style.opacity = '1';
                     devis.classList.add('active');
                     console.log('✨ Tuile DEVIS activée');
                 }
@@ -945,6 +946,7 @@ INSTRUCTIONS :
             setTimeout(() => {
                 const materiaux = document.querySelector('#stratego-final-map .tile[data-tile="materiaux"][data-section="1"]');
                 if (materiaux) {
+                    materiaux.style.opacity = '1';
                     materiaux.classList.add('active');
                     console.log('✨ Tuile MATERIAUX activée');
                 }
@@ -953,6 +955,7 @@ INSTRUCTIONS :
             setTimeout(() => {
                 const temps = document.querySelector('#stratego-final-map .tile[data-tile="temps"][data-section="1"]');
                 if (temps) {
+                    temps.style.opacity = '1';
                     temps.classList.add('active');
                     console.log('✨ Tuile TEMPS activée');
                 }
@@ -968,6 +971,7 @@ INSTRUCTIONS :
             setTimeout(() => {
                 const marge = document.querySelector('#stratego-final-map .tile[data-tile="marge"][data-section="1"]');
                 if (marge) {
+                    marge.style.opacity = '1';
                     marge.classList.add('active');
                     console.log('✨ Tuile SOLUTION (marge) activée');
                 }
@@ -983,6 +987,7 @@ INSTRUCTIONS :
             setTimeout(() => {
                 const decisions = document.querySelector('#stratego-final-map .tile[data-tile="decisions"][data-section="1"]');
                 if (decisions) {
+                    decisions.style.opacity = '1';
                     decisions.classList.add('active');
                     console.log('✨ Tuile BÉNÉFICE (decisions) activée');
                 }
@@ -993,29 +998,9 @@ INSTRUCTIONS :
             console.log('🎨 Section 2 animation séquentielle - DÉMARRAGE');
             
             // 1. PROBLÈMES s'allument UNE PAR UNE
-            setTimeout(() => {
-                const fournisseurs = document.querySelector('#stratego-final-map .tile[data-tile="fournisseurs"][data-section="2"]');
-                if (fournisseurs) {
-                    fournisseurs.classList.add('active');
-                    console.log('✨ Tuile FOURNISSEURS activée');
-                }
-            }, 500);
-            
-            setTimeout(() => {
-                const charges = document.querySelector('#stratego-final-map .tile[data-tile="charges"][data-section="2"]');
-                if (charges) {
-                    charges.classList.add('active');
-                    console.log('✨ Tuile CHARGES activée');
-                }
-            }, 800);
-            
-            setTimeout(() => {
-                const factures = document.querySelector('#stratego-final-map .tile[data-tile="factures"][data-section="2"]');
-                if (factures) {
-                    factures.classList.add('active');
-                    console.log('✨ Tuile FACTURES activée');
-                }
-            }, 1100);
+            setTimeout(() => this.activateTile('fournisseurs', 2), 500);
+            setTimeout(() => this.activateTile('charges', 2), 800);
+            setTimeout(() => this.activateTile('factures', 2), 1100);
             
             // 2. CONNEXIONS vers solution
             setTimeout(() => {
@@ -1024,13 +1009,7 @@ INSTRUCTIONS :
             }, 1500);
             
             // 3. SOLUTION s'allume
-            setTimeout(() => {
-                const previsionnel = document.querySelector('#stratego-final-map .tile[data-tile="previsionnel"][data-section="2"]');
-                if (previsionnel) {
-                    previsionnel.classList.add('active');
-                    console.log('✨ Tuile SOLUTION (previsionnel) activée');
-                }
-            }, 2200);
+            setTimeout(() => this.activateTile('previsionnel', 2), 2200);
             
             // 4. CONNEXION finale
             setTimeout(() => {
@@ -1039,13 +1018,7 @@ INSTRUCTIONS :
             }, 2600);
             
             // 5. BÉNÉFICE final
-            setTimeout(() => {
-                const serenite = document.querySelector('#stratego-final-map .tile[data-tile="serenite"][data-section="2"]');
-                if (serenite) {
-                    serenite.classList.add('active');
-                    console.log('✨ Tuile BÉNÉFICE (serenite) activée');
-                }
-            }, 3000);
+            setTimeout(() => this.activateTile('serenite', 2), 3000);
         }
         
         animateSection3() {
@@ -1055,6 +1028,7 @@ INSTRUCTIONS :
             setTimeout(() => {
                 const doute = document.querySelector('#stratego-final-map .tile[data-tile="doute"][data-section="3"]');
                 if (doute) {
+                    doute.style.opacity = '1';
                     doute.classList.add('active', 'pulse');
                     console.log('✨ Tuile DOUTE activée (avec pulse)');
                 }
@@ -1067,30 +1041,11 @@ INSTRUCTIONS :
             }, 900);
             
             // 3. PROBLÈMES résultants (une par une)
-            setTimeout(() => {
-                const investissement = document.querySelector('#stratego-final-map .tile[data-tile="investissement"][data-section="3"]');
-                if (investissement) {
-                    investissement.classList.add('active');
-                    console.log('✨ Tuile INVESTISSEMENT activée');
-                }
-            }, 1400);
-            
-            setTimeout(() => {
-                const recrutement = document.querySelector('#stratego-final-map .tile[data-tile="recrutement"][data-section="3"]');
-                if (recrutement) {
-                    recrutement.classList.add('active');
-                    console.log('✨ Tuile RECRUTEMENT activée');
-                }
-            }, 1700);
+            setTimeout(() => this.activateTile('investissement', 3), 1400);
+            setTimeout(() => this.activateTile('recrutement', 3), 1700);
             
             // 4. SOLUTION conseil
-            setTimeout(() => {
-                const conseil = document.querySelector('#stratego-final-map .tile[data-tile="conseil"][data-section="3"]');
-                if (conseil) {
-                    conseil.classList.add('active');
-                    console.log('✨ Tuile SOLUTION (conseil) activée');
-                }
-            }, 2200);
+            setTimeout(() => this.activateTile('conseil', 3), 2200);
             
             // 5. CONNEXION solution → doute
             setTimeout(() => {
@@ -1105,13 +1060,7 @@ INSTRUCTIONS :
             }, 3000);
             
             // 7. BÉNÉFICE final
-            setTimeout(() => {
-                const croissance = document.querySelector('#stratego-final-map .tile[data-tile="croissance"][data-section="3"]');
-                if (croissance) {
-                    croissance.classList.add('active');
-                    console.log('✨ Tuile BÉNÉFICE (croissance) activée');
-                }
-            }, 3400);
+            setTimeout(() => this.activateTile('croissance', 3), 3400);
         }
         
 
@@ -1305,6 +1254,18 @@ INSTRUCTIONS :
                     }
                 }
             });
+        }
+        
+        // UTILITAIRE pour activer une tuile avec opacité et classe
+        activateTile(tileId, sectionId) {
+            const tile = document.querySelector(`#stratego-final-map .tile[data-tile="${tileId}"][data-section="${sectionId}"]`);
+            if (tile) {
+                tile.style.opacity = '1';
+                tile.classList.add('active');
+                console.log(`✨ Tuile ${tileId.toUpperCase()} activée`);
+                return true;
+            }
+            return false;
         }
         
         // CRÉATION AUTOMATIQUE DES CONNEXIONS
