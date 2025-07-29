@@ -374,6 +374,19 @@ INSTRUCTIONS :
     overflow: hidden !important;
 }
 
+/* PROTECTION CONTRE LES ANIMATIONS CSS EXTERNES */
+#stratego-final-map .tile {
+    animation: none !important;
+    transform: none !important;
+    transition: opacity 0.3s ease !important;
+}
+
+/* Protection du SVG contre les animations externes */
+#stratego-final-map .connections-svg {
+    animation: none !important;
+    transform: none !important;
+}
+
 /* TUILES - État par défaut (blanches avec bordure grise) */
 #stratego-final-map .tile {
     background: var(--white) !important;
@@ -655,6 +668,7 @@ INSTRUCTIONS :
             
             // DÉTECTEUR SIMPLE pour diagnostiquer
             this.setupActiveProtection(); // Protection agressive des classes active
+            this.protectAgainstExternalCSS(); // Protection contre CSS externe
             
             // Démarrer avec la section 1
             this.switchToSection(1);
@@ -1088,6 +1102,49 @@ INSTRUCTIONS :
                     });
                 }
             }, 500); // Vérification toutes les 500ms
+        }
+        
+        // PROTECTION CONTRE CSS EXTERNE
+        protectAgainstExternalCSS() {
+            console.log('🛡️ Protection contre CSS externe activée');
+            
+            // Désactiver les animations CSS externes sur nos éléments
+            const style = document.createElement('style');
+            style.textContent = `
+                #stratego-final-map .tile,
+                #stratego-final-map .tile * {
+                    animation-name: none !important;
+                    animation-duration: 0s !important;
+                    animation-delay: 0s !important;
+                    animation-iteration-count: 1 !important;
+                    animation-fill-mode: none !important;
+                    transform: none !important;
+                    transition: opacity 0.3s ease !important;
+                }
+                
+                #stratego-final-map .connections-svg,
+                #stratego-final-map .connections-svg * {
+                    animation: none !important;
+                    transform: none !important;
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // Protection par intervalle contre les interférences
+            setInterval(() => {
+                document.querySelectorAll('#stratego-final-map .tile').forEach(tile => {
+                    // Supprimer les classes d'animation externe qui pourraient être ajoutées
+                    tile.classList.remove('fade-in-left-delay', 'go-animate');
+                    
+                    // Forcer nos styles
+                    if (tile.style.animation && tile.style.animation !== 'none') {
+                        tile.style.animation = 'none';
+                    }
+                    if (tile.style.transform && tile.style.transform !== 'none') {
+                        tile.style.transform = 'none';
+                    }
+                });
+            }, 1000);
         }
         
         // CRÉATION AUTOMATIQUE DES CONNEXIONS
