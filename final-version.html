@@ -644,11 +644,11 @@ INSTRUCTIONS :
         init() {
             console.log('🚀 Initialisation de Stratégo Map');
             
-            // INTERCEPTION : Remplacer la fonction updateTiles externe
-            this.interceptUpdateTiles();
-            
             this.bindEvents();
             this.setupScrollObserver();
+            
+            // INSTALLATION DU DÉTECTEUR
+            this.detectExternalCalls();
             
             // CRÉATION AUTOMATIQUE : toutes les connexions après chargement
             setTimeout(() => {
@@ -656,86 +656,7 @@ INSTRUCTIONS :
             }, 1000);
             
             // Démarrer avec la section 1
-            if (window.updateTiles) {
-                window.updateTiles(1, false);
-            }
             this.switchToSection(1);
-        }
-        
-        interceptUpdateTiles() {
-            // Stocker la fonction originale si elle existe
-            this.originalUpdateTiles = window.updateTiles;
-            
-            // Remplacer par notre version intelligente
-            window.updateTiles = (currentSection, isRerun = false) => {
-                console.log(`🔄 updateTiles appelée: section=${currentSection}, rerun=${isRerun}`);
-                console.log(`🔍 Contexte: this.currentSection=${this.currentSection}, this.isAnimating=${this.isAnimating}`);
-                
-                // DÉBUGAGE : D'où vient cet appel ?
-                console.log('📍 Stack trace de l\'appel:');
-                console.trace();
-                
-                const tiles = document.querySelectorAll('#stratego-final-map .tile');
-                
-                tiles.forEach(tile => {
-                    const tileSection = tile.dataset.section;
-                    
-                    // PROTECTION INTELLIGENTE : Si pas de paramètre isRerun, détecter automatiquement
-                    let shouldProtect = false;
-                    
-                    if (isRerun === true) {
-                        // Rerun explicite : protéger
-                        shouldProtect = true;
-                    } else if (isRerun === false) {
-                        // Changement explicite : ne pas protéger
-                        shouldProtect = false;
-                    } else {
-                        // Appel externe sans paramètre : protéger si même section et pas en animation
-                        shouldProtect = (parseInt(tileSection) === this.currentSection && !this.isAnimating);
-                        console.log(`🤖 Auto-détection: shouldProtect=${shouldProtect} (section=${tileSection}, current=${this.currentSection}, animating=${this.isAnimating})`);
-                    }
-                    
-                    // RÈGLE CLÉE : Ne pas modifier les classes si protection active
-                    if (shouldProtect && tileSection === String(currentSection)) {
-                        console.log(`🛡️ Protection: garde classe active pour ${tile.dataset.tile}`);
-                        return; // Skip cette tuile
-                    }
-                    
-                    // Sinon, comportement normal : retirer active si pas la bonne section
-                    if (tileSection !== String(currentSection)) {
-                        tile.classList.remove('active');
-                    }
-                    
-                    // Gérer l'opacité selon la section
-                    if (tileSection === String(currentSection)) {
-                        tile.style.opacity = '1';
-                    } else {
-                        tile.style.opacity = '0.3';
-                    }
-                });
-            }.bind(this); // IMPORTANT : Bind this pour accéder à this.currentSection
-            
-            console.log('✅ Fonction updateTiles interceptée et remplacée');
-            
-            // INVESTIGATION : Chercher toutes les fonctions updateTiles
-            setTimeout(() => {
-                console.log('🔍 Investigation des fonctions updateTiles:');
-                
-                // Chercher dans window
-                for (let key in window) {
-                    if (key.toLowerCase().includes('update') && typeof window[key] === 'function') {
-                        console.log(`  - window.${key} trouvée`);
-                    }
-                }
-                
-                // Chercher dans les éléments du DOM
-                const scripts = document.querySelectorAll('script');
-                scripts.forEach((script, index) => {
-                    if (script.textContent && script.textContent.includes('updateTiles')) {
-                        console.log(`  - updateTiles trouvée dans script ${index}:`, script.src || 'inline');
-                    }
-                });
-            }, 1000);
         }
         
         setupScrollObserver() {
@@ -788,12 +709,6 @@ INSTRUCTIONS :
                 // Changer de section si nécessaire
                 if (activeSection !== this.currentSection && !this.isAnimating) {
                     console.log(`✅ Changement de section: ${this.currentSection} → ${activeSection}`);
-                    
-                    // Appeler updateTiles pour le vrai changement de section
-                    if (window.updateTiles) {
-                        window.updateTiles(activeSection, false);
-                    }
-                    
                     lastTriggerTime = now;
                     this.switchToSection(activeSection);
                 }
@@ -830,10 +745,6 @@ INSTRUCTIONS :
             // Puis continuer toutes les 12 secondes (optimisé pour la performance)
             this.animationInterval = setInterval(() => {
                 if (!this.isAnimating && document.visibilityState === 'visible') { // Ne relancer que si visible et pas en cours
-                    // Appeler updateTiles avec isRerun=true pour les cycles automatiques
-                    if (window.updateTiles) {
-                        window.updateTiles(sectionNumber, true);
-                    }
                     this.runSingleAnimation(sectionNumber);
                 }
             }, 12000);
@@ -1069,6 +980,53 @@ INSTRUCTIONS :
                 clearInterval(this.animationInterval);
             }
             // Plus de scroll observer à nettoyer
+        }
+        
+        // Fonction pour détecter qui supprime les classes active
+        detectExternalCalls() {
+            console.log('👁️ Installation du détecteur de modifications de classe');
+            
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                        const tile = mutation.target;
+                        const oldClasses = mutation.oldValue || '';
+                        const newClasses = tile.className;
+                        
+                        // Si une classe 'active' a été supprimée
+                        if (oldClasses.includes('active') && !newClasses.includes('active')) {
+                            console.log('🚨 CLASSE ACTIVE SUPPRIMÉE DÉTECTÉE !');
+                            console.log(`  - Tuile: ${tile.dataset.tile}`);
+                            console.log(`  - Section: ${tile.dataset.section}`);
+                            console.log(`  - Section courante: ${this.currentSection}`);
+                            
+                            // STACK TRACE pour voir qui a fait ça
+                            console.trace('📍 QUI A SUPPRIMÉ CETTE CLASSE ?');
+                            
+                            // Si c'est notre section courante, la remettre immédiatement
+                            if (parseInt(tile.dataset.section) === this.currentSection) {
+                                console.log('🔧 RESTAURATION immédiate de la classe active');
+                                setTimeout(() => {
+                                    tile.classList.add('active');
+                                    console.log('✅ Classe active restaurée');
+                                }, 10);
+                            }
+                        }
+                    }
+                });
+            });
+            
+            // Observer toutes les tuiles
+            const tiles = document.querySelectorAll('#stratego-final-map .tile');
+            tiles.forEach(tile => {
+                observer.observe(tile, {
+                    attributes: true,
+                    attributeOldValue: true,
+                    attributeFilter: ['class']
+                });
+            });
+            
+            console.log('✅ Observateur de classes actives installé');
         }
         
         // CRÉATION AUTOMATIQUE DES CONNEXIONS
