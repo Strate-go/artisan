@@ -652,7 +652,7 @@ INSTRUCTIONS :
             this.animationInterval = null;
             this.isAnimating = false;
             this.scrollObserver = null;
-            this.activeTimeouts = []; // Stocker tous les setTimeout actifs pour pouvoir les annuler
+            this.currentAnimationId = null; // ID unique pour suivre l'animation active
             // this.lastAnimatedSection supprimé car causait des blocages d'animation
         }
         
@@ -780,14 +780,14 @@ INSTRUCTIONS :
         switchToSection(sectionNumber) {
             console.log('🎯 Switching to section:', sectionNumber); // Debug activé
             
-            // Arrêter l'animation précédente ET tous les timeouts en cours
+            // Arrêter l'animation précédente ET stopper l'animation en cours
             if (this.animationInterval) {
                 clearInterval(this.animationInterval);
                 this.animationInterval = null;
             }
             
-            // CRUCIAL : Annuler tous les setTimeout de l'animation précédente
-            this.clearAllTimeouts();
+            // CRUCIAL : Stopper l'animation en cours (méthode ChatGPT)
+            this.stopCurrentAnimation();
             
             this.currentSection = sectionNumber;
             
@@ -803,7 +803,7 @@ INSTRUCTIONS :
                     console.log(`🔄 Répétition automatique - Section ${sectionNumber}`);
                     // Reset FLUIDE avant répétition pour repartir de zéro
                     this.resetForRepeat();
-                    this.setManagedTimeout(() => {
+                    setTimeout(() => {
                         this.runSingleAnimation(sectionNumber);
                     }, 600); // Délai pour laisser finir les transitions fluides
                 }
@@ -828,11 +828,12 @@ INSTRUCTIONS :
                 return;
             }
             
-            // Protection supprimée : lastAnimatedSection causait des blocages
-            // Le délai de 1000ms dans handleScroll suffit pour éviter les répétitions
+            // NOUVEAU : Créer un ID unique pour cette animation (méthode ChatGPT)
+            const animationId = this.createAnimationId();
+            this.currentAnimationId = animationId;
+            console.log('🆔 Nouvelle animation démarrée avec ID:', animationId.toString());
             
             this.isAnimating = true;
-            // this.lastAnimatedSection supprimé car causait des blocages
             
             // Reset COMPLET de toutes les tuiles et connexions
             this.resetAllTiles();
@@ -853,11 +854,11 @@ INSTRUCTIONS :
                 this.recalculateConnectionPositions();
                 
                 if (sectionNumber === 1) {
-                    this.animateSection1();
+                    this.animateSection1(animationId);
                 } else if (sectionNumber === 2) {
-                    this.animateSection2();
+                    this.animateSection2(animationId);
                 } else if (sectionNumber === 3) {
-                    this.animateSection3();
+                    this.animateSection3(animationId);
                 }
             }, 200);
             
@@ -941,12 +942,12 @@ INSTRUCTIONS :
             console.log('🔄 Reset FLUIDE terminé - Prêt pour nouvelle animation avec effet de tracé');
         }
         
-        showConnectionsWithDelay(connectionIds, delayBetween = 200) {
+        showConnectionsWithDelay(connectionIds, delayBetween = 200, animationId = null) {
             console.log(`🔍 showConnectionsWithDelay appelé avec:`, connectionIds);
             connectionIds.forEach((id, index) => {
-                this.setManagedTimeout(() => {
+                this.setAnimationTimeout(() => {
                     this.showConnections([id]);
-                }, index * delayBetween);
+                }, index * delayBetween, animationId);
             });
         }
         
@@ -1000,41 +1001,39 @@ INSTRUCTIONS :
             });
         }
         
-        animateSection1() {
+        animateSection1(animationId) {
             console.log('🎨 Section 1 animation séquentielle - DÉMARRAGE');
-            console.log('🔍 DEBUG Section 1 - isAnimating:', this.isAnimating);
-            console.log('🔍 DEBUG Section 1 - currentSection:', this.currentSection);
             
             let currentDelay = 0;
             
             // 1. PROBLÈMES s'allument UNE PAR UNE
-            this.setManagedTimeout(() => this.activateTile('devis', 1), currentDelay += 500);
-            this.setManagedTimeout(() => this.activateTile('materiaux', 1), currentDelay += 300);
-            this.setManagedTimeout(() => this.activateTile('temps', 1), currentDelay += 300);
+            this.setAnimationTimeout(() => this.activateTile('devis', 1), currentDelay += 500, animationId);
+            this.setAnimationTimeout(() => this.activateTile('materiaux', 1), currentDelay += 300, animationId);
+            this.setAnimationTimeout(() => this.activateTile('temps', 1), currentDelay += 300, animationId);
             
             // 2. CONNEXIONS vers solution (attendre 500ms puis laisser 1s pour le tracé)
-            this.setManagedTimeout(() => {
+            this.setAnimationTimeout(() => {
                 console.log('🔗 Connexions problèmes → solution');
-                this.showConnectionsWithDelay(['devis-marge', 'materiaux-marge', 'temps-marge'], 150);
-            }, currentDelay += 500);
+                this.showConnectionsWithDelay(['devis-marge', 'materiaux-marge', 'temps-marge'], 150, animationId);
+            }, currentDelay += 500, animationId);
             
             // 3. SOLUTION s'allume APRÈS que les connexions soient tracées (1s + délai)
-            this.setManagedTimeout(() => this.activateTile('marge', 1), currentDelay += 1200);
+            this.setAnimationTimeout(() => this.activateTile('marge', 1), currentDelay += 1200, animationId);
             
             // 4. CONNEXION finale (attendre 400ms puis laisser 1s pour le tracé)
-            this.setManagedTimeout(() => {
+            this.setAnimationTimeout(() => {
                 console.log('🔗 Connexion solution → bénéfice');
                 this.showConnections(['marge-decisions']);
-            }, currentDelay += 400);
+            }, currentDelay += 400, animationId);
             
             // 5. BÉNÉFICE final APRÈS que la connexion soit tracée
-            this.setManagedTimeout(() => this.activateTile('decisions', 1), currentDelay += 1100);
+            this.setAnimationTimeout(() => this.activateTile('decisions', 1), currentDelay += 1100, animationId);
             
             // Marquer la fin de l'animation
-            this.setManagedTimeout(() => {
+            this.setAnimationTimeout(() => {
                 this.isAnimating = false;
                 console.log('🏁 Animation Section 1 terminée');
-            }, currentDelay += 500);
+            }, currentDelay += 500, animationId);
         }
         
         animateSection2() {
@@ -1328,26 +1327,30 @@ INSTRUCTIONS :
             return false;
         }
         
-        // UTILITAIRE pour setTimeout avec suivi automatique
-        setManagedTimeout(callback, delay) {
-            const timeoutId = setTimeout(() => {
-                // Supprimer de la liste quand il s'exécute
-                this.activeTimeouts = this.activeTimeouts.filter(id => id !== timeoutId);
-                callback();
-            }, delay);
-            
-            // Ajouter à la liste des timeouts actifs
-            this.activeTimeouts.push(timeoutId);
-            return timeoutId;
+        // SYSTÈME D'ANIMATION AVEC ID UNIQUE (méthode ChatGPT)
+        createAnimationId() {
+            return Symbol('animation-' + Date.now());
         }
         
-        // UTILITAIRE pour annuler tous les timeouts en cours
-        clearAllTimeouts() {
-            console.log(`🛑 Annulation de ${this.activeTimeouts.length} timeouts en cours`);
-            this.activeTimeouts.forEach(timeoutId => {
-                clearTimeout(timeoutId);
-            });
-            this.activeTimeouts = [];
+        // setTimeout sécurisé qui vérifie l'ID d'animation
+        setAnimationTimeout(callback, delay, animationId) {
+            return setTimeout(() => {
+                // Vérifier que cette animation est toujours active
+                if (this.currentAnimationId !== animationId) {
+                    console.log('🚫 Animation timeout abandonné (nouvelle animation en cours)');
+                    return;
+                }
+                callback();
+            }, delay);
+        }
+        
+        // Stopper l'animation en cours
+        stopCurrentAnimation() {
+            if (this.currentAnimationId) {
+                console.log('🛑 Animation en cours stoppée');
+                this.currentAnimationId = null;
+                this.isAnimating = false;
+            }
         }
         
         // CRÉATION AUTOMATIQUE DES CONNEXIONS
