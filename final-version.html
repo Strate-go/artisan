@@ -671,6 +671,10 @@ INSTRUCTIONS :
                 console.log(`🔄 updateTiles appelée: section=${currentSection}, rerun=${isRerun}`);
                 console.log(`🔍 Contexte: this.currentSection=${this.currentSection}, this.isAnimating=${this.isAnimating}`);
                 
+                // DÉBUGAGE : D'où vient cet appel ?
+                console.log('📍 Stack trace de l\'appel:');
+                console.trace();
+                
                 const tiles = document.querySelectorAll('#stratego-final-map .tile');
                 
                 tiles.forEach(tile => {
@@ -712,6 +716,26 @@ INSTRUCTIONS :
             }.bind(this); // IMPORTANT : Bind this pour accéder à this.currentSection
             
             console.log('✅ Fonction updateTiles interceptée et remplacée');
+            
+            // INVESTIGATION : Chercher toutes les fonctions updateTiles
+            setTimeout(() => {
+                console.log('🔍 Investigation des fonctions updateTiles:');
+                
+                // Chercher dans window
+                for (let key in window) {
+                    if (key.toLowerCase().includes('update') && typeof window[key] === 'function') {
+                        console.log(`  - window.${key} trouvée`);
+                    }
+                }
+                
+                // Chercher dans les éléments du DOM
+                const scripts = document.querySelectorAll('script');
+                scripts.forEach((script, index) => {
+                    if (script.textContent && script.textContent.includes('updateTiles')) {
+                        console.log(`  - updateTiles trouvée dans script ${index}:`, script.src || 'inline');
+                    }
+                });
+            }, 1000);
         }
         
         setupScrollObserver() {
