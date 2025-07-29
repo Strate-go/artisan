@@ -787,13 +787,21 @@ INSTRUCTIONS :
             
             this.currentSection = sectionNumber;
             
-            // Plus besoin de lastAnimatedSection - supprimé car causait des blocages
-            
             // Reset complet et démarrage propre
             this.resetAllTiles();
             
             // Démarrer immédiatement la première animation
             this.runSingleAnimation(sectionNumber);
+            
+            // NOUVEAU : Répétition automatique toutes les 12 secondes
+            this.animationInterval = setInterval(() => {
+                if (!this.isAnimating && document.visibilityState === 'visible') {
+                    console.log(`🔄 Répétition automatique - Section ${sectionNumber}`);
+                    this.runSingleAnimation(sectionNumber);
+                }
+            }, 12000); // 12 secondes
+            
+            console.log(`🔄 Animation en boucle activée pour Section ${sectionNumber} (toutes les 12s)`);
             
             // INTERVALLE SUPPRIMÉ - causait la désactivation des tuiles
             // L'animation ne se joue qu'une fois par section
@@ -1082,6 +1090,7 @@ INSTRUCTIONS :
         destroy() {
             if (this.animationInterval) {
                 clearInterval(this.animationInterval);
+                console.log('🛑 Animation en boucle arrêtée');
             }
             // Plus de scroll observer à nettoyer
         }
