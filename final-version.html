@@ -946,12 +946,12 @@ INSTRUCTIONS :
             console.log(`🔍 showConnectionsWithDelay appelé avec:`, connectionIds);
             connectionIds.forEach((id, index) => {
                 this.setAnimationTimeout(() => {
-                    this.showConnections([id]);
+                    this.showConnections([id], animationId);
                 }, index * delayBetween, animationId);
             });
         }
         
-        showConnections(connectionIds) {
+        showConnections(connectionIds, animationId = null) {
             console.log(`🔍 showConnections appelé avec:`, connectionIds);
             connectionIds.forEach(id => {
                 // ✅ Sélection optimisée par ID unique
@@ -987,11 +987,16 @@ INSTRUCTIONS :
                     if (path.style.opacity === '0' || path.style.opacity === '') {
                         path.style.opacity = '0.8'; // Rendre visible
                         
-                        // 3. ANIMATION après petit délai
-                        setTimeout(() => {
+                        // 3. ANIMATION après petit délai avec vérification d'ID
+                        this.setAnimationTimeout(() => {
+                            // Vérifier que l'animation est toujours active
+                            if (animationId && this.currentAnimationId !== animationId) {
+                                console.log('🚫 Animation de tracé annulée (nouvelle animation en cours)');
+                                return;
+                            }
                             path.style.transition = 'stroke-dashoffset 1s ease-in-out';
                             path.style.strokeDashoffset = 0; // Se dessine progressivement
-                        }, 100);
+                        }, 100, animationId);
                         
                         console.log(`🎨 Connexion ${id} tracée (longueur: ${Math.round(pathLength)}px)`);
                     }
@@ -1023,7 +1028,7 @@ INSTRUCTIONS :
             // 4. CONNEXION finale (attendre 400ms puis laisser 1s pour le tracé)
             this.setAnimationTimeout(() => {
                 console.log('🔗 Connexion solution → bénéfice');
-                this.showConnections(['marge-decisions']);
+                this.showConnections(['marge-decisions'], animationId);
             }, currentDelay += 400, animationId);
             
             // 5. BÉNÉFICE final APRÈS que la connexion soit tracée
@@ -1058,7 +1063,7 @@ INSTRUCTIONS :
             // 4. CONNEXION finale (attendre 400ms puis laisser 1s pour le tracé)
             this.setAnimationTimeout(() => {
                 console.log('🔗 Connexion solution → bénéfice');
-                this.showConnections(['previsionnel-serenite']);
+                this.showConnections(['previsionnel-serenite'], animationId);
             }, currentDelay += 400, animationId);
             
             // 5. BÉNÉFICE final APRÈS que la connexion soit tracée
@@ -1102,13 +1107,13 @@ INSTRUCTIONS :
             // 5. CONNEXION solution → doute (attendre 400ms puis laisser 1s pour le tracé)
             this.setAnimationTimeout(() => {
                 console.log('🔗 Connexion conseil → doute');
-                this.showConnections(['conseil-doute']);
+                this.showConnections(['conseil-doute'], animationId);
             }, currentDelay += 400, animationId);
             
             // 6. CONNEXION finale vers bénéfice (attendre 1s puis laisser 1s pour le tracé)
             this.setAnimationTimeout(() => {
                 console.log('🔗 Connexion conseil → croissance');
-                this.showConnections(['conseil-croissance']);
+                this.showConnections(['conseil-croissance'], animationId);
             }, currentDelay += 1000, animationId);
             
             // 7. BÉNÉFICE final APRÈS que la connexion soit tracée
