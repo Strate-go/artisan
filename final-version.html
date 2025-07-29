@@ -644,8 +644,8 @@ INSTRUCTIONS :
         init() {
             console.log('🚀 Initialisation de Stratégo Map');
             
-            // DEBUG : Observer les changements de classes
-            this.setupClassObserver();
+            // DEBUG : Observer désactivé temporairement
+            // this.setupClassObserver();
             
             this.bindEvents();
             this.setupScrollObserver();
@@ -796,6 +796,11 @@ INSTRUCTIONS :
                     this.runSingleAnimation(sectionNumber, true); // true = rerun, garde les tuiles
                 }
             }, 12000);
+            
+            // PROTECTION : Maintenir les classes active toutes les 2 secondes
+            this.protectionInterval = setInterval(() => {
+                this.protectActiveTiles();
+            }, 2000);
         }
         
         runSingleAnimation(sectionNumber, isRerun = false) {
@@ -858,7 +863,7 @@ INSTRUCTIONS :
         }
         
         resetAllTiles() {
-            console.log('🔁 RESET ALL TILES'); // DEBUG TEMPORAIRE
+            // console.log('🔁 RESET ALL TILES'); // DEBUG TEMPORAIRE
             // Reset toutes les tuiles
             document.querySelectorAll('#stratego-final-map .tile').forEach(tile => {
                 if (tile.classList.contains('active')) {
@@ -1047,9 +1052,24 @@ INSTRUCTIONS :
             // Événements supprimés avec les connexions
         }
         
+        protectActiveTiles() {
+            // Reforcer les classes active pour la section courante
+            const targetTiles = document.querySelectorAll(`#stratego-final-map .tile[data-section="${this.currentSection}"]`);
+            
+            targetTiles.forEach(tile => {
+                if (!tile.classList.contains('active')) {
+                    console.log(`🛡️ Restauration classe active: ${tile.dataset.tile}`);
+                    tile.classList.add('active');
+                }
+            });
+        }
+        
         destroy() {
             if (this.animationInterval) {
                 clearInterval(this.animationInterval);
+            }
+            if (this.protectionInterval) {
+                clearInterval(this.protectionInterval);
             }
             // Plus de scroll observer à nettoyer
         }
