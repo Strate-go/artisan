@@ -653,7 +653,7 @@ INSTRUCTIONS :
             }, 1000);
             
             // DÉTECTEUR SIMPLE pour diagnostiquer
-            this.setupClassDetector();
+            // this.setupClassDetector(); // Temporairement désactivé pour débugger
             
             // Démarrer avec la section 1
             this.switchToSection(1);
@@ -859,8 +859,16 @@ INSTRUCTIONS :
                 if (!path) {
                     console.log(`🔧 Connexion ${id} manquante, recréation...`);
                     const [fromTile, toTile] = id.split('-');
-                    this.createSingleConnection(fromTile, toTile);
-                    path = document.getElementById(connectionId);
+                    
+                    // Récupérer le SVG existant
+                    const svg = document.querySelector('#stratego-final-map .connections-svg');
+                    if (svg) {
+                        this.createSingleConnection(svg, fromTile, toTile, '#bf9b30', '3');
+                        path = document.getElementById(connectionId);
+                        console.log(`✅ Connexion ${id} recréée avec succès`);
+                    } else {
+                        console.error(`❌ SVG container introuvable pour recréer ${id}`);
+                    }
                 }
                 
                 console.log(`🔍 Recherche connexion ID: ${connectionId}, trouvé:`, !!path);
@@ -1129,15 +1137,22 @@ INSTRUCTIONS :
                 return false;
             }
             
-            // Calculer les coordonnées
+            // Calculer les coordonnées avec validation
             const svgRect = svg.getBoundingClientRect();
             const fromRect = fromElement.getBoundingClientRect();
             const toRect = toElement.getBoundingClientRect();
             
-            const x1 = fromRect.left + fromRect.width/2 - svgRect.left;
-            const y1 = fromRect.top + fromRect.height/2 - svgRect.top;
-            const x2 = toRect.left + toRect.width/2 - svgRect.left;
-            const y2 = toRect.top + toRect.height/2 - svgRect.top;
+            // Calcul sécurisé avec arrondi et validation
+            let x1 = Math.round(fromRect.left + fromRect.width/2 - svgRect.left);
+            let y1 = Math.round(fromRect.top + fromRect.height/2 - svgRect.top);
+            let x2 = Math.round(toRect.left + toRect.width/2 - svgRect.left);
+            let y2 = Math.round(toRect.top + toRect.height/2 - svgRect.top);
+            
+            // Validation des coordonnées
+            if (isNaN(x1) || isNaN(y1) || isNaN(x2) || isNaN(y2)) {
+                console.error(`❌ Coordonnées invalides pour ${fromTile}-${toTile}: (${x1},${y1}) → (${x2},${y2})`);
+                return false;
+            }
             
             // Créer le path avec ID unique
             const connectionId = `connection-${fromTile}-${toTile}`;
