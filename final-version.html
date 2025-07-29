@@ -644,6 +644,9 @@ INSTRUCTIONS :
         init() {
             console.log('🚀 Initialisation de Stratégo Map');
             
+            // DEBUG : Observer les changements de classes
+            this.setupClassObserver();
+            
             this.bindEvents();
             this.setupScrollObserver();
             
@@ -654,6 +657,37 @@ INSTRUCTIONS :
             
             // Démarrer avec la section 1
             this.switchToSection(1);
+        }
+        
+        setupClassObserver() {
+            // Observer TOUS les changements de classes sur les tuiles
+            const tiles = document.querySelectorAll('#stratego-final-map .tile');
+            
+            tiles.forEach(tile => {
+                const observer = new MutationObserver((mutations) => {
+                    mutations.forEach(mutation => {
+                        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                            const wasActive = mutation.oldValue && mutation.oldValue.includes('active');
+                            const isActive = tile.classList.contains('active');
+                            
+                            if (wasActive && !isActive) {
+                                console.log(`🚨 CLASSE ACTIVE SUPPRIMÉE de ${tile.dataset.tile} !`);
+                                console.log(`   Ancienne classe: "${mutation.oldValue}"`);
+                                console.log(`   Nouvelle classe: "${tile.className}"`);
+                                console.trace('Stack trace de suppression:');
+                            }
+                        }
+                    });
+                });
+                
+                observer.observe(tile, {
+                    attributes: true,
+                    attributeOldValue: true,
+                    attributeFilter: ['class']
+                });
+            });
+            
+            console.log('🔍 Observateur de classes activé sur toutes les tuiles');
         }
         
         setupScrollObserver() {
