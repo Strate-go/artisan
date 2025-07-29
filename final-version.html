@@ -797,11 +797,11 @@ INSTRUCTIONS :
             this.animationInterval = setInterval(() => {
                 if (!this.isAnimating && document.visibilityState === 'visible') {
                     console.log(`🔄 Répétition automatique - Section ${sectionNumber}`);
-                    // Reset COMPLET avant répétition pour repartir de zéro
+                    // Reset FLUIDE avant répétition pour repartir de zéro
                     this.resetForRepeat();
                     setTimeout(() => {
                         this.runSingleAnimation(sectionNumber);
-                    }, 100); // Petit délai après reset
+                    }, 600); // Délai pour laisser finir les transitions fluides
                 }
             }, 12000); // 12 secondes
             
@@ -904,29 +904,37 @@ INSTRUCTIONS :
             });
         }
         
-        // NOUVEAU : Reset complet pour répétitions (désactive TOUT)
+        // NOUVEAU : Reset fluide pour répétitions (préserve l'effet de tracé)
         resetForRepeat() {
-            console.log('🔄 Reset COMPLET pour répétition animation');
+            console.log('🔄 Reset FLUIDE pour répétition animation');
             
-            // Désactiver TOUTES les tuiles y compris la section courante
+            // Désactiver TOUTES les tuiles avec transition douce
             document.querySelectorAll('#stratego-final-map .tile').forEach(tile => {
                 tile.classList.remove('active', 'pulse', 'glow');
                 tile.style.animation = '';
-                tile.style.opacity = '0.3'; // Toutes masquées au début
+                // Transition douce vers l'état masqué
+                tile.style.transition = 'opacity 0.5s ease';
+                tile.style.opacity = '0.3';
             });
             
-            // Reset toutes les connexions (opacité 0)
+            // Reset les connexions avec effet de tracé PRÉSERVÉ
             document.querySelectorAll('#stratego-final-map .auto-connection').forEach(path => {
+                // Transition douce pour masquer
+                path.style.transition = 'opacity 0.3s ease';
                 path.style.opacity = '0';
-                path.style.transition = 'none';
-                if (path.getTotalLength) {
-                    const pathLength = path.getTotalLength();
-                    path.style.strokeDasharray = pathLength;
-                    path.style.strokeDashoffset = pathLength; // Ligne invisible
-                }
+                
+                // PRÉSERVER l'effet de tracé pour la prochaine animation
+                setTimeout(() => {
+                    path.style.transition = 'none'; // Supprimer temporairement la transition
+                    if (path.getTotalLength) {
+                        const pathLength = path.getTotalLength();
+                        path.style.strokeDasharray = pathLength;
+                        path.style.strokeDashoffset = pathLength; // Prêt pour re-tracé
+                    }
+                }, 300); // Après la transition d'opacité
             });
             
-            console.log('🔄 Reset COMPLET terminé - Toutes les tuiles désactivées');
+            console.log('🔄 Reset FLUIDE terminé - Prêt pour nouvelle animation avec effet de tracé');
         }
         
         showConnectionsWithDelay(connectionIds, delayBetween = 200) {
