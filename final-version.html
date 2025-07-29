@@ -652,7 +652,7 @@ INSTRUCTIONS :
             this.animationInterval = null;
             this.isAnimating = false;
             this.scrollObserver = null;
-            this.lastAnimatedSection = null; // Pour empêcher les répétitions
+            // this.lastAnimatedSection supprimé car causait des blocages d'animation
         }
         
         init() {
@@ -768,9 +768,7 @@ INSTRUCTIONS :
             
             this.currentSection = sectionNumber;
             
-            // RÉINITIALISER lastAnimatedSection pour permettre la réanimation
-            this.lastAnimatedSection = null;
-            console.log('🔄 lastAnimatedSection réinitialisé pour permettre nouvelle animation');
+            // Plus besoin de lastAnimatedSection - supprimé car causait des blocages
             
             // Reset complet et démarrage propre
             this.resetAllTiles();
@@ -795,14 +793,11 @@ INSTRUCTIONS :
                 return;
             }
             
-            // EMPÊCHER LA RÉPÉTITION - si déjà animé récemment, ne rien faire
-            if (this.lastAnimatedSection === sectionNumber) {
-                console.log(`⏭️ Section ${sectionNumber} déjà animée récemment, ignorer`);
-                return;
-            }
+            // Protection supprimée : lastAnimatedSection causait des blocages
+            // Le délai de 1000ms dans handleScroll suffit pour éviter les répétitions
             
             this.isAnimating = true;
-            this.lastAnimatedSection = sectionNumber;
+            // this.lastAnimatedSection supprimé car causait des blocages
             
             // Reset COMPLET de toutes les tuiles et connexions
             this.resetAllTiles();
