@@ -682,13 +682,13 @@ INSTRUCTIONS :
                     const viewportCenter = scrollTop + (viewportHeight / 2);
                     const sectionNumber = parseInt(block.dataset.content);
                     
-                    // Logique différente pour Section 3 (plus permissive)
+                    // Logique différente pour Section 3 (très permissive)
                     let isActive = false;
                     if (sectionNumber === 3) {
-                        // Pour section 3 : se déclenche quand elle est dans les 50% du haut de l'écran
-                        isActive = rect.top < viewportHeight * 0.5 && rect.bottom > 0;
+                        // Pour section 3 : se déclenche dès que le titre commence à apparaître
+                        isActive = rect.top < viewportHeight * 0.9 && rect.bottom > 0;
                         if (isActive) {
-                            console.log(`🔍 Section 3 détectée (top: ${rect.top}px, seuil: ${viewportHeight * 0.5}px)`);
+                            console.log(`🔍 Section 3 détectée très tôt (top: ${rect.top}px, seuil: ${viewportHeight * 0.9}px)`);
                         }
                     } else {
                         // Pour sections 1 et 2 : logique normale (centre)
