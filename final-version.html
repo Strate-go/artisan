@@ -666,14 +666,19 @@ INSTRUCTIONS :
                 this.createAllConnections();
             }, 1000);
             
-            // PROTECTIONS INSTALLÉES EN PREMIER
-            this.setupActiveProtection(); // Protection agressive des classes active
-            this.protectAgainstExternalCSS(); // Protection contre CSS externe
+            // SIMPLIFICATION : Suppression des protections complexes qui causent l'instabilité
+            // On garde seulement la protection CSS de base
+            this.protectAgainstExternalCSS(); 
             
-            // NE PAS lancer automatiquement la Section 1 au chargement
-            // Elle se lancera naturellement quand l'utilisateur scrollera jusqu'à la map
-            console.log('🎬 Initialisation terminée - En attente du scroll utilisateur vers la map');
-            this.currentSection = null; // Aucune section active au départ
+            // Démarrage simple et direct
+            console.log('🎬 Initialisation simple - Démarrage Section 1');
+            this.currentSection = 1;
+            this.isAnimating = false;
+            
+            // Démarrage immédiat mais propre
+            setTimeout(() => {
+                this.switchToSection(1);
+            }, 200);
         }
         
         setupScrollObserver() {
@@ -723,20 +728,17 @@ INSTRUCTIONS :
                     }
                 });
                 
-                // Changer de section SEULEMENT si pas en cours d'animation 
+                // Changer de section SEULEMENT si pas en cours d'animation
                 if (activeSection !== this.currentSection && !this.isAnimating) {
-                    // Pour le premier chargement (currentSection = null), pas de délai
-                    if (this.currentSection !== null) {
-                        // Éviter les changements trop rapides entre sections
-                        const now = Date.now();
-                        if (now - lastTriggerTime < 1000) { // Minimum 1 seconde entre changements
-                            console.log(`⏰ Changement trop rapide ignoré: ${this.currentSection} → ${activeSection}`);
-                            return;
-                        }
-                        lastTriggerTime = now;
+                    // Délai simple pour éviter les changements trop rapides
+                    const now = Date.now();
+                    if (now - lastTriggerTime < 1500) { // 1.5 seconde pour plus de stabilité
+                        console.log(`⏰ Changement trop rapide ignoré: ${this.currentSection} → ${activeSection}`);
+                        return;
                     }
                     
                     console.log(`✅ Changement de section: ${this.currentSection} → ${activeSection}`);
+                    lastTriggerTime = now;
                     this.switchToSection(activeSection);
                 }
             };
@@ -1084,9 +1086,8 @@ INSTRUCTIONS :
                         const oldClasses = mutation.oldValue || '';
                         const newClasses = tile.className;
                         
-                        // Si une classe 'active' a été supprimée ET que c'est une tuile de la section courante
-                        // MAIS PAS PENDANT LES ANIMATIONS (sinon ça restaure pendant nos délais)
-                        if (oldClasses.includes('active') && !newClasses.includes('active') && 
+                        // PROTECTION DÉSACTIVÉE TEMPORAIREMENT - causait l'instabilité
+                        if (false && oldClasses.includes('active') && !newClasses.includes('active') && 
                             tileSection === self.currentSection && !self.isAnimating) {
                             
                             console.log(`🛡️ PROTECTION: Restauration ${tileName} (section ${tileSection})`);
@@ -1114,19 +1115,18 @@ INSTRUCTIONS :
             
             console.log(`🛡️ Protection installée sur ${tiles.length} tuiles`);
             
-            // BONUS : Protection par intervalle au cas où le MutationObserver rate quelque chose
-            // MAIS PAS PENDANT LES ANIMATIONS (sinon ça active tout d'un coup)
-            setInterval(() => {
-                if (self.currentSection && !self.isAnimating) {
-                    const currentTiles = document.querySelectorAll(`#stratego-final-map .tile[data-section="${self.currentSection}"]`);
-                    currentTiles.forEach(tile => {
-                        if (!tile.classList.contains('active')) {
-                            console.log(`🔧 RÉPARATION: ${tile.dataset.tile} manquait la classe active`);
-                            tile.classList.add('active');
-                        }
-                    });
-                }
-            }, 500); // Vérification toutes les 500ms
+            // PROTECTION DÉSACTIVÉE TEMPORAIREMENT - causait l'instabilité des animations
+            // setInterval(() => {
+            //     if (self.currentSection && !self.isAnimating) {
+            //         const currentTiles = document.querySelectorAll(`#stratego-final-map .tile[data-section="${self.currentSection}"]`);
+            //         currentTiles.forEach(tile => {
+            //             if (!tile.classList.contains('active')) {
+            //                 console.log(`🔧 RÉPARATION: ${tile.dataset.tile} manquait la classe active`);
+            //                 tile.classList.add('active');
+            //             }
+            //         });
+            //     }
+            // }, 500);
         }
         
         // PROTECTION CONTRE CSS EXTERNE ET SCRIPTS EXTERNES
