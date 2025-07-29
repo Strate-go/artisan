@@ -639,6 +639,7 @@ INSTRUCTIONS :
             this.animationInterval = null;
             this.isAnimating = false;
             this.scrollObserver = null;
+            this.lastAnimatedSection = null; // Pour empêcher les répétitions
         }
         
         init() {
@@ -766,7 +767,14 @@ INSTRUCTIONS :
                 return;
             }
             
+            // EMPÊCHER LA RÉPÉTITION - si déjà animé récemment, ne rien faire
+            if (this.lastAnimatedSection === sectionNumber) {
+                console.log(`⏭️ Section ${sectionNumber} déjà animée récemment, ignorer`);
+                return;
+            }
+            
             this.isAnimating = true;
+            this.lastAnimatedSection = sectionNumber;
             
             // Reset COMPLET de toutes les tuiles et connexions
             this.resetAllTiles();
