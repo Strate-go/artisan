@@ -639,7 +639,6 @@ INSTRUCTIONS :
             this.animationInterval = null;
             this.isAnimating = false;
             this.scrollObserver = null;
-            this.isInternalReset = false; // Flag pour nos propres resets
         }
         
         init() {
@@ -653,8 +652,8 @@ INSTRUCTIONS :
             this.bindEvents();
             this.setupScrollObserver();
             
-            // PROTECTION ACTIVE DES TUILES
-            this.protectActiveTiles();
+            // PROTECTION DÉSACTIVÉE - causait une boucle infinie
+            // this.protectActiveTiles();
             
             // CRÉATION AUTOMATIQUE : toutes les connexions après chargement
             setTimeout(() => {
@@ -807,29 +806,24 @@ INSTRUCTIONS :
         }
         
         resetAllTiles() {
-            // Marquer que c'est un reset interne
-            this.isInternalReset = true;
-            
-            // Reset toutes les tuiles SEULEMENT si pas d'animation en cours
+            // Reset SIMPLE : masquer seulement les tuiles des autres sections
             document.querySelectorAll('#stratego-final-map .tile').forEach(tile => {
+                const tileSection = parseInt(tile.dataset.section);
+                
+                // Supprimer animations et effets visuels
                 tile.classList.remove('pulse', 'glow');
                 tile.style.animation = '';
                 
-                // Ne supprimer 'active' que pour les tuiles d'autres sections
-                const tileSection = parseInt(tile.dataset.section);
                 if (tileSection !== this.currentSection) {
+                    // Masquer les autres sections
                     tile.classList.remove('active');
                     tile.style.opacity = '0.3';
                 } else {
                     // Garder les tuiles de la section courante visibles
+                    // MAIS ne pas toucher à leur classe 'active'
                     tile.style.opacity = '1';
                 }
             });
-            
-            // Démarquer après un délai
-            setTimeout(() => {
-                this.isInternalReset = false;
-            }, 100);
             
             // Reset complet des connexions avec animation
             this.resetOnlyConnections();
@@ -1021,47 +1015,7 @@ INSTRUCTIONS :
             // Plus de scroll observer à nettoyer
         }
         
-        // Protection ACTIVE contre la suppression des classes active
-        protectActiveTiles() {
-            console.log('🛡️ Installation de la protection active des tuiles');
-            
-            const observer = new MutationObserver((mutations) => {
-                mutations.forEach((mutation) => {
-                    if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-                        const tile = mutation.target;
-                        const oldClasses = mutation.oldValue || '';
-                        const newClasses = tile.className;
-                        const tileSection = parseInt(tile.dataset.section);
-                        
-                        // Si une classe 'active' a été supprimée d'une tuile de la section courante
-                        if (oldClasses.includes('active') && 
-                            !newClasses.includes('active') && 
-                            tileSection === this.currentSection &&
-                            !this.isInternalReset) {
-                            
-                            console.log(`🔧 RESTAURATION: ${tile.dataset.tile} (section ${tileSection})`);
-                            
-                            // Restaurer immédiatement la classe
-                            setTimeout(() => {
-                                tile.classList.add('active');
-                            }, 1);
-                        }
-                    }
-                });
-            });
-            
-            // Observer toutes les tuiles
-            const tiles = document.querySelectorAll('#stratego-final-map .tile');
-            tiles.forEach(tile => {
-                observer.observe(tile, {
-                    attributes: true,
-                    attributeOldValue: true,
-                    attributeFilter: ['class']
-                });
-            });
-            
-            console.log(`🛡️ Protection installée sur ${tiles.length} tuiles`);
-        }
+        // Protection supprimée - causait des boucles infinies
         
         // CRÉATION AUTOMATIQUE DES CONNEXIONS
         createAllConnections() {
