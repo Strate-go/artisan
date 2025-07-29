@@ -670,13 +670,10 @@ INSTRUCTIONS :
             this.setupActiveProtection(); // Protection agressive des classes active
             this.protectAgainstExternalCSS(); // Protection contre CSS externe
             
-            // Démarrer avec la section 1 avec un petit délai pour l'initialisation
-            setTimeout(() => {
-                console.log('🎬 Lancement Section 1 après initialisation complète');
-                this.currentSection = 1; // Forcer l'état initial
-                this.isAnimating = false; // S'assurer qu'on n'est pas en cours d'animation
-                this.switchToSection(1);
-            }, 100); // Délai minimal pour que tout soit prêt
+            // NE PAS lancer automatiquement la Section 1 au chargement
+            // Elle se lancera naturellement quand l'utilisateur scrollera jusqu'à la map
+            console.log('🎬 Initialisation terminée - En attente du scroll utilisateur vers la map');
+            this.currentSection = null; // Aucune section active au départ
         }
         
         setupScrollObserver() {
@@ -726,17 +723,20 @@ INSTRUCTIONS :
                     }
                 });
                 
-                // Changer de section SEULEMENT si pas en cours d'animation ET avec distance suffisante
+                // Changer de section SEULEMENT si pas en cours d'animation 
                 if (activeSection !== this.currentSection && !this.isAnimating) {
-                    // Éviter les changements trop rapides
-                    const now = Date.now();
-                    if (now - lastTriggerTime < 1000) { // Minimum 1 seconde entre changements
-                        console.log(`⏰ Changement trop rapide ignoré: ${this.currentSection} → ${activeSection}`);
-                        return;
+                    // Pour le premier chargement (currentSection = null), pas de délai
+                    if (this.currentSection !== null) {
+                        // Éviter les changements trop rapides entre sections
+                        const now = Date.now();
+                        if (now - lastTriggerTime < 1000) { // Minimum 1 seconde entre changements
+                            console.log(`⏰ Changement trop rapide ignoré: ${this.currentSection} → ${activeSection}`);
+                            return;
+                        }
+                        lastTriggerTime = now;
                     }
                     
                     console.log(`✅ Changement de section: ${this.currentSection} → ${activeSection}`);
-                    lastTriggerTime = now;
                     this.switchToSection(activeSection);
                 }
             };
