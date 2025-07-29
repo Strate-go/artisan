@@ -653,7 +653,7 @@ INSTRUCTIONS :
             }, 1000);
             
             // DÉTECTEUR SIMPLE pour diagnostiquer
-            // this.setupClassDetector(); // Temporairement désactivé pour débugger
+            this.setupActiveProtection(); // Protection agressive des classes active
             
             // Démarrer avec la section 1
             this.switchToSection(1);
@@ -1024,23 +1024,33 @@ INSTRUCTIONS :
             // Plus de scroll observer à nettoyer
         }
         
-        // DÉTECTEUR SIMPLE pour diagnostic (mode silencieux)
-        setupClassDetector() {
-            console.log('🕵️ Installation du détecteur de classes active (mode silencieux)');
+        // PROTECTION AGRESSIVE contre les scripts externes
+        setupActiveProtection() {
+            console.log('🛡️ Installation de la protection agressive des classes active');
+            
+            const self = this; // Capture du contexte
             
             const observer = new MutationObserver((mutations) => {
                 mutations.forEach((mutation) => {
                     if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
                         const tile = mutation.target;
+                        const tileName = tile.dataset.tile;
+                        const tileSection = parseInt(tile.dataset.section);
                         const oldClasses = mutation.oldValue || '';
                         const newClasses = tile.className;
                         
-                        // Si une classe 'active' a été supprimée
-                        if (oldClasses.includes('active') && !newClasses.includes('active')) {
-                            // Log seulement 1 fois sur 20 pour éviter le spam
-                            if (Math.random() < 0.05) {
-                                console.log(`⚠️ Classe active supprimée: ${tile.dataset.tile}`);
-                            }
+                        // Si une classe 'active' a été supprimée ET que c'est une tuile de la section courante
+                        if (oldClasses.includes('active') && !newClasses.includes('active') && 
+                            tileSection === self.currentSection) {
+                            
+                            console.log(`🛡️ PROTECTION: Restauration ${tileName} (section ${tileSection})`);
+                            
+                            // Restaurer immédiatement la classe active
+                            setTimeout(() => {
+                                if (!tile.classList.contains('active')) {
+                                    tile.classList.add('active');
+                                }
+                            }, 10); // Petit délai pour éviter les conflits
                         }
                     }
                 });
@@ -1056,7 +1066,20 @@ INSTRUCTIONS :
                 });
             });
             
-            console.log(`🕵️ Détecteur installé sur ${tiles.length} tuiles`);
+            console.log(`🛡️ Protection installée sur ${tiles.length} tuiles`);
+            
+            // BONUS : Protection par intervalle au cas où le MutationObserver rate quelque chose
+            setInterval(() => {
+                if (self.currentSection) {
+                    const currentTiles = document.querySelectorAll(`#stratego-final-map .tile[data-section="${self.currentSection}"]`);
+                    currentTiles.forEach(tile => {
+                        if (!tile.classList.contains('active')) {
+                            console.log(`🔧 RÉPARATION: ${tile.dataset.tile} manquait la classe active`);
+                            tile.classList.add('active');
+                        }
+                    });
+                }
+            }, 500); // Vérification toutes les 500ms
         }
         
         // CRÉATION AUTOMATIQUE DES CONNEXIONS
