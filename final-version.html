@@ -797,7 +797,11 @@ INSTRUCTIONS :
             this.animationInterval = setInterval(() => {
                 if (!this.isAnimating && document.visibilityState === 'visible') {
                     console.log(`🔄 Répétition automatique - Section ${sectionNumber}`);
-                    this.runSingleAnimation(sectionNumber);
+                    // Reset COMPLET avant répétition pour repartir de zéro
+                    this.resetForRepeat();
+                    setTimeout(() => {
+                        this.runSingleAnimation(sectionNumber);
+                    }, 100); // Petit délai après reset
                 }
             }, 12000); // 12 secondes
             
@@ -898,6 +902,31 @@ INSTRUCTIONS :
                     console.warn('Erreur getTotalLength pour path:', path.id);
                 }
             });
+        }
+        
+        // NOUVEAU : Reset complet pour répétitions (désactive TOUT)
+        resetForRepeat() {
+            console.log('🔄 Reset COMPLET pour répétition animation');
+            
+            // Désactiver TOUTES les tuiles y compris la section courante
+            document.querySelectorAll('#stratego-final-map .tile').forEach(tile => {
+                tile.classList.remove('active', 'pulse', 'glow');
+                tile.style.animation = '';
+                tile.style.opacity = '0.3'; // Toutes masquées au début
+            });
+            
+            // Reset toutes les connexions (opacité 0)
+            document.querySelectorAll('#stratego-final-map .auto-connection').forEach(path => {
+                path.style.opacity = '0';
+                path.style.transition = 'none';
+                if (path.getTotalLength) {
+                    const pathLength = path.getTotalLength();
+                    path.style.strokeDasharray = pathLength;
+                    path.style.strokeDashoffset = pathLength; // Ligne invisible
+                }
+            });
+            
+            console.log('🔄 Reset COMPLET terminé - Toutes les tuiles désactivées');
         }
         
         showConnectionsWithDelay(connectionIds, delayBetween = 200) {
