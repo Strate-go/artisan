@@ -710,8 +710,14 @@ INSTRUCTIONS :
                         if (isActive) {
                             console.log(`🔍 Section 3 détectée très tôt (top: ${rect.top}px, seuil: ${viewportHeight * 0.9}px)`);
                         }
+                    } else if (sectionNumber === 1) {
+                        // Pour section 1 : détection plus tardive pour laisser le temps de voir l'animation
+                        isActive = Math.abs(blockCenter - viewportCenter) < viewportHeight / 4; // Plus restrictif
+                        if (isActive) {
+                            console.log(`🔍 Section 1 détectée (distance: ${Math.abs(blockCenter - viewportCenter)}px, seuil restrictif)`);
+                        }
                     } else {
-                        // Pour sections 1 et 2 : logique normale (centre)
+                        // Pour section 2 : logique normale (centre)
                         isActive = Math.abs(blockCenter - viewportCenter) < viewportHeight / 3;
                         if (isActive) {
                             console.log(`🔍 Section ${sectionNumber} détectée au centre (distance: ${Math.abs(blockCenter - viewportCenter)}px)`);
@@ -737,7 +743,18 @@ INSTRUCTIONS :
                     }
                     
                     console.log(`✅ Changement de section: ${this.currentSection} → ${activeSection}`);
-                    this.switchToSection(activeSection);
+                    
+                    // Pour la Section 1, petit délai pour qu'elle soit bien visible
+                    if (activeSection === 1 && this.currentSection === null) {
+                        console.log('⏰ Délai spécial pour Section 1 - attendre qu\'elle soit bien visible');
+                        setTimeout(() => {
+                            if (!this.isAnimating) { // Vérifier qu'il n'y a pas eu d'autre changement
+                                this.switchToSection(activeSection);
+                            }
+                        }, 800);
+                    } else {
+                        this.switchToSection(activeSection);
+                    }
                 }
             };
             
