@@ -639,6 +639,7 @@ INSTRUCTIONS :
             this.animationInterval = null;
             this.isAnimating = false;
             this.scrollObserver = null;
+            this.isInternalReset = false; // Flag pour nos propres resets
         }
         
         init() {
@@ -652,8 +653,8 @@ INSTRUCTIONS :
             this.bindEvents();
             this.setupScrollObserver();
             
-            // DÉTECTEUR DÉSACTIVÉ - problème résolu
-            // this.detectExternalCalls();
+            // PROTECTION ACTIVE DES TUILES
+            this.protectActiveTiles();
             
             // CRÉATION AUTOMATIQUE : toutes les connexions après chargement
             setTimeout(() => {
@@ -795,6 +796,9 @@ INSTRUCTIONS :
         }
         
         resetAllTiles() {
+            // Marquer que c'est un reset interne
+            this.isInternalReset = true;
+            
             // Reset toutes les tuiles SEULEMENT si pas d'animation en cours
             document.querySelectorAll('#stratego-final-map .tile').forEach(tile => {
                 tile.classList.remove('pulse', 'glow');
@@ -810,6 +814,11 @@ INSTRUCTIONS :
                     tile.style.opacity = '1';
                 }
             });
+            
+            // Démarquer après un délai
+            setTimeout(() => {
+                this.isInternalReset = false;
+            }, 100);
             
             // Reset complet des connexions avec animation
             document.querySelectorAll('#stratego-final-map .auto-connection').forEach(path => {
@@ -996,9 +1005,9 @@ INSTRUCTIONS :
             // Plus de scroll observer à nettoyer
         }
         
-        // Fonction pour détecter qui supprime les classes active (SANS clignement)
-        detectExternalCalls() {
-            console.log('👁️ Installation du détecteur de modifications de classe (mode discret)');
+        // Protection ACTIVE contre la suppression des classes active
+        protectActiveTiles() {
+            console.log('🛡️ Installation de la protection active des tuiles');
             
             const observer = new MutationObserver((mutations) => {
                 mutations.forEach((mutation) => {
@@ -1006,19 +1015,20 @@ INSTRUCTIONS :
                         const tile = mutation.target;
                         const oldClasses = mutation.oldValue || '';
                         const newClasses = tile.className;
+                        const tileSection = parseInt(tile.dataset.section);
                         
-                        // Si une classe 'active' a été supprimée
-                        if (oldClasses.includes('active') && !newClasses.includes('active')) {
-                            console.log('🚨 CLASSE ACTIVE SUPPRIMÉE DÉTECTÉE !');
-                            console.log(`  - Tuile: ${tile.dataset.tile}`);
-                            console.log(`  - Section: ${tile.dataset.section}`);
-                            console.log(`  - Section courante: ${this.currentSection}`);
+                        // Si une classe 'active' a été supprimée d'une tuile de la section courante
+                        if (oldClasses.includes('active') && 
+                            !newClasses.includes('active') && 
+                            tileSection === this.currentSection &&
+                            !this.isInternalReset) {
                             
-                            // STACK TRACE pour voir qui a fait ça
-                            console.trace('📍 QUI A SUPPRIMÉ CETTE CLASSE ?');
+                            console.log(`🔧 RESTAURATION: ${tile.dataset.tile} (section ${tileSection})`);
                             
-                            // ⚠️ NE PAS restaurer pour éviter le clignement - juste logger
-                            console.log('ℹ️ Classe supprimée mais non restaurée (mode observation)');
+                            // Restaurer immédiatement la classe
+                            setTimeout(() => {
+                                tile.classList.add('active');
+                            }, 1);
                         }
                     }
                 });
@@ -1034,7 +1044,7 @@ INSTRUCTIONS :
                 });
             });
             
-            console.log(`✅ Observateur installé sur ${tiles.length} tuiles (mode observation seulement)`);
+            console.log(`🛡️ Protection installée sur ${tiles.length} tuiles`);
         }
         
         // CRÉATION AUTOMATIQUE DES CONNEXIONS
