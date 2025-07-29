@@ -745,38 +745,49 @@ INSTRUCTIONS :
             // Reset complet et démarrage propre
             this.resetAllTiles();
             
-            // Démarrer immédiatement la première animation
-            this.runSingleAnimation(sectionNumber);
+            // Démarrer immédiatement la première animation (reset complet)
+            this.runSingleAnimation(sectionNumber, { isRerun: false });
             
             // Puis continuer toutes les 12 secondes (optimisé pour la performance)
             this.animationInterval = setInterval(() => {
                 if (!this.isAnimating && document.visibilityState === 'visible') { // Ne relancer que si visible et pas en cours
-                    this.runSingleAnimation(sectionNumber);
+                    console.log(`🔄 Rerun automatique pour section ${sectionNumber}`);
+                    this.runSingleAnimation(sectionNumber, { isRerun: true });
                 }
             }, 12000);
         }
         
-        runSingleAnimation(sectionNumber) {
-            if (this.isAnimating) {
-                // console.log('⏸️ Animation already running, skipping'); // Debug désactivé
+        runSingleAnimation(sectionNumber, options = {}) {
+            const { isRerun = false } = options;
+            
+            console.log(`🎯 runSingleAnimation appelé: section=${sectionNumber}, isRerun=${isRerun}`);
+            
+            if (this.isAnimating && !isRerun) {
+                console.log('⏸️ Animation en cours, skipping');
                 return;
             }
             
-            // console.log('🎭 Starting animation for section:', sectionNumber); // Debug désactivé
             this.isAnimating = true;
             
-            // Reset COMPLET de toutes les tuiles et connexions
-            this.resetAllTiles();
-            
-            // Masquer toutes les sections sauf celle active
-            document.querySelectorAll('#stratego-final-map .tile').forEach(tile => {
-                const tileSection = tile.dataset.section;
-                if (parseInt(tileSection) === sectionNumber) {
-                    tile.style.opacity = '1';
-                } else {
-                    tile.style.opacity = '0.3';
-                }
-            });
+            if (!isRerun) {
+                // Reset COMPLET seulement pour les nouveaux changements de section
+                console.log('🔄 Reset complet (nouveau changement de section)');
+                this.resetAllTiles();
+                
+                // Masquer toutes les sections sauf celle active
+                document.querySelectorAll('#stratego-final-map .tile').forEach(tile => {
+                    const tileSection = tile.dataset.section;
+                    if (parseInt(tileSection) === sectionNumber) {
+                        tile.style.opacity = '1';
+                    } else {
+                        tile.style.opacity = '0.3';
+                    }
+                });
+            } else {
+                // Pour les reruns, reset seulement les connexions
+                console.log('🔄 Reset connexions seulement (rerun)');
+                this.resetOnlyConnections();
+            }
             
             // Lancer l'animation appropriée après un petit délai
             setTimeout(() => {
@@ -821,6 +832,11 @@ INSTRUCTIONS :
             }, 100);
             
             // Reset complet des connexions avec animation
+            this.resetOnlyConnections();
+        }
+        
+        resetOnlyConnections() {
+            // Reset seulement les connexions (pas les tuiles)
             document.querySelectorAll('#stratego-final-map .auto-connection').forEach(path => {
                 path.style.opacity = '0';
                 path.style.transition = 'none'; // Pas d'animation pendant reset
