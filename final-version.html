@@ -745,6 +745,13 @@ INSTRUCTIONS :
             }, 1000);
             
             console.log('✅ Scroll listener configuré');
+            
+            // Recalculer les connexions au redimensionnement
+            window.addEventListener('resize', () => {
+                setTimeout(() => {
+                    this.recalculateConnectionPositions();
+                }, 250);
+            });
         }
         
         switchToSection(sectionNumber) {
@@ -805,6 +812,9 @@ INSTRUCTIONS :
             
             // Lancer l'animation appropriée après un petit délai
             setTimeout(() => {
+                // Recalculer les positions avant l'animation
+                this.recalculateConnectionPositions();
+                
                 if (sectionNumber === 1) {
                     this.animateSection1();
                 } else if (sectionNumber === 2) {
@@ -1190,6 +1200,42 @@ INSTRUCTIONS :
             };
         }
         
+        // RECALCULER LES COORDONNÉES DES CONNEXIONS EXISTANTES
+        recalculateConnectionPositions() {
+            console.log('🔄 Recalcul des positions des connexions');
+            
+            const svg = document.querySelector('#stratego-final-map .connections-svg');
+            if (!svg) {
+                console.warn('❌ SVG non trouvé pour recalcul');
+                return;
+            }
+            
+            const connections = document.querySelectorAll('#stratego-final-map .auto-connection');
+            connections.forEach(path => {
+                const fromTile = path.dataset.from;
+                const toTile = path.dataset.to;
+                
+                const fromElement = document.querySelector(`#stratego-final-map .tile[data-tile="${fromTile}"]`);
+                const toElement = document.querySelector(`#stratego-final-map .tile[data-tile="${toTile}"]`);
+                
+                if (fromElement && toElement) {
+                    const svgRect = svg.getBoundingClientRect();
+                    const fromRect = fromElement.getBoundingClientRect();
+                    const toRect = toElement.getBoundingClientRect();
+                    
+                    const x1 = Math.round(fromRect.left + fromRect.width/2 - svgRect.left);
+                    const y1 = Math.round(fromRect.top + fromRect.height/2 - svgRect.top);
+                    const x2 = Math.round(toRect.left + toRect.width/2 - svgRect.left);
+                    const y2 = Math.round(toRect.top + toRect.height/2 - svgRect.top);
+                    
+                    if (!isNaN(x1) && !isNaN(y1) && !isNaN(x2) && !isNaN(y2)) {
+                        path.setAttribute('d', `M ${x1} ${y1} L ${x2} ${y2}`);
+                        console.log(`✅ Connexion ${fromTile}→${toTile} recalculée: (${x1},${y1}) → (${x2},${y2})`);
+                    }
+                }
+            });
+        }
+        
         // CRÉATION AUTOMATIQUE DES CONNEXIONS
         createAllConnections() {
             console.log('🔧 Création automatique des connexions');
@@ -1268,7 +1314,7 @@ INSTRUCTIONS :
                 return false;
             }
             
-            // Calculer les coordonnées avec validation
+            // Calculer les coordonnées avec validation et attente que les éléments soient visibles
             const svgRect = svg.getBoundingClientRect();
             const fromRect = fromElement.getBoundingClientRect();
             const toRect = toElement.getBoundingClientRect();
@@ -1278,6 +1324,12 @@ INSTRUCTIONS :
             let y1 = Math.round(fromRect.top + fromRect.height/2 - svgRect.top);
             let x2 = Math.round(toRect.left + toRect.width/2 - svgRect.left);
             let y2 = Math.round(toRect.top + toRect.height/2 - svgRect.top);
+            
+            // Debug des coordonnées
+            console.log(`🔍 Coordonnées ${fromTile}→${toTile}: (${x1},${y1}) → (${x2},${y2})`);
+            console.log(`📐 SVG rect:`, {left: svgRect.left, top: svgRect.top, width: svgRect.width, height: svgRect.height});
+            console.log(`📐 From rect:`, {left: fromRect.left, top: fromRect.top, width: fromRect.width, height: fromRect.height});
+            console.log(`📐 To rect:`, {left: toRect.left, top: toRect.top, width: toRect.width, height: toRect.height});
             
             // Validation des coordonnées
             if (isNaN(x1) || isNaN(y1) || isNaN(x2) || isNaN(y2)) {
