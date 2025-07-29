@@ -785,15 +785,18 @@ INSTRUCTIONS :
                 console.log('🔄 Reset connexions seulement (rerun de section)');
             }
             
-            // Masquer toutes les sections sauf celle active
-            document.querySelectorAll('#stratego-final-map .tile').forEach(tile => {
-                const tileSection = tile.dataset.section;
-                if (parseInt(tileSection) === sectionNumber) {
-                    tile.style.opacity = '1';
-                } else {
-                    tile.style.opacity = '0.3';
-                }
-            });
+            // Masquer toutes les sections sauf celle active (SEULEMENT lors du changement de section)
+            if (!isRerun) {
+                document.querySelectorAll('#stratego-final-map .tile').forEach(tile => {
+                    const tileSection = tile.dataset.section;
+                    if (parseInt(tileSection) === sectionNumber) {
+                        tile.style.opacity = '1';
+                    } else {
+                        tile.style.opacity = '0.3';
+                    }
+                });
+                console.log('🎨 Opacités des tuiles ajustées pour nouvelle section');
+            }
             
             // Lancer l'animation appropriée après un petit délai
             setTimeout(() => {
@@ -816,6 +819,9 @@ INSTRUCTIONS :
             console.log('🔁 RESET ALL TILES'); // DEBUG TEMPORAIRE
             // Reset toutes les tuiles
             document.querySelectorAll('#stratego-final-map .tile').forEach(tile => {
+                if (tile.classList.contains('active')) {
+                    console.log(`🚫 Suppression classe active de: ${tile.dataset.tile} (section ${tile.dataset.section})`);
+                }
                 tile.classList.remove('active', 'pulse', 'glow');
                 tile.style.opacity = '';
                 tile.style.animation = '';
