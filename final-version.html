@@ -674,11 +674,19 @@ INSTRUCTIONS :
                                 console.log(`🚨 CLASSE ACTIVE SUPPRIMÉE de ${tile.dataset.tile} !`);
                                 console.log(`   Ancienne classe: "${mutation.oldValue}"`);
                                 console.log(`   Nouvelle classe: "${tile.className}"`);
-                                console.trace('Stack trace de suppression:');
+                                
+                                // PROTECTION : Restaurer la classe active si c'est la bonne section
+                                const tileSection = parseInt(tile.dataset.section);
+                                if (tileSection === this.currentSection) {
+                                    console.log(`🛡️ RESTAURATION de la classe active pour ${tile.dataset.tile}`);
+                                    setTimeout(() => {
+                                        tile.classList.add('active');
+                                    }, 10); // Petit délai pour éviter les conflits
+                                }
                             }
                         }
                     });
-                });
+                }.bind(this));
                 
                 observer.observe(tile, {
                     attributes: true,
