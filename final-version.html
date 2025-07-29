@@ -670,11 +670,13 @@ INSTRUCTIONS :
             this.setupActiveProtection(); // Protection agressive des classes active
             this.protectAgainstExternalCSS(); // Protection contre CSS externe
             
-            // Démarrer immédiatement avec la section 1 
-            console.log('🎬 Lancement immédiat de la Section 1');
-            this.currentSection = 1; // Forcer l'état initial
-            this.isAnimating = false; // S'assurer qu'on n'est pas en cours d'animation
-            this.switchToSection(1);
+            // Démarrer avec la section 1 avec un petit délai pour l'initialisation
+            setTimeout(() => {
+                console.log('🎬 Lancement Section 1 après initialisation complète');
+                this.currentSection = 1; // Forcer l'état initial
+                this.isAnimating = false; // S'assurer qu'on n'est pas en cours d'animation
+                this.switchToSection(1);
+            }, 100); // Délai minimal pour que tout soit prêt
         }
         
         setupScrollObserver() {
