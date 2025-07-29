@@ -652,6 +652,9 @@ INSTRUCTIONS :
                 this.createAllConnections();
             }, 1000);
             
+            // DÉTECTEUR SIMPLE pour diagnostiquer
+            this.setupClassDetector();
+            
             // Démarrer avec la section 1
             this.switchToSection(1);
         }
@@ -789,6 +792,9 @@ INSTRUCTIONS :
         }
         
         resetAllTiles() {
+            console.log('🔄 resetAllTiles() appelé - Stack trace:');
+            console.trace();
+            
             // Reset SIMPLE - ne jamais supprimer 'active' de la section courante
             document.querySelectorAll('#stratego-final-map .tile').forEach(tile => {
                 const tileSection = parseInt(tile.dataset.section);
@@ -801,9 +807,11 @@ INSTRUCTIONS :
                     // Seulement masquer les autres sections
                     tile.classList.remove('active');
                     tile.style.opacity = '0.3';
+                    console.log(`  ❌ Désactivation tuile ${tile.dataset.tile} (section ${tileSection})`);
                 } else {
                     // Garder la section courante visible SANS toucher 'active'
                     tile.style.opacity = '1';
+                    console.log(`  ✅ Préservation tuile ${tile.dataset.tile} (section ${tileSection})`);
                 }
             });
             
@@ -990,6 +998,43 @@ INSTRUCTIONS :
                 clearInterval(this.animationInterval);
             }
             // Plus de scroll observer à nettoyer
+        }
+        
+        // DÉTECTEUR SIMPLE pour diagnostic
+        setupClassDetector() {
+            console.log('🕵️ Installation du détecteur de classes active');
+            
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                        const tile = mutation.target;
+                        const oldClasses = mutation.oldValue || '';
+                        const newClasses = tile.className;
+                        
+                        // Si une classe 'active' a été supprimée
+                        if (oldClasses.includes('active') && !newClasses.includes('active')) {
+                            console.log('🚨 CLASSE ACTIVE SUPPRIMÉE !');
+                            console.log(`  - Tuile: ${tile.dataset.tile} (section ${tile.dataset.section})`);
+                            console.log(`  - Ancien: "${oldClasses}"`);
+                            console.log(`  - Nouveau: "${newClasses}"`);
+                            console.log('  - Stack trace:');
+                            console.trace();
+                        }
+                    }
+                });
+            });
+            
+            // Observer toutes les tuiles
+            const tiles = document.querySelectorAll('#stratego-final-map .tile');
+            tiles.forEach(tile => {
+                observer.observe(tile, {
+                    attributes: true,
+                    attributeOldValue: true,
+                    attributeFilter: ['class']
+                });
+            });
+            
+            console.log(`🕵️ Détecteur installé sur ${tiles.length} tuiles`);
         }
         
         // CRÉATION AUTOMATIQUE DES CONNEXIONS
