@@ -768,6 +768,10 @@ INSTRUCTIONS :
             
             this.currentSection = sectionNumber;
             
+            // RÉINITIALISER lastAnimatedSection pour permettre la réanimation
+            this.lastAnimatedSection = null;
+            console.log('🔄 lastAnimatedSection réinitialisé pour permettre nouvelle animation');
+            
             // Reset complet et démarrage propre
             this.resetAllTiles();
             
