@@ -670,11 +670,11 @@ INSTRUCTIONS :
             this.setupActiveProtection(); // Protection agressive des classes active
             this.protectAgainstExternalCSS(); // Protection contre CSS externe
             
-            // Démarrer avec la section 1 APRÈS installation des protections
-            setTimeout(() => {
-                console.log('🎬 Lancement retardé de la Section 1 pour animation propre');
-                this.switchToSection(1);
-            }, 500); // Petit délai pour s'assurer que les protections sont actives
+            // Démarrer immédiatement avec la section 1 
+            console.log('🎬 Lancement immédiat de la Section 1');
+            this.currentSection = 1; // Forcer l'état initial
+            this.isAnimating = false; // S'assurer qu'on n'est pas en cours d'animation
+            this.switchToSection(1);
         }
         
         setupScrollObserver() {
@@ -934,6 +934,8 @@ INSTRUCTIONS :
         
         animateSection1() {
             console.log('🎨 Section 1 animation séquentielle - DÉMARRAGE');
+            console.log('🔍 DEBUG Section 1 - isAnimating:', this.isAnimating);
+            console.log('🔍 DEBUG Section 1 - currentSection:', this.currentSection);
             
             let currentDelay = 0;
             
