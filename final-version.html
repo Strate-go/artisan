@@ -644,6 +644,9 @@ INSTRUCTIONS :
         init() {
             console.log('🚀 Initialisation de Stratégo Map');
             
+            // INTERCEPTION : Remplacer la fonction updateTiles externe
+            this.interceptUpdateTiles();
+            
             this.bindEvents();
             this.setupScrollObserver();
             
@@ -654,6 +657,43 @@ INSTRUCTIONS :
             
             // Démarrer avec la section 1
             this.switchToSection(1);
+        }
+        
+        interceptUpdateTiles() {
+            // Stocker la fonction originale si elle existe
+            this.originalUpdateTiles = window.updateTiles;
+            
+            // Remplacer par notre version intelligente
+            window.updateTiles = (currentSection, isRerun = false) => {
+                console.log(`🔄 updateTiles appelée: section=${currentSection}, rerun=${isRerun}`);
+                console.log(`🔍 Contexte: this.currentSection=${this.currentSection}, this.isAnimating=${this.isAnimating}`);
+                
+                const tiles = document.querySelectorAll('#stratego-final-map .tile');
+                
+                tiles.forEach(tile => {
+                    const tileSection = tile.dataset.section;
+                    
+                    // RÈGLE CLÉE : Ne pas modifier les classes si c'est un rerun et la tuile est dans la section courante
+                    if (isRerun && tileSection === String(currentSection)) {
+                        console.log(`🛡️ Protection: garde classe active pour ${tile.dataset.tile}`);
+                        return; // Skip cette tuile
+                    }
+                    
+                    // Sinon, comportement normal : retirer active si pas la bonne section
+                    if (tileSection !== String(currentSection)) {
+                        tile.classList.remove('active');
+                    }
+                    
+                    // Gérer l'opacité selon la section
+                    if (tileSection === String(currentSection)) {
+                        tile.style.opacity = '1';
+                    } else {
+                        tile.style.opacity = '0.3';
+                    }
+                });
+            };
+            
+            console.log('✅ Fonction updateTiles interceptée et remplacée');
         }
         
         setupScrollObserver() {
@@ -736,12 +776,21 @@ INSTRUCTIONS :
             // Reset complet et démarrage propre
             this.resetAllTiles();
             
+            // Appeler updateTiles pour le vrai changement de section
+            if (window.updateTiles) {
+                window.updateTiles(sectionNumber, false);
+            }
+            
             // Démarrer immédiatement la première animation
             this.runSingleAnimation(sectionNumber);
             
             // Puis continuer toutes les 12 secondes (optimisé pour la performance)
             this.animationInterval = setInterval(() => {
                 if (!this.isAnimating && document.visibilityState === 'visible') { // Ne relancer que si visible et pas en cours
+                    // Appeler updateTiles avec isRerun=true pour les cycles automatiques
+                    if (window.updateTiles) {
+                        window.updateTiles(sectionNumber, true);
+                    }
                     this.runSingleAnimation(sectionNumber);
                 }
             }, 12000);
