@@ -1104,9 +1104,9 @@ INSTRUCTIONS :
             }, 500); // Vérification toutes les 500ms
         }
         
-        // PROTECTION CONTRE CSS EXTERNE
+        // PROTECTION CONTRE CSS EXTERNE ET SCRIPTS EXTERNES
         protectAgainstExternalCSS() {
-            console.log('🛡️ Protection contre CSS externe activée');
+            console.log('🛡️ Protection contre CSS externe et scripts externes activée');
             
             // Désactiver les animations CSS externes sur nos éléments
             const style = document.createElement('style');
@@ -1130,6 +1130,9 @@ INSTRUCTIONS :
             `;
             document.head.appendChild(style);
             
+            // INTERCEPTER LE SCRIPT EXTERNE updateTiles
+            this.interceptExternalUpdateTiles();
+            
             // Protection par intervalle contre les interférences
             setInterval(() => {
                 document.querySelectorAll('#stratego-final-map .tile').forEach(tile => {
@@ -1145,6 +1148,46 @@ INSTRUCTIONS :
                     }
                 });
             }, 1000);
+        }
+        
+        // INTERCEPTER LE SCRIPT EXTERNE QUI SUPPRIME NOS CLASSES ACTIVE
+        interceptExternalUpdateTiles() {
+            console.log('🔒 Interception du script externe updateTiles');
+            
+            // Sauvegarder la fonction querySelector originale
+            const originalQuerySelectorAll = document.querySelectorAll;
+            
+            // Remplacer querySelectorAll pour intercepter les sélections de '.tile'
+            document.querySelectorAll = function(selector) {
+                const result = originalQuerySelectorAll.call(this, selector);
+                
+                // Si on sélectionne '.tile', exclure nos tuiles de Stratégo
+                if (selector === '.tile') {
+                    console.log('🚫 Script externe tente de sélectionner .tile - BLOQUÉ');
+                    
+                    // Retourner seulement les tuiles qui ne sont PAS dans notre map
+                    const filteredResult = Array.from(result).filter(tile => {
+                        return !tile.closest('#stratego-final-map');
+                    });
+                    
+                    // Convertir en NodeList-like object
+                    const nodeList = {
+                        length: filteredResult.length,
+                        forEach: function(callback) {
+                            filteredResult.forEach(callback);
+                        }
+                    };
+                    
+                    // Ajouter les éléments comme propriétés indexées
+                    filteredResult.forEach((item, index) => {
+                        nodeList[index] = item;
+                    });
+                    
+                    return nodeList;
+                }
+                
+                return result;
+            };
         }
         
         // CRÉATION AUTOMATIQUE DES CONNEXIONS
