@@ -706,11 +706,44 @@ INSTRUCTIONS :
                     }
                 });
                 
-                // Changer de section si nécessaire
+                // Changer de section si nécessaire (avec tolérance)
                 if (activeSection !== this.currentSection && !this.isAnimating) {
-                    console.log(`✅ Changement de section: ${this.currentSection} → ${activeSection}`);
-                    lastTriggerTime = now;
-                    this.switchToSection(activeSection);
+                    // Ajouter une double vérification pour éviter les faux positifs
+                    setTimeout(() => {
+                        // Re-vérifier la section après 200ms
+                        const blocks = document.querySelectorAll('#stratego-final-map .content-block');
+                        const viewportHeight = window.innerHeight;
+                        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                        
+                        let confirmedSection = 1;
+                        blocks.forEach(block => {
+                            const rect = block.getBoundingClientRect();
+                            const blockTop = rect.top + scrollTop;
+                            const blockHeight = rect.height;
+                            const blockCenter = blockTop + (blockHeight / 2);
+                            const viewportCenter = scrollTop + (viewportHeight / 2);
+                            const sectionNumber = parseInt(block.dataset.content);
+                            
+                            let isActive = false;
+                            if (sectionNumber === 3) {
+                                isActive = rect.top < viewportHeight * 0.9 && rect.bottom > 0;
+                            } else {
+                                isActive = Math.abs(blockCenter - viewportCenter) < viewportHeight / 3;
+                            }
+                            
+                            if (isActive && sectionNumber) {
+                                confirmedSection = sectionNumber;
+                            }
+                        });
+                        
+                        // Seulement si la section est VRAIMENT différente
+                        if (confirmedSection !== this.currentSection && !this.isAnimating) {
+                            console.log(`✅ Changement de section CONFIRMÉ: ${this.currentSection} → ${confirmedSection}`);
+                            this.switchToSection(confirmedSection);
+                        } else {
+                            console.log(`❌ Faux positif évité - reste en section ${this.currentSection}`);
+                        }
+                    }, 200);
                 }
             };
             
