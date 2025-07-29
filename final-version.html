@@ -933,96 +933,77 @@ INSTRUCTIONS :
         animateSection1() {
             console.log('🎨 Section 1 animation séquentielle - DÉMARRAGE');
             
+            let currentDelay = 0;
+            
             // 1. PROBLÈMES s'allument UNE PAR UNE
-            setTimeout(() => {
-                const devis = document.querySelector('#stratego-final-map .tile[data-tile="devis"][data-section="1"]');
-                if (devis) {
-                    devis.style.opacity = '1';
-                    devis.classList.add('active');
-                    console.log('✨ Tuile DEVIS activée');
-                }
-            }, 500);
+            setTimeout(() => this.activateTile('devis', 1), currentDelay += 500);
+            setTimeout(() => this.activateTile('materiaux', 1), currentDelay += 300);
+            setTimeout(() => this.activateTile('temps', 1), currentDelay += 300);
             
-            setTimeout(() => {
-                const materiaux = document.querySelector('#stratego-final-map .tile[data-tile="materiaux"][data-section="1"]');
-                if (materiaux) {
-                    materiaux.style.opacity = '1';
-                    materiaux.classList.add('active');
-                    console.log('✨ Tuile MATERIAUX activée');
-                }
-            }, 800);
-            
-            setTimeout(() => {
-                const temps = document.querySelector('#stratego-final-map .tile[data-tile="temps"][data-section="1"]');
-                if (temps) {
-                    temps.style.opacity = '1';
-                    temps.classList.add('active');
-                    console.log('✨ Tuile TEMPS activée');
-                }
-            }, 1100);
-            
-            // 2. CONNEXIONS vers solution (avec délai cascade)
+            // 2. CONNEXIONS vers solution (attendre 500ms puis laisser 1s pour le tracé)
             setTimeout(() => {
                 console.log('🔗 Connexions problèmes → solution');
                 this.showConnectionsWithDelay(['devis-marge', 'materiaux-marge', 'temps-marge'], 150);
-            }, 1500);
+            }, currentDelay += 500);
             
-            // 3. SOLUTION s'allume
-            setTimeout(() => {
-                const marge = document.querySelector('#stratego-final-map .tile[data-tile="marge"][data-section="1"]');
-                if (marge) {
-                    marge.style.opacity = '1';
-                    marge.classList.add('active');
-                    console.log('✨ Tuile SOLUTION (marge) activée');
-                }
-            }, 2200);
+            // 3. SOLUTION s'allume APRÈS que les connexions soient tracées (1s + délai)
+            setTimeout(() => this.activateTile('marge', 1), currentDelay += 1200);
             
-            // 4. CONNEXION finale
+            // 4. CONNEXION finale (attendre 400ms puis laisser 1s pour le tracé)
             setTimeout(() => {
                 console.log('🔗 Connexion solution → bénéfice');
                 this.showConnections(['marge-decisions']);
-            }, 2600);
+            }, currentDelay += 400);
             
-            // 5. BÉNÉFICE final
+            // 5. BÉNÉFICE final APRÈS que la connexion soit tracée
+            setTimeout(() => this.activateTile('decisions', 1), currentDelay += 1100);
+            
+            // Marquer la fin de l'animation
             setTimeout(() => {
-                const decisions = document.querySelector('#stratego-final-map .tile[data-tile="decisions"][data-section="1"]');
-                if (decisions) {
-                    decisions.style.opacity = '1';
-                    decisions.classList.add('active');
-                    console.log('✨ Tuile BÉNÉFICE (decisions) activée');
-                }
-            }, 3000);
+                this.isAnimating = false;
+                console.log('🏁 Animation Section 1 terminée');
+            }, currentDelay += 500);
         }
         
         animateSection2() {
             console.log('🎨 Section 2 animation séquentielle - DÉMARRAGE');
             
-            // 1. PROBLÈMES s'allument UNE PAR UNE
-            setTimeout(() => this.activateTile('fournisseurs', 2), 500);
-            setTimeout(() => this.activateTile('charges', 2), 800);
-            setTimeout(() => this.activateTile('factures', 2), 1100);
+            let currentDelay = 0;
             
-            // 2. CONNEXIONS vers solution
+            // 1. PROBLÈMES s'allument UNE PAR UNE
+            setTimeout(() => this.activateTile('fournisseurs', 2), currentDelay += 500);
+            setTimeout(() => this.activateTile('charges', 2), currentDelay += 300);
+            setTimeout(() => this.activateTile('factures', 2), currentDelay += 300);
+            
+            // 2. CONNEXIONS vers solution (attendre 500ms puis laisser 1s pour le tracé)
             setTimeout(() => {
                 console.log('🔗 Connexions problèmes → solution');
                 this.showConnectionsWithDelay(['fournisseurs-previsionnel', 'charges-previsionnel', 'factures-previsionnel'], 150);
-            }, 1500);
+            }, currentDelay += 500);
             
-            // 3. SOLUTION s'allume
-            setTimeout(() => this.activateTile('previsionnel', 2), 2200);
+            // 3. SOLUTION s'allume APRÈS que les connexions soient tracées (1s + délai)
+            setTimeout(() => this.activateTile('previsionnel', 2), currentDelay += 1200);
             
-            // 4. CONNEXION finale
+            // 4. CONNEXION finale (attendre 400ms puis laisser 1s pour le tracé)
             setTimeout(() => {
                 console.log('🔗 Connexion solution → bénéfice');
-                this.showConnectionsWithDelay(['previsionnel-serenite'], 150);
-            }, 2600);
+                this.showConnections(['previsionnel-serenite']);
+            }, currentDelay += 400);
             
-            // 5. BÉNÉFICE final
-            setTimeout(() => this.activateTile('serenite', 2), 3000);
+            // 5. BÉNÉFICE final APRÈS que la connexion soit tracée
+            setTimeout(() => this.activateTile('serenite', 2), currentDelay += 1100);
+            
+            // Marquer la fin de l'animation
+            setTimeout(() => {
+                this.isAnimating = false;
+                console.log('🏁 Animation Section 2 terminée');
+            }, currentDelay += 500);
         }
         
         animateSection3() {
             console.log('🎨 Section 3 animation séquentielle - DÉMARRAGE');
+            
+            let currentDelay = 0;
             
             // 1. PROBLÈME central avec pulse
             setTimeout(() => {
@@ -1032,35 +1013,41 @@ INSTRUCTIONS :
                     doute.classList.add('active', 'pulse');
                     console.log('✨ Tuile DOUTE activée (avec pulse)');
                 }
-            }, 500);
+            }, currentDelay += 500);
             
-            // 2. CONNEXIONS depuis le doute
+            // 2. CONNEXIONS depuis le doute (attendre 400ms puis laisser 1s pour le tracé)
             setTimeout(() => {
                 console.log('🔗 Connexions doute → problèmes');
                 this.showConnectionsWithDelay(['doute-investissement', 'doute-recrutement'], 150);
-            }, 900);
+            }, currentDelay += 400);
             
-            // 3. PROBLÈMES résultants (une par une)
-            setTimeout(() => this.activateTile('investissement', 3), 1400);
-            setTimeout(() => this.activateTile('recrutement', 3), 1700);
+            // 3. PROBLÈMES résultants APRÈS que les connexions soient tracées
+            setTimeout(() => this.activateTile('investissement', 3), currentDelay += 1100);
+            setTimeout(() => this.activateTile('recrutement', 3), currentDelay += 300);
             
-            // 4. SOLUTION conseil
-            setTimeout(() => this.activateTile('conseil', 3), 2200);
+            // 4. SOLUTION conseil (attendre 500ms)
+            setTimeout(() => this.activateTile('conseil', 3), currentDelay += 500);
             
-            // 5. CONNEXION solution → doute
+            // 5. CONNEXION solution → doute (attendre 400ms puis laisser 1s pour le tracé)
             setTimeout(() => {
                 console.log('🔗 Connexion conseil → doute');
                 this.showConnections(['conseil-doute']);
-            }, 2600);
+            }, currentDelay += 400);
             
-            // 6. CONNEXION finale vers bénéfice
+            // 6. CONNEXION finale vers bénéfice (attendre 1s puis laisser 1s pour le tracé)
             setTimeout(() => {
                 console.log('🔗 Connexion conseil → croissance');
-                this.showConnectionsWithDelay(['conseil-croissance'], 150);
-            }, 3000);
+                this.showConnections(['conseil-croissance']);
+            }, currentDelay += 1000);
             
-            // 7. BÉNÉFICE final
-            setTimeout(() => this.activateTile('croissance', 3), 3400);
+            // 7. BÉNÉFICE final APRÈS que la connexion soit tracée
+            setTimeout(() => this.activateTile('croissance', 3), currentDelay += 1100);
+            
+            // Marquer la fin de l'animation
+            setTimeout(() => {
+                this.isAnimating = false;
+                console.log('🏁 Animation Section 3 terminée');
+            }, currentDelay += 500);
         }
         
 
