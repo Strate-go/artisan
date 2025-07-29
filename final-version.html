@@ -708,6 +708,8 @@ INSTRUCTIONS :
                     console.log(`✅ Changement de section: ${this.currentSection} → ${activeSection}`);
                     lastTriggerTime = now;
                     this.switchToSection(activeSection);
+                } else if (activeSection === this.currentSection) {
+                    console.log(`🔍 Même section détectée: ${activeSection} (pas de changement)`);
                 }
             };
             
@@ -804,6 +806,7 @@ INSTRUCTIONS :
         }
         
         resetAllTiles() {
+            console.log('🔁 RESET ALL TILES'); // DEBUG TEMPORAIRE
             // Reset toutes les tuiles
             document.querySelectorAll('#stratego-final-map .tile').forEach(tile => {
                 tile.classList.remove('active', 'pulse', 'glow');
