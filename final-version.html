@@ -656,6 +656,9 @@ INSTRUCTIONS :
             }, 1000);
             
             // Démarrer avec la section 1
+            if (window.updateTiles) {
+                window.updateTiles(1, false);
+            }
             this.switchToSection(1);
         }
         
@@ -746,6 +749,12 @@ INSTRUCTIONS :
                 // Changer de section si nécessaire
                 if (activeSection !== this.currentSection && !this.isAnimating) {
                     console.log(`✅ Changement de section: ${this.currentSection} → ${activeSection}`);
+                    
+                    // Appeler updateTiles pour le vrai changement de section
+                    if (window.updateTiles) {
+                        window.updateTiles(activeSection, false);
+                    }
+                    
                     lastTriggerTime = now;
                     this.switchToSection(activeSection);
                 }
@@ -775,11 +784,6 @@ INSTRUCTIONS :
             
             // Reset complet et démarrage propre
             this.resetAllTiles();
-            
-            // Appeler updateTiles pour le vrai changement de section
-            if (window.updateTiles) {
-                window.updateTiles(sectionNumber, false);
-            }
             
             // Démarrer immédiatement la première animation
             this.runSingleAnimation(sectionNumber);
