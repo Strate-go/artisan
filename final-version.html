@@ -652,8 +652,8 @@ INSTRUCTIONS :
             this.bindEvents();
             this.setupScrollObserver();
             
-            // INSTALLATION DU DÉTECTEUR
-            this.detectExternalCalls();
+            // DÉTECTEUR DÉSACTIVÉ - problème résolu
+            // this.detectExternalCalls();
             
             // CRÉATION AUTOMATIQUE : toutes les connexions après chargement
             setTimeout(() => {
@@ -795,11 +795,20 @@ INSTRUCTIONS :
         }
         
         resetAllTiles() {
-            // Reset toutes les tuiles
+            // Reset toutes les tuiles SEULEMENT si pas d'animation en cours
             document.querySelectorAll('#stratego-final-map .tile').forEach(tile => {
-                tile.classList.remove('active', 'pulse', 'glow');
-                tile.style.opacity = '';
+                tile.classList.remove('pulse', 'glow');
                 tile.style.animation = '';
+                
+                // Ne supprimer 'active' que pour les tuiles d'autres sections
+                const tileSection = parseInt(tile.dataset.section);
+                if (tileSection !== this.currentSection) {
+                    tile.classList.remove('active');
+                    tile.style.opacity = '0.3';
+                } else {
+                    // Garder les tuiles de la section courante visibles
+                    tile.style.opacity = '1';
+                }
             });
             
             // Reset complet des connexions avec animation
