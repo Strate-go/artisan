@@ -710,6 +710,13 @@ INSTRUCTIONS :
                     this.switchToSection(activeSection);
                 } else if (activeSection === this.currentSection) {
                     console.log(`🔍 Même section détectée: ${activeSection} (pas de changement)`);
+                    
+                    // DEBUG : Vérifier si les tuiles sont toujours actives
+                    const activeTiles = document.querySelectorAll('#stratego-final-map .tile.active');
+                    console.log(`🔍 Tuiles actives trouvées: ${activeTiles.length}`);
+                    activeTiles.forEach(tile => {
+                        console.log(`  - ${tile.dataset.tile} (section ${tile.dataset.section})`);
+                    });
                 }
             };
             
