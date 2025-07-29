@@ -736,18 +736,18 @@ INSTRUCTIONS :
             // Reset complet et démarrage propre
             this.resetAllTiles();
             
-            // Démarrer immédiatement la première animation
-            this.runSingleAnimation(sectionNumber);
+            // Démarrer immédiatement la première animation (reset complet)
+            this.runSingleAnimation(sectionNumber, false);
             
             // Puis continuer toutes les 12 secondes (optimisé pour la performance)
             this.animationInterval = setInterval(() => {
                 if (!this.isAnimating && document.visibilityState === 'visible') { // Ne relancer que si visible et pas en cours
-                    this.runSingleAnimation(sectionNumber);
+                    this.runSingleAnimation(sectionNumber, true); // true = rerun, garde les tuiles
                 }
             }, 12000);
         }
         
-        runSingleAnimation(sectionNumber) {
+        runSingleAnimation(sectionNumber, isRerun = false) {
             if (this.isAnimating) {
                 // console.log('⏸️ Animation already running, skipping'); // Debug désactivé
                 return;
@@ -756,8 +756,25 @@ INSTRUCTIONS :
             // console.log('🎭 Starting animation for section:', sectionNumber); // Debug désactivé
             this.isAnimating = true;
             
-            // Reset COMPLET de toutes les tuiles et connexions
-            this.resetAllTiles();
+            // Reset SEULEMENT si c'est un nouveau changement de section (pas un rerun)
+            if (!isRerun) {
+                this.resetAllTiles();
+                console.log('🔄 Reset complet (nouveau changement de section)');
+            } else {
+                // Pour les reruns : reset seulement les connexions, garder les tuiles actives
+                document.querySelectorAll('#stratego-final-map .auto-connection').forEach(path => {
+                    path.style.opacity = '0';
+                    path.style.transition = 'none';
+                    try {
+                        const pathLength = path.getTotalLength();
+                        path.style.strokeDasharray = pathLength;
+                        path.style.strokeDashoffset = pathLength;
+                    } catch (error) {
+                        // Ignore
+                    }
+                });
+                console.log('🔄 Reset connexions seulement (rerun de section)');
+            }
             
             // Masquer toutes les sections sauf celle active
             document.querySelectorAll('#stratego-final-map .tile').forEach(tile => {
