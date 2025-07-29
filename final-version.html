@@ -643,6 +643,11 @@ INSTRUCTIONS :
         
         init() {
             console.log('🚀 Initialisation de Stratégo Map');
+            console.log('📊 État initial:', {
+                currentSection: this.currentSection,
+                container: !!document.querySelector('#stratego-final-map'),
+                tiles: document.querySelectorAll('#stratego-final-map .tile').length
+            });
             
             this.bindEvents();
             this.setupScrollObserver();
@@ -982,9 +987,9 @@ INSTRUCTIONS :
             // Plus de scroll observer à nettoyer
         }
         
-        // Fonction pour détecter qui supprime les classes active
+        // Fonction pour détecter qui supprime les classes active (SANS clignement)
         detectExternalCalls() {
-            console.log('👁️ Installation du détecteur de modifications de classe');
+            console.log('👁️ Installation du détecteur de modifications de classe (mode discret)');
             
             const observer = new MutationObserver((mutations) => {
                 mutations.forEach((mutation) => {
@@ -1003,14 +1008,8 @@ INSTRUCTIONS :
                             // STACK TRACE pour voir qui a fait ça
                             console.trace('📍 QUI A SUPPRIMÉ CETTE CLASSE ?');
                             
-                            // Si c'est notre section courante, la remettre immédiatement
-                            if (parseInt(tile.dataset.section) === this.currentSection) {
-                                console.log('🔧 RESTAURATION immédiate de la classe active');
-                                setTimeout(() => {
-                                    tile.classList.add('active');
-                                    console.log('✅ Classe active restaurée');
-                                }, 10);
-                            }
+                            // ⚠️ NE PAS restaurer pour éviter le clignement - juste logger
+                            console.log('ℹ️ Classe supprimée mais non restaurée (mode observation)');
                         }
                     }
                 });
@@ -1026,7 +1025,7 @@ INSTRUCTIONS :
                 });
             });
             
-            console.log('✅ Observateur de classes actives installé');
+            console.log(`✅ Observateur installé sur ${tiles.length} tuiles (mode observation seulement)`);
         }
         
         // CRÉATION AUTOMATIQUE DES CONNEXIONS
@@ -1107,15 +1106,21 @@ INSTRUCTIONS :
                 return false;
             }
             
-            // Calculer les coordonnées
+            // Calculer les coordonnées avec sécurité
             const svgRect = svg.getBoundingClientRect();
             const fromRect = fromElement.getBoundingClientRect();
             const toRect = toElement.getBoundingClientRect();
             
-            const x1 = fromRect.left + fromRect.width/2 - svgRect.left;
-            const y1 = fromRect.top + fromRect.height/2 - svgRect.top;
-            const x2 = toRect.left + toRect.width/2 - svgRect.left;
-            const y2 = toRect.top + toRect.height/2 - svgRect.top;
+            const x1 = Math.round(fromRect.left + fromRect.width/2 - svgRect.left);
+            const y1 = Math.round(fromRect.top + fromRect.height/2 - svgRect.top);
+            const x2 = Math.round(toRect.left + toRect.width/2 - svgRect.left);
+            const y2 = Math.round(toRect.top + toRect.height/2 - svgRect.top);
+            
+            // Vérifier que les coordonnées sont valides
+            if (isNaN(x1) || isNaN(y1) || isNaN(x2) || isNaN(y2)) {
+                console.warn(`❌ Coordonnées invalides pour ${fromTile} → ${toTile}:`, {x1, y1, x2, y2});
+                return false;
+            }
             
             // Créer le path avec ID unique
             const connectionId = `connection-${fromTile}-${toTile}`;
@@ -1138,9 +1143,16 @@ INSTRUCTIONS :
     
     // Initialisation
     function initializeMap() {
-        if (document.querySelector('#stratego-final-map')) {
+        console.log('🔍 Tentative d\'initialisation...');
+        const container = document.querySelector('#stratego-final-map');
+        console.log('📦 Container trouvé:', !!container);
+        
+        if (container) {
+            console.log('✅ Démarrage du contrôleur');
             window.finalMapController = new FinalMapController();
             window.finalMapController.init();
+        } else {
+            console.warn('❌ Container #stratego-final-map non trouvé');
         }
     }
     
