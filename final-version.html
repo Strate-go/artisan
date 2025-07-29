@@ -706,44 +706,18 @@ INSTRUCTIONS :
                     }
                 });
                 
-                // Changer de section si nécessaire (avec tolérance)
+                // Changer de section SEULEMENT si pas en cours d'animation ET avec distance suffisante
                 if (activeSection !== this.currentSection && !this.isAnimating) {
-                    // Ajouter une double vérification pour éviter les faux positifs
-                    setTimeout(() => {
-                        // Re-vérifier la section après 200ms
-                        const blocks = document.querySelectorAll('#stratego-final-map .content-block');
-                        const viewportHeight = window.innerHeight;
-                        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-                        
-                        let confirmedSection = 1;
-                        blocks.forEach(block => {
-                            const rect = block.getBoundingClientRect();
-                            const blockTop = rect.top + scrollTop;
-                            const blockHeight = rect.height;
-                            const blockCenter = blockTop + (blockHeight / 2);
-                            const viewportCenter = scrollTop + (viewportHeight / 2);
-                            const sectionNumber = parseInt(block.dataset.content);
-                            
-                            let isActive = false;
-                            if (sectionNumber === 3) {
-                                isActive = rect.top < viewportHeight * 0.9 && rect.bottom > 0;
-                            } else {
-                                isActive = Math.abs(blockCenter - viewportCenter) < viewportHeight / 3;
-                            }
-                            
-                            if (isActive && sectionNumber) {
-                                confirmedSection = sectionNumber;
-                            }
-                        });
-                        
-                        // Seulement si la section est VRAIMENT différente
-                        if (confirmedSection !== this.currentSection && !this.isAnimating) {
-                            console.log(`✅ Changement de section CONFIRMÉ: ${this.currentSection} → ${confirmedSection}`);
-                            this.switchToSection(confirmedSection);
-                        } else {
-                            console.log(`❌ Faux positif évité - reste en section ${this.currentSection}`);
-                        }
-                    }, 200);
+                    // Éviter les changements trop rapides
+                    const now = Date.now();
+                    if (now - lastTriggerTime < 1000) { // Minimum 1 seconde entre changements
+                        console.log(`⏰ Changement trop rapide ignoré: ${this.currentSection} → ${activeSection}`);
+                        return;
+                    }
+                    
+                    console.log(`✅ Changement de section: ${this.currentSection} → ${activeSection}`);
+                    lastTriggerTime = now;
+                    this.switchToSection(activeSection);
                 }
             };
             
@@ -879,7 +853,16 @@ INSTRUCTIONS :
             connectionIds.forEach(id => {
                 // ✅ Sélection optimisée par ID unique
                 const connectionId = `connection-${id}`;
-                const path = document.getElementById(connectionId);
+                let path = document.getElementById(connectionId);
+                
+                // 🔧 Si la connexion n'existe pas, la recréer automatiquement
+                if (!path) {
+                    console.log(`🔧 Connexion ${id} manquante, recréation...`);
+                    const [fromTile, toTile] = id.split('-');
+                    this.createSingleConnection(fromTile, toTile);
+                    path = document.getElementById(connectionId);
+                }
+                
                 console.log(`🔍 Recherche connexion ID: ${connectionId}, trouvé:`, !!path);
                 
                 if (path) {
@@ -902,7 +885,7 @@ INSTRUCTIONS :
                         console.log(`🎨 Connexion ${id} tracée (longueur: ${Math.round(pathLength)}px)`);
                     }
                 } else {
-                    console.warn(`❌ Connexion ${id} non trouvée (ID: ${connectionId})`);
+                    console.warn(`❌ Connexion ${id} non trouvée même après recréation (ID: ${connectionId})`);
                 }
             });
         }
@@ -1033,9 +1016,9 @@ INSTRUCTIONS :
             // Plus de scroll observer à nettoyer
         }
         
-        // DÉTECTEUR SIMPLE pour diagnostic
+        // DÉTECTEUR SIMPLE pour diagnostic (mode silencieux)
         setupClassDetector() {
-            console.log('🕵️ Installation du détecteur de classes active');
+            console.log('🕵️ Installation du détecteur de classes active (mode silencieux)');
             
             const observer = new MutationObserver((mutations) => {
                 mutations.forEach((mutation) => {
@@ -1046,12 +1029,10 @@ INSTRUCTIONS :
                         
                         // Si une classe 'active' a été supprimée
                         if (oldClasses.includes('active') && !newClasses.includes('active')) {
-                            console.log('🚨 CLASSE ACTIVE SUPPRIMÉE !');
-                            console.log(`  - Tuile: ${tile.dataset.tile} (section ${tile.dataset.section})`);
-                            console.log(`  - Ancien: "${oldClasses}"`);
-                            console.log(`  - Nouveau: "${newClasses}"`);
-                            console.log('  - Stack trace:');
-                            console.trace();
+                            // Log seulement 1 fois sur 20 pour éviter le spam
+                            if (Math.random() < 0.05) {
+                                console.log(`⚠️ Classe active supprimée: ${tile.dataset.tile}`);
+                            }
                         }
                     }
                 });
