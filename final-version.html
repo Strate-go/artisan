@@ -676,8 +676,23 @@ INSTRUCTIONS :
                 tiles.forEach(tile => {
                     const tileSection = tile.dataset.section;
                     
-                    // RÈGLE CLÉE : Ne pas modifier les classes si c'est un rerun et la tuile est dans la section courante
-                    if (isRerun && tileSection === String(currentSection)) {
+                    // PROTECTION INTELLIGENTE : Si pas de paramètre isRerun, détecter automatiquement
+                    let shouldProtect = false;
+                    
+                    if (isRerun === true) {
+                        // Rerun explicite : protéger
+                        shouldProtect = true;
+                    } else if (isRerun === false) {
+                        // Changement explicite : ne pas protéger
+                        shouldProtect = false;
+                    } else {
+                        // Appel externe sans paramètre : protéger si même section et pas en animation
+                        shouldProtect = (parseInt(tileSection) === this.currentSection && !this.isAnimating);
+                        console.log(`🤖 Auto-détection: shouldProtect=${shouldProtect} (section=${tileSection}, current=${this.currentSection}, animating=${this.isAnimating})`);
+                    }
+                    
+                    // RÈGLE CLÉE : Ne pas modifier les classes si protection active
+                    if (shouldProtect && tileSection === String(currentSection)) {
                         console.log(`🛡️ Protection: garde classe active pour ${tile.dataset.tile}`);
                         return; // Skip cette tuile
                     }
@@ -694,7 +709,7 @@ INSTRUCTIONS :
                         tile.style.opacity = '0.3';
                     }
                 });
-            };
+            }.bind(this); // IMPORTANT : Bind this pour accéder à this.currentSection
             
             console.log('✅ Fonction updateTiles interceptée et remplacée');
         }
