@@ -739,21 +739,23 @@ INSTRUCTIONS :
             // Démarrer immédiatement la première animation
             this.runSingleAnimation(sectionNumber);
             
-            // Puis continuer toutes les 12 secondes (optimisé pour la performance)
-            this.animationInterval = setInterval(() => {
-                if (!this.isAnimating && document.visibilityState === 'visible') { // Ne relancer que si visible et pas en cours
-                    this.runSingleAnimation(sectionNumber);
-                }
-            }, 12000);
+            // INTERVALLE SUPPRIMÉ - causait la désactivation des tuiles
+            // L'animation ne se joue qu'une fois par section
+            // this.animationInterval = setInterval(() => {
+            //     if (!this.isAnimating && document.visibilityState === 'visible') {
+            //         this.runSingleAnimation(sectionNumber);
+            //     }
+            // }, 12000);
         }
         
         runSingleAnimation(sectionNumber) {
+            console.log('🎭 runSingleAnimation appelé pour section:', sectionNumber);
+            
             if (this.isAnimating) {
-                // console.log('⏸️ Animation already running, skipping'); // Debug désactivé
+                console.log('⏸️ Animation already running, skipping');
                 return;
             }
             
-            // console.log('🎭 Starting animation for section:', sectionNumber); // Debug désactivé
             this.isAnimating = true;
             
             // Reset COMPLET de toutes les tuiles et connexions
