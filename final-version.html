@@ -662,14 +662,23 @@ INSTRUCTIONS :
             this.bindEvents();
             this.setupScrollObserver();
             
-            // CRÉATION AUTOMATIQUE : toutes les connexions après chargement
-            setTimeout(() => {
-                this.createAllConnections();
-            }, 1000);
-            
-            // SIMPLIFICATION : Suppression des protections complexes qui causent l'instabilité
-            // On garde seulement la protection CSS de base
+            // Protection contre CSS externe d'abord
             this.protectAgainstExternalCSS(); 
+            
+            // CRÉATION AUTOMATIQUE : toutes les connexions après chargement
+            // Attendre que la page soit complètement chargée et rendue
+            const initConnections = () => {
+                const container = document.querySelector('#stratego-final-map .single-interactive-map');
+                if (container && container.getBoundingClientRect().width > 0) {
+                    console.log('🔧 Container prêt, création des connexions...');
+                    this.createAllConnections();
+                } else {
+                    console.log('⏸️ Container pas encore prêt, nouvelle tentative...');
+                    setTimeout(initConnections, 500);
+                }
+            };
+            
+            setTimeout(initConnections, 1000);
             
             // AUCUNE animation au chargement - elle se lancera au scroll
             console.log('🎬 Initialisation simple - En attente du scroll utilisateur');
@@ -944,6 +953,15 @@ INSTRUCTIONS :
         
         showConnections(connectionIds, animationId) {
             console.log(`🔍 showConnections appelé avec:`, connectionIds);
+            
+            // Vérifier que le SVG principal existe
+            const mainSvg = document.querySelector('#stratego-final-map .connections-svg');
+            if (!mainSvg) {
+                console.error('❌ SVG principal manquant - Recréation automatique');
+                this.createAllConnections();
+                return;
+            }
+            
             connectionIds.forEach(id => {
                 // ✅ Sélection optimisée par ID unique
                 const connectionId = `connection-${id}`;
@@ -954,41 +972,58 @@ INSTRUCTIONS :
                     console.log(`🔧 Connexion ${id} manquante, recréation...`);
                     const [fromTile, toTile] = id.split('-');
                     
-                    // Récupérer le SVG existant
-                    const svg = document.querySelector('#stratego-final-map .connections-svg');
-                    if (svg) {
-                        this.createSingleConnection(svg, fromTile, toTile, '#bf9b30', '3');
+                    if (fromTile && toTile) {
+                        this.createSingleConnection(mainSvg, fromTile, toTile, '#bf9b30', '3');
                         path = document.getElementById(connectionId);
-                        console.log(`✅ Connexion ${id} recréée avec succès`);
+                        
+                        if (path) {
+                            console.log(`✅ Connexion ${id} recréée avec succès`);
+                        } else {
+                            console.error(`❌ Échec de recréation de ${id}`);
+                            return;
+                        }
                     } else {
-                        console.error(`❌ SVG container introuvable pour recréer ${id}`);
+                        console.error(`❌ Format ID invalide: ${id}`);
+                        return;
                     }
                 }
                 
                 console.log(`🔍 Recherche connexion ID: ${connectionId}, trouvé:`, !!path);
                 
-                if (path) {
-                    // 1. RESET obligatoire pour re-animation
-                    const pathLength = path.getTotalLength();
-                    path.style.strokeDasharray = pathLength;
-                    path.style.strokeDashoffset = pathLength; // Ligne invisible
-                    path.style.transition = 'none'; // Pas d'animation pendant reset
-                    
-                    // 2. CONDITION : éviter re-animation si déjà visible
-                    if (path.style.opacity === '0' || path.style.opacity === '') {
-                        path.style.opacity = '0.8'; // Rendre visible
+                if (path && path.parentNode) {
+                    try {
+                        // 1. RESET obligatoire pour re-animation
+                        const pathLength = path.getTotalLength();
                         
-                        // 3. ANIMATION après petit délai
-                        this.setAnimationTimeout(() => {
-                            if (!this.isAnimationActive(animationId)) return;
-                            path.style.transition = 'stroke-dashoffset 1s ease-in-out';
-                            path.style.strokeDashoffset = 0; // Se dessine progressivement
-                        }, 100, animationId);
+                        if (!isFinite(pathLength) || pathLength <= 0) {
+                            console.warn(`❌ Longueur invalide pour ${id}: ${pathLength}`);
+                            return;
+                        }
                         
-                        console.log(`🎨 Connexion ${id} tracée (longueur: ${Math.round(pathLength)}px)`);
+                        path.style.strokeDasharray = pathLength;
+                        path.style.strokeDashoffset = pathLength; // Ligne invisible
+                        path.style.transition = 'none'; // Pas d'animation pendant reset
+                        
+                        // 2. CONDITION : éviter re-animation si déjà visible
+                        if (path.style.opacity === '0' || path.style.opacity === '') {
+                            path.style.opacity = '0.8'; // Rendre visible
+                            
+                            // 3. ANIMATION après petit délai
+                            this.setAnimationTimeout(() => {
+                                if (!this.isAnimationActive(animationId)) return;
+                                if (path && path.parentNode) {
+                                    path.style.transition = 'stroke-dashoffset 1s ease-in-out';
+                                    path.style.strokeDashoffset = 0; // Se dessine progressivement
+                                }
+                            }, 100, animationId);
+                            
+                            console.log(`🎨 Connexion ${id} tracée (longueur: ${Math.round(pathLength)}px)`);
+                        }
+                    } catch (error) {
+                        console.error(`❌ Erreur lors de l'animation de ${id}:`, error);
                     }
                 } else {
-                    console.warn(`❌ Connexion ${id} non trouvée même après recréation (ID: ${connectionId})`);
+                    console.warn(`❌ Connexion ${id} non trouvée ou détachée du DOM (ID: ${connectionId})`);
                 }
             });
         }
@@ -1304,34 +1339,62 @@ INSTRUCTIONS :
             
             const svg = document.querySelector('#stratego-final-map .connections-svg');
             if (!svg) {
-                console.warn('❌ SVG non trouvé pour recalcul');
+                console.warn('❌ SVG non trouvé pour recalcul - Recréation automatique');
+                this.createAllConnections();
+                return;
+            }
+            
+            // Vérifier que le SVG est dans le DOM et visible
+            if (!svg.parentNode || svg.getBoundingClientRect().width === 0) {
+                console.warn('❌ SVG non visible ou détaché - Recréation automatique');
+                this.createAllConnections();
                 return;
             }
             
             const connections = document.querySelectorAll('#stratego-final-map .auto-connection');
+            let successCount = 0;
+            
             connections.forEach(path => {
                 const fromTile = path.dataset.from;
                 const toTile = path.dataset.to;
                 
+                if (!fromTile || !toTile) {
+                    console.warn(`❌ Données manquantes pour path ${path.id}`);
+                    return;
+                }
+                
                 const fromElement = document.querySelector(`#stratego-final-map .tile[data-tile="${fromTile}"]`);
                 const toElement = document.querySelector(`#stratego-final-map .tile[data-tile="${toTile}"]`);
                 
-                if (fromElement && toElement) {
-                    const svgRect = svg.getBoundingClientRect();
-                    const fromRect = fromElement.getBoundingClientRect();
-                    const toRect = toElement.getBoundingClientRect();
-                    
-                    const x1 = Math.round(fromRect.left + fromRect.width/2 - svgRect.left);
-                    const y1 = Math.round(fromRect.top + fromRect.height/2 - svgRect.top);
-                    const x2 = Math.round(toRect.left + toRect.width/2 - svgRect.left);
-                    const y2 = Math.round(toRect.top + toRect.height/2 - svgRect.top);
-                    
-                    if (!isNaN(x1) && !isNaN(y1) && !isNaN(x2) && !isNaN(y2)) {
+                if (!fromElement || !toElement) {
+                    console.warn(`❌ Tuiles manquantes pour recalcul: ${fromTile} ou ${toTile}`);
+                    return;
+                }
+                
+                const svgRect = svg.getBoundingClientRect();
+                const fromRect = fromElement.getBoundingClientRect();
+                const toRect = toElement.getBoundingClientRect();
+                
+                const x1 = Math.round(fromRect.left + fromRect.width/2 - svgRect.left);
+                const y1 = Math.round(fromRect.top + fromRect.height/2 - svgRect.top);
+                const x2 = Math.round(toRect.left + toRect.width/2 - svgRect.left);
+                const y2 = Math.round(toRect.top + toRect.height/2 - svgRect.top);
+                
+                if (!isNaN(x1) && !isNaN(y1) && !isNaN(x2) && !isNaN(y2) &&
+                    isFinite(x1) && isFinite(y1) && isFinite(x2) && isFinite(y2)) {
+                    try {
                         path.setAttribute('d', `M ${x1} ${y1} L ${x2} ${y2}`);
+                        successCount++;
                         console.log(`✅ Connexion ${fromTile}→${toTile} recalculée: (${x1},${y1}) → (${x2},${y2})`);
+                    } catch (error) {
+                        console.error(`❌ Erreur lors du recalcul de ${fromTile}→${toTile}:`, error);
                     }
+                } else {
+                    console.error(`❌ Coordonnées invalides pour recalcul ${fromTile}→${toTile}: (${x1},${y1}) → (${x2},${y2})`);
                 }
             });
+            
+            console.log(`✅ ${successCount}/${connections.length} connexions recalculées`);
         }
         
         // UTILITAIRE pour activer une tuile avec opacité et classe
@@ -1422,32 +1485,56 @@ INSTRUCTIONS :
         createAllConnections() {
             console.log('🔧 Création automatique des connexions');
             
-            // Étape 1 : Créer le SVG
+            // Étape 1 : Créer le SVG de manière plus robuste
             const container = document.querySelector('#stratego-final-map .single-interactive-map');
             if (!container) {
-                console.warn('❌ Container non trouvé');
+                console.error('❌ Container principal non trouvé !');
                 return;
             }
             
-            // Supprimer l'ancien SVG s'il existe
-            const oldSvg = container.querySelector('.connections-svg');
-            if (oldSvg) {
-                oldSvg.remove();
+            // Vérifier si le SVG existe déjà
+            let svg = container.querySelector('.connections-svg');
+            if (svg) {
+                console.log('🔄 SVG existant trouvé, nettoyage...');
+                // Nettoyer le contenu existant au lieu de supprimer le SVG
+                svg.innerHTML = '';
+            } else {
+                console.log('🆕 Création d\'un nouveau SVG...');
+                // Créer le nouveau SVG
+                svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                svg.classList.add('connections-svg');
+                svg.style.cssText = `
+                    position: absolute !important;
+                    top: 0 !important;
+                    left: 0 !important;
+                    width: 100% !important;
+                    height: 100% !important;
+                    z-index: 999 !important;
+                    pointer-events: none !important;
+                    overflow: visible !important;
+                `;
+                
+                // Ajouter un attribut pour identifier notre SVG
+                svg.setAttribute('data-stratego-svg', 'true');
+                
+                container.appendChild(svg);
             }
             
-            // Créer le nouveau SVG
-            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-            svg.classList.add('connections-svg');
-            svg.style.position = 'absolute';
-            svg.style.top = '0';
-            svg.style.left = '0';
-            svg.style.width = '100%';
-            svg.style.height = '100%';
-            svg.style.zIndex = '999';
-            svg.style.pointerEvents = 'none';
-            svg.style.overflow = 'visible'; // ✅ Correction overflow
-            container.appendChild(svg);
-            console.log('✅ SVG créé');
+            console.log('✅ SVG préparé');
+            
+            // Attendre que le SVG soit bien dans le DOM
+            setTimeout(() => {
+                this.createConnectionPaths(svg);
+            }, 100);
+        }
+        
+        createConnectionPaths(svg) {
+            // Vérifier que le SVG est toujours là
+            if (!svg || !svg.parentNode) {
+                console.error('❌ SVG disparu du DOM, nouvelle tentative...');
+                this.createAllConnections();
+                return;
+            }
             
             // Étape 2 : Définir toutes les connexions
             const connections = [
@@ -1455,22 +1542,22 @@ INSTRUCTIONS :
                 { from: 'devis', to: 'marge', color: '#bf9b30', width: '3' },
                 { from: 'materiaux', to: 'marge', color: '#bf9b30', width: '3' },
                 { from: 'temps', to: 'marge', color: '#bf9b30', width: '3' },
-                { from: 'marge', to: 'decisions', color: '#3a8eff', width: '3' },
+                { from: 'marge', to: 'decisions', color: '#bf9b30', width: '3' },
                 
                 // Section 2 - Trésorerie
                 { from: 'fournisseurs', to: 'previsionnel', color: '#bf9b30', width: '3' },
                 { from: 'charges', to: 'previsionnel', color: '#bf9b30', width: '3' },
                 { from: 'factures', to: 'previsionnel', color: '#bf9b30', width: '3' },
-                { from: 'previsionnel', to: 'serenite', color: '#3a8eff', width: '3' },
+                { from: 'previsionnel', to: 'serenite', color: '#bf9b30', width: '3' },
                 
                 // Section 3 - Croissance  
                 { from: 'doute', to: 'investissement', color: '#bf9b30', width: '3' },
                 { from: 'doute', to: 'recrutement', color: '#bf9b30', width: '3' },
-                { from: 'conseil', to: 'doute', color: '#3a8eff', width: '3' },
-                { from: 'conseil', to: 'croissance', color: '#3a8eff', width: '3' }
+                { from: 'conseil', to: 'doute', color: '#bf9b30', width: '3' },
+                { from: 'conseil', to: 'croissance', color: '#bf9b30', width: '3' }
             ];
             
-            // Étape 3 : Créer chaque connexion
+            // Étape 3 : Créer chaque connexion avec validation robuste
             let successCount = 0;
             connections.forEach(conn => {
                 if (this.createSingleConnection(svg, conn.from, conn.to, conn.color, conn.width)) {
@@ -1480,11 +1567,42 @@ INSTRUCTIONS :
             
             console.log(`✅ ${successCount}/${connections.length} connexions créées avec succès`);
             
+            // Protéger le SVG contre la suppression
+            this.protectSVG(svg);
+            
             // DEBUG : Lister tous les IDs créés
             console.log('🔍 IDs de connexions créés:');
             document.querySelectorAll('#stratego-final-map .auto-connection').forEach(path => {
                 console.log(`  - ${path.id} (${path.dataset.from} → ${path.dataset.to})`);
             });
+        }
+        
+        // Nouvelle fonction pour protéger le SVG
+        protectSVG(svg) {
+            // Observer les mutations pour détecter si le SVG est supprimé
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.type === 'childList') {
+                        mutation.removedNodes.forEach((node) => {
+                            if (node === svg || (node.querySelector && node.querySelector('.connections-svg'))) {
+                                console.warn('🚨 SVG supprimé du DOM ! Recréation...');
+                                observer.disconnect();
+                                setTimeout(() => {
+                                    this.createAllConnections();
+                                }, 100);
+                            }
+                        });
+                    }
+                });
+            });
+            
+            const container = svg.parentNode;
+            if (container) {
+                observer.observe(container, {
+                    childList: true,
+                    subtree: true
+                });
+            }
         }
         
         createSingleConnection(svg, fromTile, toTile, color = '#bf9b30', width = '3') {
@@ -1496,10 +1614,28 @@ INSTRUCTIONS :
                 return false;
             }
             
-            // Calculer les coordonnées avec validation et attente que les éléments soient visibles
+            // Vérifier que le SVG est toujours valide
+            if (!svg || !svg.parentNode) {
+                console.error(`❌ SVG invalide lors de la création de ${fromTile}→${toTile}`);
+                return false;
+            }
+            
+            // Calculer les coordonnées avec validation robuste
             const svgRect = svg.getBoundingClientRect();
             const fromRect = fromElement.getBoundingClientRect();
             const toRect = toElement.getBoundingClientRect();
+            
+            // Vérifier que tous les rectangles sont valides
+            if (svgRect.width === 0 || svgRect.height === 0 || 
+                fromRect.width === 0 || fromRect.height === 0 ||
+                toRect.width === 0 || toRect.height === 0) {
+                console.warn(`⏸️ Éléments pas encore rendus, attente... (${fromTile}→${toTile})`);
+                // Réessayer plus tard
+                setTimeout(() => {
+                    this.createSingleConnection(svg, fromTile, toTile, color, width);
+                }, 200);
+                return false;
+            }
             
             // Calcul sécurisé avec arrondi et validation
             let x1 = Math.round(fromRect.left + fromRect.width/2 - svgRect.left);
@@ -1507,21 +1643,38 @@ INSTRUCTIONS :
             let x2 = Math.round(toRect.left + toRect.width/2 - svgRect.left);
             let y2 = Math.round(toRect.top + toRect.height/2 - svgRect.top);
             
-            // Debug des coordonnées
-            console.log(`🔍 Coordonnées ${fromTile}→${toTile}: (${x1},${y1}) → (${x2},${y2})`);
-            console.log(`📐 SVG rect:`, {left: svgRect.left, top: svgRect.top, width: svgRect.width, height: svgRect.height});
-            console.log(`📐 From rect:`, {left: fromRect.left, top: fromRect.top, width: fromRect.width, height: fromRect.height});
-            console.log(`📐 To rect:`, {left: toRect.left, top: toRect.top, width: toRect.width, height: toRect.height});
-            
-            // Validation des coordonnées
-            if (isNaN(x1) || isNaN(y1) || isNaN(x2) || isNaN(y2)) {
+            // Validation stricte des coordonnées
+            if (isNaN(x1) || isNaN(y1) || isNaN(x2) || isNaN(y2) ||
+                !isFinite(x1) || !isFinite(y1) || !isFinite(x2) || !isFinite(y2)) {
                 console.error(`❌ Coordonnées invalides pour ${fromTile}-${toTile}: (${x1},${y1}) → (${x2},${y2})`);
                 return false;
             }
             
-            // Créer le path avec ID unique
+            // Vérifier que les coordonnées sont dans des limites raisonnables
+            const maxCoord = 10000; // Limite raisonnable
+            if (Math.abs(x1) > maxCoord || Math.abs(y1) > maxCoord || 
+                Math.abs(x2) > maxCoord || Math.abs(y2) > maxCoord) {
+                console.error(`❌ Coordonnées hors limites pour ${fromTile}-${toTile}: (${x1},${y1}) → (${x2},${y2})`);
+                return false;
+            }
+            
+            // Debug des coordonnées (seulement si valides)
+            console.log(`🔍 Coordonnées ${fromTile}→${toTile}: (${x1},${y1}) → (${x2},${y2})`);
+            
+            // Créer le path avec ID unique et validation
             const connectionId = `connection-${fromTile}-${toTile}`;
-            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            
+            // Vérifier si la connexion existe déjà
+            let path = document.getElementById(connectionId);
+            if (path) {
+                // Mettre à jour la connexion existante
+                path.setAttribute('d', `M ${x1} ${y1} L ${x2} ${y2}`);
+                console.log(`🔄 Connexion ${connectionId} mise à jour`);
+                return true;
+            }
+            
+            // Créer une nouvelle connexion
+            path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
             path.id = connectionId; // ✅ ID unique
             path.setAttribute('d', `M ${x1} ${y1} L ${x2} ${y2}`);
             path.setAttribute('stroke', color);
@@ -1532,9 +1685,14 @@ INSTRUCTIONS :
             path.dataset.from = fromTile; // Gardé pour compatibilité
             path.dataset.to = toTile;
             
-            svg.appendChild(path);
-            // console.log(`🔗 ${fromTile} → ${toTile}`);
-            return true;
+            try {
+                svg.appendChild(path);
+                console.log(`✅ Connexion ${connectionId} créée avec succès`);
+                return true;
+            } catch (error) {
+                console.error(`❌ Erreur lors de l'ajout de ${connectionId}:`, error);
+                return false;
+            }
         }
     }
     
