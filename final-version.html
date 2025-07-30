@@ -786,8 +786,13 @@ INSTRUCTIONS :
                 this.animationInterval = null;
             }
             
-            // CRUCIAL : Stopper l'animation en cours (méthode ChatGPT)
+            // CRUCIAL : Stopper l'animation en cours ET forcer l'arrêt immédiat
             this.stopCurrentAnimation();
+            
+            // NOUVEAU : Forcer l'invalidation immédiate pour éviter les timings serrés
+            this.currentAnimationId = null; // Invalide immédiatement tous les setTimeout en cours
+            this.forceStopVisuals(); // Arrêt visuel immédiat
+            console.log('🛑 Invalidation immédiate de tous les timeouts en cours');
             
             this.currentSection = sectionNumber;
             
@@ -1340,9 +1345,14 @@ INSTRUCTIONS :
         // setTimeout sécurisé qui vérifie l'ID d'animation
         setAnimationTimeout(callback, delay, animationId) {
             return setTimeout(() => {
-                // Vérifier que cette animation est toujours active
-                if (this.currentAnimationId !== animationId) {
-                    console.log('🚫 Animation timeout abandonné (nouvelle animation en cours)');
+                // DOUBLE VÉRIFICATION pour éviter les problèmes de timing
+                if (this.currentAnimationId !== animationId || this.currentAnimationId === null) {
+                    console.log('🚫 Animation timeout abandonné (ID invalide ou null)');
+                    return;
+                }
+                // Vérification supplémentaire au moment de l'exécution
+                if (!animationId) {
+                    console.log('🚫 Animation timeout abandonné (animationId undefined)');
                     return;
                 }
                 callback();
@@ -1356,6 +1366,21 @@ INSTRUCTIONS :
                 this.currentAnimationId = null;
                 this.isAnimating = false;
             }
+        }
+        
+        // NOUVEAU : Arrêt visuel immédiat pour éviter les conflits de timing
+        forceStopVisuals() {
+            // Arrêter toutes les transitions CSS en cours
+            document.querySelectorAll('#stratego-final-map .auto-connection').forEach(path => {
+                path.style.transition = 'none';
+            });
+            
+            // Arrêter toutes les transitions de tuiles
+            document.querySelectorAll('#stratego-final-map .tile').forEach(tile => {
+                tile.style.transition = 'opacity 0.3s ease !important';
+            });
+            
+            console.log('⚡ Arrêt visuel immédiat appliqué');
         }
         
         // CRÉATION AUTOMATIQUE DES CONNEXIONS
