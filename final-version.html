@@ -683,18 +683,27 @@ INSTRUCTIONS :
             let lastTriggerTime = 0;
             let lastScrollTime = 0;
             
-            // KILL SWITCH : Invalider toute animation dès le scroll
+            // KILL SWITCH INTELLIGENT : Ne coupe que si scroll significatif
+            let significantScrollCount = 0;
             const killSwitchScroll = () => {
                 const now = Date.now();
-                if (now - lastScrollTime < 50) return; // Throttle léger
+                if (now - lastScrollTime < 100) return; // Throttle plus large
                 lastScrollTime = now;
                 
-                // Si une animation est en cours, l'invalider immédiatement
-                if (this.isAnimating && this.currentAnimationId) {
-                    console.log('⚡ KILL SWITCH: Animation interrompue par scroll');
+                significantScrollCount++;
+                
+                // Ne couper l'animation QUE si scroll continu/rapide (probable changement de section)
+                if (this.isAnimating && this.currentAnimationId && significantScrollCount > 3) {
+                    console.log('⚡ KILL SWITCH: Animation interrompue par scroll continu');
                     this.currentAnimationId = Symbol('scroll-interrupt');
                     this.forceStopVisuals();
+                    significantScrollCount = 0; // Reset
                 }
+                
+                // Reset counter après 1 seconde d'inactivité
+                setTimeout(() => {
+                    significantScrollCount = Math.max(0, significantScrollCount - 1);
+                }, 1000);
             };
             
             const handleScroll = () => {
