@@ -795,11 +795,15 @@ INSTRUCTIONS :
             // Démarrer immédiatement la première animation
             this.runSingleAnimation(sectionNumber);
             
-            // RÉPÉTITION AUTOMATIQUE SIMPLE
+            // RÉPÉTITION AUTOMATIQUE AVEC RESET
             this.animationInterval = setInterval(() => {
                 if (!this.isAnimating && document.visibilityState === 'visible') {
                     console.log(`🔄 Répétition automatique - Section ${sectionNumber}`);
-                    this.runSingleAnimation(sectionNumber);
+                    // Reset TOUTES les tuiles de la section courante avant répétition
+                    this.resetCurrentSectionTiles(sectionNumber);
+                    setTimeout(() => {
+                        this.runSingleAnimation(sectionNumber);
+                    }, 300); // Petit délai après reset
                 }
             }, 12000); // 12 secondes
             
@@ -1278,6 +1282,35 @@ INSTRUCTIONS :
                 return true;
             }
             return false;
+        }
+        
+        // NOUVEAU : Reset seulement les tuiles de la section courante pour répétition
+        resetCurrentSectionTiles(sectionNumber) {
+            console.log(`🔄 Reset des tuiles de la section ${sectionNumber} pour répétition`);
+            
+            // Désactiver toutes les tuiles de cette section
+            document.querySelectorAll(`#stratego-final-map .tile[data-section="${sectionNumber}"]`).forEach(tile => {
+                tile.classList.remove('active', 'pulse', 'glow');
+                tile.style.opacity = '0.3';
+                tile.style.transition = 'opacity 0.3s ease';
+            });
+            
+            // Reset toutes les connexions
+            document.querySelectorAll('#stratego-final-map .auto-connection').forEach(path => {
+                path.style.opacity = '0';
+                path.style.transition = 'none';
+                if (path.getTotalLength) {
+                    try {
+                        const pathLength = path.getTotalLength();
+                        path.style.strokeDasharray = pathLength;
+                        path.style.strokeDashoffset = pathLength;
+                    } catch (e) {
+                        // Ignore les erreurs de getTotalLength
+                    }
+                }
+            });
+            
+            console.log(`✅ Reset terminé pour section ${sectionNumber}`);
         }
         
         // CRÉATION AUTOMATIQUE DES CONNEXIONS
