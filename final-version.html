@@ -795,13 +795,15 @@ INSTRUCTIONS :
             // Démarrer immédiatement la première animation
             this.runSingleAnimation(sectionNumber);
             
-            // INTERVALLE SUPPRIMÉ - causait la désactivation des tuiles
-            // L'animation ne se joue qu'une fois par section
-            // this.animationInterval = setInterval(() => {
-            //     if (!this.isAnimating && document.visibilityState === 'visible') {
-            //         this.runSingleAnimation(sectionNumber);
-            //     }
-            // }, 12000);
+            // RÉPÉTITION AUTOMATIQUE SIMPLE
+            this.animationInterval = setInterval(() => {
+                if (!this.isAnimating && document.visibilityState === 'visible') {
+                    console.log(`🔄 Répétition automatique - Section ${sectionNumber}`);
+                    this.runSingleAnimation(sectionNumber);
+                }
+            }, 12000); // 12 secondes
+            
+            console.log(`🔄 Animation en boucle activée pour Section ${sectionNumber} (toutes les 12s)`);
         }
         
         runSingleAnimation(sectionNumber) {
