@@ -717,8 +717,14 @@ INSTRUCTIONS :
                         if (isActive) {
                             console.log(`🔍 Section 1 détectée (distance: ${Math.abs(blockCenter - viewportCenter)}px, seuil restrictif)`);
                         }
+                    } else if (sectionNumber === 2) {
+                        // Pour section 2 : détection plus précoce (seuil élargi)
+                        isActive = Math.abs(blockCenter - viewportCenter) < viewportHeight / 2.2; // Plus permissif
+                        if (isActive) {
+                            console.log(`🔍 Section 2 détectée plus tôt (distance: ${Math.abs(blockCenter - viewportCenter)}px, seuil élargi)`);
+                        }
                     } else {
-                        // Pour section 2 : logique normale (centre)
+                        // Pour les autres sections : logique normale
                         isActive = Math.abs(blockCenter - viewportCenter) < viewportHeight / 3;
                         if (isActive) {
                             console.log(`🔍 Section ${sectionNumber} détectée au centre (distance: ${Math.abs(blockCenter - viewportCenter)}px)`);
