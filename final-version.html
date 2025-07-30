@@ -681,12 +681,30 @@ INSTRUCTIONS :
             console.log('🔍 Configuration du scroll listener simple');
             
             let lastTriggerTime = 0;
+            let lastScrollTime = 0;
+            
+            // KILL SWITCH : Invalider toute animation dès le scroll
+            const killSwitchScroll = () => {
+                const now = Date.now();
+                if (now - lastScrollTime < 50) return; // Throttle léger
+                lastScrollTime = now;
+                
+                // Si une animation est en cours, l'invalider immédiatement
+                if (this.isAnimating && this.currentAnimationId) {
+                    console.log('⚡ KILL SWITCH: Animation interrompue par scroll');
+                    this.currentAnimationId = Symbol('scroll-interrupt');
+                    this.forceStopVisuals();
+                }
+            };
             
             const handleScroll = () => {
+                // KILL SWITCH en premier
+                killSwitchScroll();
+                
                 const now = Date.now();
                 
-                // Debounce
-                if (now - lastTriggerTime < 500) return;
+                // Debounce pour la détection de section
+                if (now - lastTriggerTime < 1500) return;
                 
                 // Calculer quelle section est visible
                 const blocks = document.querySelectorAll('#stratego-final-map .content-block');
@@ -994,9 +1012,9 @@ INSTRUCTIONS :
                         
                         // 3. ANIMATION après petit délai avec vérification d'ID
                         this.setAnimationTimeout(() => {
-                            // Vérifier que l'animation est toujours active
-                            if (animationId && this.currentAnimationId !== animationId) {
-                                console.log('🚫 Animation de tracé annulée (nouvelle animation en cours)');
+                            // Vérification renforcée avec la fonction utilitaire
+                            if (!this.isAnimationActive(animationId)) {
+                                console.log('🚫 Animation de tracé annulée (animation inactive)');
                                 return;
                             }
                             path.style.transition = 'stroke-dashoffset 1s ease-in-out';
@@ -1342,17 +1360,20 @@ INSTRUCTIONS :
             return Symbol('animation-' + Date.now());
         }
         
+        // Vérifier si une animation est toujours active
+        isAnimationActive(animationId) {
+            return this.currentAnimationId === animationId && 
+                   this.currentAnimationId !== null && 
+                   animationId !== null && 
+                   animationId !== undefined;
+        }
+        
         // setTimeout sécurisé qui vérifie l'ID d'animation
         setAnimationTimeout(callback, delay, animationId) {
             return setTimeout(() => {
-                // DOUBLE VÉRIFICATION pour éviter les problèmes de timing
-                if (this.currentAnimationId !== animationId || this.currentAnimationId === null) {
-                    console.log('🚫 Animation timeout abandonné (ID invalide ou null)');
-                    return;
-                }
-                // Vérification supplémentaire au moment de l'exécution
-                if (!animationId) {
-                    console.log('🚫 Animation timeout abandonné (animationId undefined)');
+                // VÉRIFICATION CENTRALISÉE avec la fonction utilitaire
+                if (!this.isAnimationActive(animationId)) {
+                    console.log('🚫 Animation timeout abandonné (animation inactive)');
                     return;
                 }
                 callback();
