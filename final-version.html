@@ -765,19 +765,28 @@ INSTRUCTIONS :
                 }
             };
             
-            // Kill switch global : invalider l'animation dès le scroll
+            // Kill switch moins agressif : compter les scrolls significatifs
+            let significantScrollCount = 0;
             const killSwitchScroll = () => {
-                if (this.currentAnimationId) {
-                    console.log('🛑 KILL SWITCH: Animation stoppée par scroll');
+                significantScrollCount++;
+                
+                // SEULEMENT après 3 scrolls significatifs, tuer l'animation
+                if (significantScrollCount > 3 && this.currentAnimationId) {
+                    console.log('🛑 KILL SWITCH: Animation stoppée après scrolls multiples');
                     this.currentAnimationId = null;
+                    significantScrollCount = 0; // Reset
                 }
+                
+                // Reset du compteur après 2 secondes sans scroll
+                setTimeout(() => {
+                    if (significantScrollCount > 0) {
+                        significantScrollCount = Math.max(0, significantScrollCount - 1);
+                    }
+                }, 2000);
             };
             
-            // Écouter le scroll avec kill switch
-            window.addEventListener('scroll', (e) => {
-                killSwitchScroll();
-                handleScroll(e);
-            }, { passive: true });
+            // Écouter le scroll SANS kill switch pour test
+            window.addEventListener('scroll', handleScroll, { passive: true });
             
             // Test initial
             setTimeout(() => {
