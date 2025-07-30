@@ -652,6 +652,7 @@ INSTRUCTIONS :
             this.animationInterval = null;
             this.isAnimating = false;
             this.scrollObserver = null;
+            this.currentAnimationId = null; // ID unique pour suivre l'animation active
             // this.lastAnimatedSection supprimé car causait des blocages d'animation
         }
         
@@ -779,11 +780,14 @@ INSTRUCTIONS :
         switchToSection(sectionNumber) {
             console.log('🎯 Switching to section:', sectionNumber); // Debug activé
             
-            // Arrêter l'animation précédente
+            // Arrêter l'animation précédente ET stopper l'animation en cours
             if (this.animationInterval) {
                 clearInterval(this.animationInterval);
                 this.animationInterval = null;
             }
+            
+            // CRUCIAL : Stopper l'animation en cours (système ID unique)
+            this.stopCurrentAnimation();
             
             this.currentSection = sectionNumber;
             
@@ -818,8 +822,10 @@ INSTRUCTIONS :
                 return;
             }
             
-            // Protection supprimée : lastAnimatedSection causait des blocages
-            // Le délai de 1000ms dans handleScroll suffit pour éviter les répétitions
+            // NOUVEAU : Créer un ID unique pour cette animation
+            const animationId = this.createAnimationId();
+            this.currentAnimationId = animationId;
+            console.log('🆔 Nouvelle animation démarrée avec ID:', animationId.toString());
             
             this.isAnimating = true;
             // this.lastAnimatedSection supprimé car causait des blocages
@@ -843,11 +849,11 @@ INSTRUCTIONS :
                 this.recalculateConnectionPositions();
                 
                 if (sectionNumber === 1) {
-                    this.animateSection1();
+                    this.animateSection1(animationId);
                 } else if (sectionNumber === 2) {
-                    this.animateSection2();
+                    this.animateSection2(animationId);
                 } else if (sectionNumber === 3) {
-                    this.animateSection3();
+                    this.animateSection3(animationId);
                 }
             }, 200);
             
@@ -1282,6 +1288,40 @@ INSTRUCTIONS :
                 return true;
             }
             return false;
+        }
+        
+        // SYSTÈME D'ANIMATION AVEC ID UNIQUE
+        createAnimationId() {
+            return Symbol('animation-' + Date.now());
+        }
+        
+        // Vérifier si une animation est toujours active
+        isAnimationActive(animationId) {
+            return this.currentAnimationId === animationId && 
+                   this.currentAnimationId !== null && 
+                   animationId !== null && 
+                   animationId !== undefined;
+        }
+        
+        // setTimeout sécurisé qui vérifie l'ID d'animation
+        setAnimationTimeout(callback, delay, animationId) {
+            return setTimeout(() => {
+                // Vérifier que cette animation est toujours active
+                if (!this.isAnimationActive(animationId)) {
+                    console.log('🚫 Animation timeout abandonné (animation inactive)');
+                    return;
+                }
+                callback();
+            }, delay);
+        }
+        
+        // Stopper l'animation en cours
+        stopCurrentAnimation() {
+            if (this.currentAnimationId) {
+                console.log('🛑 Animation en cours stoppée');
+                this.currentAnimationId = null;
+                this.isAnimating = false;
+            }
         }
         
         // NOUVEAU : Reset seulement les tuiles de la section courante pour répétition
