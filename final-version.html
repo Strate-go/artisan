@@ -1100,14 +1100,15 @@ INSTRUCTIONS :
         animateSection1(animationId) {
             console.log('▶️ Start anim 1', animationId.toString());
             
-            // ✅ VÉRIFICATION CRITIQUE : Section a-t-elle changé ?
-            if (this.currentSection !== 1) {
-                console.log('❌ Abandon animation section 1 car section a changé:', this.currentSection, '≠ 1');
+            // 🔐 VÉRIFICATION CRITIQUE : animationId actif ?
+            if (!this.isAnimationActive(animationId)) {
+                console.log('⛔ animateSection1 annulée : animationId plus actif');
                 return;
             }
             
-            if (!this.isAnimationActive(animationId)) {
-                console.log('🚫 Section 1 animation annulée avant démarrage');
+            // ✅ VÉRIFICATION CRITIQUE : Section a-t-elle changé ?
+            if (this.currentSection !== 1) {
+                console.log('❌ Abandon animation section 1 car section a changé:', this.currentSection, '≠ 1');
                 return;
             }
             console.log('🎨 Section 1 animation séquentielle - DÉMARRAGE');
@@ -1152,14 +1153,15 @@ INSTRUCTIONS :
         animateSection2(animationId) {
             console.log('▶️ Start anim 2', animationId.toString());
             
-            // ✅ VÉRIFICATION CRITIQUE : Section a-t-elle changé ?
-            if (this.currentSection !== 2) {
-                console.log('❌ Abandon animation section 2 car section a changé:', this.currentSection, '≠ 2');
+            // 🔐 VÉRIFICATION CRITIQUE : animationId actif ?
+            if (!this.isAnimationActive(animationId)) {
+                console.log('⛔ animateSection2 annulée : animationId plus actif');
                 return;
             }
             
-            if (!this.isAnimationActive(animationId)) {
-                console.log('🚫 Section 2 animation annulée avant démarrage');
+            // ✅ VÉRIFICATION CRITIQUE : Section a-t-elle changé ?
+            if (this.currentSection !== 2) {
+                console.log('❌ Abandon animation section 2 car section a changé:', this.currentSection, '≠ 2');
                 return;
             }
             console.log('🎨 Section 2 animation séquentielle - DÉMARRAGE');
@@ -1202,14 +1204,15 @@ INSTRUCTIONS :
         animateSection3(animationId) {
             console.log('▶️ Start anim 3', animationId.toString());
             
-            // ✅ VÉRIFICATION CRITIQUE : Section a-t-elle changé ?
-            if (this.currentSection !== 3) {
-                console.log('❌ Abandon animation section 3 car section a changé:', this.currentSection, '≠ 3');
+            // 🔐 VÉRIFICATION CRITIQUE : animationId actif ?
+            if (!this.isAnimationActive(animationId)) {
+                console.log('⛔ animateSection3 annulée : animationId plus actif');
                 return;
             }
             
-            if (!this.isAnimationActive(animationId)) {
-                console.log('🚫 Section 3 animation annulée avant démarrage');
+            // ✅ VÉRIFICATION CRITIQUE : Section a-t-elle changé ?
+            if (this.currentSection !== 3) {
+                console.log('❌ Abandon animation section 3 car section a changé:', this.currentSection, '≠ 3');
                 return;
             }
             console.log('🎨 Section 3 animation séquentielle - DÉMARRAGE');
