@@ -823,6 +823,13 @@ INSTRUCTIONS :
             console.log('📦 switchToSection déclenché pour section', sectionNumber);
             console.log("➡️ isAnimating avant switch:", this.isAnimating);
             
+            // 💡 Nettoyer les timeouts restants AVANT tout
+            if (this.pendingTimeouts && this.pendingTimeouts.length > 0) {
+                this.pendingTimeouts.forEach(timeoutId => clearTimeout(timeoutId));
+                this.pendingTimeouts = [];
+                console.log("♻️ Timeouts nettoyés avant lancement nouvelle animation");
+            }
+            
             // Arrêter l'animation précédente ET stopper l'animation en cours
             if (this.animationInterval) {
                 clearInterval(this.animationInterval);
@@ -1532,24 +1539,26 @@ INSTRUCTIONS :
             console.log('🔎 stopCurrentAnimation called - currentAnimationId:', this.currentAnimationId);
             console.log('🛑 STOP appelé depuis:', new Error().stack);
             
+            // 🚫 ANNULER TOUS LES TIMEOUTS EN COURS (même si currentAnimationId est null)
+            if (this.pendingTimeouts && this.pendingTimeouts.length > 0) {
+                this.pendingTimeouts.forEach(timeoutId => clearTimeout(timeoutId));
+                this.pendingTimeouts = [];
+                console.log("🧹 Tous les timeouts annulés");
+            }
+            
             if (this.currentAnimationId) {
                 console.log('🛑 KILL SWITCH: Animation stoppée:', this.currentAnimationId.toString());
                 this.currentAnimationId = null;
                 this.isAnimating = false;
                 
-                // Force stop visuel : arrêter toutes les transitions CSS
+                // 🧯 Arrêt visuel d'urgence : enlever transition
                 document.querySelectorAll('#stratego-final-map .auto-connection').forEach(path => {
                     path.style.transition = 'none';
                 });
-
-                // ✅ Nouvelle mesure préventive : annuler les timeouts si stockés
-                if (this.pendingTimeouts && this.pendingTimeouts.length > 0) {
-                    this.pendingTimeouts.forEach(timeout => clearTimeout(timeout));
-                    this.pendingTimeouts = [];
-                    console.log('⛔ Tous les timeouts manuels ont été annulés');
-                }
             } else {
                 console.log('⚠️ stopCurrentAnimation appelé mais currentAnimationId est null');
+                // Même sans currentAnimationId, forcer l'arrêt
+                this.isAnimating = false;
             }
         }
         
