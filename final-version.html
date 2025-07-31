@@ -1810,6 +1810,41 @@ INSTRUCTIONS :
             }
         }
         
+        createOrUpdateGradient(svg, color) {
+            const gradientId = `gradient-${color.replace('#', '')}`;
+            
+            // Ne pas dupliquer un dégradé déjà existant
+            if (svg.querySelector(`#${gradientId}`)) return gradientId;
+
+            const defs = svg.querySelector('defs') || svg.insertBefore(
+                document.createElementNS('http://www.w3.org/2000/svg', 'defs'),
+                svg.firstChild
+            );
+
+            const linear = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+            linear.id = gradientId;
+            linear.setAttribute('x1', '0%');
+            linear.setAttribute('y1', '0%');
+            linear.setAttribute('x2', '100%');
+            linear.setAttribute('y2', '0%');
+
+            const stop1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+            stop1.setAttribute('offset', '0%');
+            stop1.setAttribute('stop-color', color);
+            stop1.setAttribute('stop-opacity', '0.2');
+
+            const stop2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+            stop2.setAttribute('offset', '100%');
+            stop2.setAttribute('stop-color', color);
+            stop2.setAttribute('stop-opacity', '1');
+
+            linear.appendChild(stop1);
+            linear.appendChild(stop2);
+            defs.appendChild(linear);
+
+            return gradientId;
+        }
+
         createSingleConnection(svg, fromTile, toTile, color = '#bf9b30', width = '3') {
             const fromElement = document.querySelector(`#stratego-final-map .tile[data-tile="${fromTile}"]`);
             const toElement = document.querySelector(`#stratego-final-map .tile[data-tile="${toTile}"]`);
@@ -1872,8 +1907,10 @@ INSTRUCTIONS :
             // Vérifier si la connexion existe déjà
             let path = document.getElementById(connectionId);
             if (path) {
-                // Mettre à jour la connexion existante
-                path.setAttribute('d', `M ${x1} ${y1} L ${x2} ${y2}`);
+                // Mettre à jour la connexion existante avec le style amélioré
+                const dx = Math.abs(x2 - x1) * 0.4; // Tension de la courbe
+                const d = `M ${x1},${y1} C ${x1 + dx},${y1} ${x2 - dx},${y2} ${x2},${y2}`;
+                path.setAttribute('d', d);
                 console.log(`🔄 Connexion ${connectionId} mise à jour`);
                 return true;
             }
@@ -1881,9 +1918,19 @@ INSTRUCTIONS :
             // Créer une nouvelle connexion
             path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
             path.id = connectionId; // ✅ ID unique
-            path.setAttribute('d', `M ${x1} ${y1} L ${x2} ${y2}`);
-            path.setAttribute('stroke', color);
+            
+            // ⤴️ Générer un path fluide type cubic bezier
+            const dx = Math.abs(x2 - x1) * 0.4; // Tension de la courbe
+            const d = `M ${x1},${y1} C ${x1 + dx},${y1} ${x2 - dx},${y2} ${x2},${y2}`;
+            
+            // 🎨 Générer le gradient et l'utiliser
+            const gradientId = this.createOrUpdateGradient(svg, color);
+            
+            // 🖌️ Appliquer les styles améliorés
+            path.setAttribute('d', d);
+            path.setAttribute('stroke', `url(#${gradientId})`);
             path.setAttribute('stroke-width', width);
+            path.setAttribute('stroke-linecap', 'round');
             path.setAttribute('fill', 'none');
             path.setAttribute('opacity', '0'); // Masqué par défaut
             path.classList.add('auto-connection');
