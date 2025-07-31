@@ -654,6 +654,7 @@ INSTRUCTIONS :
             this.scrollObserver = null;
             this.currentAnimationId = null; // ID unique pour suivre l'animation active
             this.pendingTimeouts = []; // ✅ Tableau pour tracker tous les setTimeout
+            console.log("✅ 1. this.pendingTimeouts initialisé:", this.pendingTimeouts);
             // this.lastAnimatedSection supprimé car causait des blocages d'animation
         }
         
@@ -693,10 +694,21 @@ INSTRUCTIONS :
             let lastTriggerTime = 0;
             
             const handleScroll = () => {
+                console.log("📍 handleScroll déclenché");
                 const now = Date.now();
                 
+                // ✅ 7. Protection temporaire : ignorer scroll pendant animation
+                if (this.isAnimating) {
+                    console.log("⚠️ Scroll ignoré car animation en cours");
+                    return;
+                }
+                
                 // Debounce
-                if (now - lastTriggerTime < 500) return;
+                console.log("🕐 Temps depuis dernier trigger:", now - lastTriggerTime, "ms");
+                if (now - lastTriggerTime < 500) {
+                    console.log("⚠️ Scroll ignoré (debounce < 500ms)");
+                    return;
+                }
                 
                 // Calculer quelle section est visible
                 const blocks = document.querySelectorAll('#stratego-final-map .content-block');
@@ -746,18 +758,26 @@ INSTRUCTIONS :
                     }
                 });
                 
+                console.log(`🔍 Section détectée: ${activeSection}, section actuelle: ${this.currentSection}, isAnimating: ${this.isAnimating}`);
+                
                 // Changer de section SEULEMENT si pas en cours d'animation
                 if (activeSection !== this.currentSection && !this.isAnimating) {
+                    console.log(`✅ Conditions remplies pour changement: ${this.currentSection} → ${activeSection}`);
+                    
                     // Pour le premier scroll (currentSection = null), pas de délai
                     if (this.currentSection !== null) {
-                        // Délai simple pour éviter les changements trop rapides
-                        const now = Date.now();
-                        if (now - lastTriggerTime < 1500) { // 1.5 seconde pour plus de stabilité
-                            console.log(`⏰ Changement trop rapide ignoré: ${this.currentSection} → ${activeSection}`);
+                        // ✅ 3. Correction : déplacer lastTriggerTime après validation
+                        const timeSinceLastTrigger = now - lastTriggerTime;
+                        console.log(`🕐 Temps depuis dernier changement: ${timeSinceLastTrigger}ms`);
+                        
+                        if (timeSinceLastTrigger < 1500) { // 1.5 seconde pour plus de stabilité
+                            console.log(`⏰ Changement trop rapide ignoré: ${this.currentSection} → ${activeSection} (${timeSinceLastTrigger}ms < 1500ms)`);
                             return;
                         }
-                        lastTriggerTime = now;
                     }
+                    
+                    // ✅ Mettre à jour le timestamp APRÈS validation
+                    lastTriggerTime = now;
                     
                     console.log(`✅ Changement de section: ${this.currentSection} → ${activeSection}`);
                     
@@ -772,6 +792,12 @@ INSTRUCTIONS :
                     } else {
                         this.switchToSection(activeSection);
                     }
+                } else {
+                    console.log(`❌ Conditions NON remplies pour changement:`);
+                    console.log(`   - activeSection: ${activeSection}`);
+                    console.log(`   - this.currentSection: ${this.currentSection}`);
+                    console.log(`   - !this.isAnimating: ${!this.isAnimating}`);
+                    console.log(`   - activeSection !== this.currentSection: ${activeSection !== this.currentSection}`);
                 }
             };
             
@@ -794,7 +820,8 @@ INSTRUCTIONS :
         }
         
         switchToSection(sectionNumber) {
-            console.log('🎯 Switching to section:', sectionNumber); // Debug activé
+            console.log('📦 switchToSection déclenché pour section', sectionNumber);
+            console.log("➡️ isAnimating avant switch:", this.isAnimating);
             
             // Arrêter l'animation précédente ET stopper l'animation en cours
             if (this.animationInterval) {
@@ -840,7 +867,8 @@ INSTRUCTIONS :
         }
         
         runSingleAnimation(sectionNumber) {
-            console.log('🎭 runSingleAnimation appelé pour section:', sectionNumber);
+            console.log('🚀 Démarrage animation pour section', sectionNumber);
+            console.log("➡️ isAnimating au début de runSingleAnimation:", this.isAnimating);
             
             if (this.isAnimating) {
                 console.log('⏸️ Animation already running, skipping');
@@ -899,6 +927,7 @@ INSTRUCTIONS :
 
                 this.isAnimating = false;
                 console.log("✅ Animation terminée pour", sectionNumber);
+                console.log("✅ isAnimating remis à false:", this.isAnimating);
             }, 6000);
             this.pendingTimeouts.push(t2);
         }
@@ -1452,6 +1481,9 @@ INSTRUCTIONS :
         
         // Stopper l'animation en cours
         stopCurrentAnimation() {
+            console.log('🔎 stopCurrentAnimation called - currentAnimationId:', this.currentAnimationId);
+            console.log('🛑 STOP appelé depuis:', new Error().stack);
+            
             if (this.currentAnimationId) {
                 console.log('🛑 KILL SWITCH: Animation stoppée:', this.currentAnimationId.toString());
                 this.currentAnimationId = null;
@@ -1468,6 +1500,8 @@ INSTRUCTIONS :
                     this.pendingTimeouts = [];
                     console.log('⛔ Tous les timeouts manuels ont été annulés');
                 }
+            } else {
+                console.log('⚠️ stopCurrentAnimation appelé mais currentAnimationId est null');
             }
         }
         
