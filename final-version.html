@@ -991,6 +991,16 @@ INSTRUCTIONS :
                 this.isAnimating = false;
                 console.log("✅ Animation terminée pour", sectionNumber);
                 console.log("✅ isAnimating remis à false:", this.isAnimating);
+                
+                // 🆕 NOUVEAU : vérifier si la section visible est différente de currentSection
+                const newVisibleSection = this.getVisibleSectionNumber();
+                if (newVisibleSection && newVisibleSection !== this.currentSection) {
+                    console.log(`👀 Nouvelle section visible détectée après animation: ${newVisibleSection} (était: ${this.currentSection})`);
+                    console.log(`🚀 Lancement automatique de l'animation pour la section ${newVisibleSection}`);
+                    this.switchToSection(newVisibleSection);
+                } else if (newVisibleSection === this.currentSection) {
+                    console.log(`✅ Même section visible: ${newVisibleSection} - pas de changement nécessaire`);
+                }
             }, 6000);
             this.pendingTimeouts.push(t2);
         }
@@ -1584,6 +1594,34 @@ INSTRUCTIONS :
             return timeoutId;
         }
         
+        // Détecter quelle section est actuellement visible
+        getVisibleSectionNumber() {
+            const sections = document.querySelectorAll('#stratego-final-map .content-block[data-content]');
+            
+            for (let section of sections) {
+                const sectionNumber = parseInt(section.getAttribute('data-content'));
+                if (!sectionNumber) continue;
+                
+                const rect = section.getBoundingClientRect();
+                const viewportHeight = window.innerHeight;
+                
+                // Utiliser la même logique que handleScroll pour la cohérence
+                const sectionCenter = rect.top + rect.height / 2;
+                const viewportCenter = viewportHeight / 2;
+                
+                // Section visible si son centre est dans la partie centrale de l'écran
+                const isVisible = rect.top < viewportHeight / 2 && rect.bottom > viewportHeight / 4;
+                
+                if (isVisible) {
+                    console.log(`👀 Section ${sectionNumber} détectée comme visible (top: ${Math.round(rect.top)}, bottom: ${Math.round(rect.bottom)})`);
+                    return sectionNumber;
+                }
+            }
+            
+            console.log('👀 Aucune section clairement visible');
+            return null;
+        }
+
         // Stopper l'animation en cours
         stopCurrentAnimation() {
             console.log('🔎 stopCurrentAnimation called - currentAnimationId:', this.currentAnimationId);
