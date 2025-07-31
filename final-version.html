@@ -1081,6 +1081,18 @@ INSTRUCTIONS :
                 const connectionId = `connection-${id}`;
                 let path = document.getElementById(connectionId);
                 
+                // 🔍 DEBUG SPÉCIAL pour materiaux et charges
+                if (id.includes('materiaux') || id.includes('charges')) {
+                    console.log(`🔬 SHOW CONNECTION ${id}:`);
+                    console.log(`  ConnectionId: ${connectionId}`);
+                    console.log(`  Path trouvé: ${path ? 'OUI' : 'NON'}`);
+                    if (path) {
+                        console.log(`  Path d: ${path.getAttribute('d')}`);
+                        console.log(`  Path stroke: ${path.getAttribute('stroke')}`);
+                        console.log(`  Path opacity: ${path.getAttribute('opacity')}`);
+                    }
+                }
+                
                 // 🔧 Si la connexion n'existe pas, la recréer automatiquement
                 if (!path) {
                     console.log(`🔧 Connexion ${id} manquante, recréation...`);
@@ -1910,6 +1922,13 @@ INSTRUCTIONS :
                 // Mettre à jour la connexion existante avec le style amélioré
                 const dx = Math.abs(x2 - x1) * 0.4; // Tension de la courbe
                 const d = `M ${x1},${y1} C ${x1 + dx},${y1} ${x2 - dx},${y2} ${x2},${y2}`;
+                
+                // 🔍 DEBUG SPÉCIAL pour materiaux et charges
+                if (fromTile === 'materiaux' || fromTile === 'charges') {
+                    console.log(`🔬 UPDATE ${fromTile}→${toTile}:`);
+                    console.log(`  Path mis à jour: ${d}`);
+                }
+                
                 path.setAttribute('d', d);
                 console.log(`🔄 Connexion ${connectionId} mise à jour`);
                 return true;
@@ -1922,6 +1941,16 @@ INSTRUCTIONS :
             // ⤴️ Générer un path fluide type cubic bezier
             const dx = Math.abs(x2 - x1) * 0.4; // Tension de la courbe
             const d = `M ${x1},${y1} C ${x1 + dx},${y1} ${x2 - dx},${y2} ${x2},${y2}`;
+            
+            // 🔍 DEBUG SPÉCIAL pour materiaux et charges
+            if (fromTile === 'materiaux' || fromTile === 'charges') {
+                console.log(`🔬 DEBUG ${fromTile}→${toTile}:`);
+                console.log(`  Coordonnées: (${x1},${y1}) → (${x2},${y2})`);
+                console.log(`  Distance horizontale: ${Math.abs(x2 - x1)}`);
+                console.log(`  dx (tension): ${dx}`);
+                console.log(`  Points de contrôle: C1(${x1 + dx},${y1}) C2(${x2 - dx},${y2})`);
+                console.log(`  Path généré: ${d}`);
+            }
             
             // 🎨 Générer le gradient et l'utiliser
             const gradientId = this.createOrUpdateGradient(svg, color);
