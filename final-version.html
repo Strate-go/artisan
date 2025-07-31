@@ -922,6 +922,12 @@ INSTRUCTIONS :
                     return;
                 }
 
+                // ✅ Vérification ultime : section en cours
+                if (this.currentSection !== sectionNumber) {
+                    console.log("❌ Interruption : section a changé depuis le lancement du timeout", this.currentSection, "≠", sectionNumber);
+                    return;
+                }
+
                 this.recalculateConnectionPositions();
 
                 if (sectionNumber === 1) {
@@ -938,6 +944,12 @@ INSTRUCTIONS :
             const t2 = setTimeout(() => {
                 if (!this.isAnimationActive(animationId)) {
                     console.log("⛔ Annulé : déblocage ignoré (animationId plus actif)");
+                    return;
+                }
+
+                // ✅ Vérification ultime : section en cours (déblocage)
+                if (this.currentSection !== sectionNumber) {
+                    console.log("❌ Déblocage ignoré : section a changé depuis le lancement", this.currentSection, "≠", sectionNumber);
                     return;
                 }
 
