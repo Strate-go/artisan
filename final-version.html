@@ -834,6 +834,7 @@ INSTRUCTIONS :
             if (this.animationInterval) {
                 clearInterval(this.animationInterval);
                 this.animationInterval = null;
+                console.log('🧹 Ancien intervalle de répétition annulé');
             }
             
             // CRUCIAL : Stopper l'animation en cours (système ID unique)
@@ -853,7 +854,24 @@ INSTRUCTIONS :
             this.runSingleAnimation(sectionNumber);
             
             // RÉPÉTITION AUTOMATIQUE AVEC RESET
+            // ✅ Sécurité supplémentaire : s'assurer qu'aucun ancien interval ne traîne
+            if (this.animationInterval) {
+                clearInterval(this.animationInterval);
+                console.log('🔧 Nettoyage preventif d\'un interval restant');
+            }
+            
+            // ✅ Créer un ID unique pour cet interval pour tracking
+            const intervalId = Date.now();
+            console.log(`🔄 Création nouvel interval pour section ${sectionNumber} (ID: ${intervalId})`);
+            
             this.animationInterval = setInterval(() => {
+                // ✅ Vérification supplémentaire : on est toujours sur la bonne section ?
+                if (this.currentSection !== sectionNumber) {
+                    console.log(`🚫 ARRÊT AUTOMATIQUE: Section changée (${this.currentSection} ≠ ${sectionNumber}) - clearing interval`);
+                    clearInterval(this.animationInterval);
+                    this.animationInterval = null;
+                    return;
+                }
                 if (!this.isAnimating && document.visibilityState === 'visible' && this.currentSection === sectionNumber) {
                     
                     // 🔍 VÉRIFICATION CRITIQUE : La section est-elle visible à l'écran ?
@@ -1576,6 +1594,13 @@ INSTRUCTIONS :
                 this.pendingTimeouts.forEach(timeoutId => clearTimeout(timeoutId));
                 this.pendingTimeouts = [];
                 console.log("🧹 Tous les timeouts annulés");
+            }
+            
+            // 🚫 ANNULER AUSSI L'INTERVAL DE RÉPÉTITION
+            if (this.animationInterval) {
+                clearInterval(this.animationInterval);
+                this.animationInterval = null;
+                console.log("🧹 Interval de répétition annulé dans stopCurrentAnimation");
             }
             
             if (this.currentAnimationId) {
