@@ -1081,7 +1081,16 @@ INSTRUCTIONS :
                 const connectionId = `connection-${id}`;
                 let path = document.getElementById(connectionId);
                 
-
+                // 🔍 DEBUG SPÉCIAL pour materiaux et charges
+                if (id.includes('materiaux') || id.includes('charges')) {
+                    console.log(`🔬 SHOW CONNECTION ${id}:`);
+                    console.log(`  ID recherché: ${connectionId}`);
+                    console.log(`  Path trouvé: ${path ? 'OUI' : 'NON'}`);
+                    if (path) {
+                        console.log(`  Opacity avant: ${path.getAttribute('opacity')}`);
+                        console.log(`  Stroke: ${path.getAttribute('stroke')}`);
+                    }
+                }
                 
                 // 🔧 Si la connexion n'existe pas, la recréer automatiquement
                 if (!path) {
@@ -1123,6 +1132,14 @@ INSTRUCTIONS :
                         // 2. CONDITION : éviter re-animation si déjà visible
                         if (path.style.opacity === '0' || path.style.opacity === '') {
                             path.style.opacity = '0.8'; // Rendre visible
+                            
+                            // 🔍 DEBUG SPÉCIAL pour materiaux et charges
+                            if (id.includes('materiaux') || id.includes('charges')) {
+                                console.log(`🔬 RENDERING ${id}: opacity set to 0.8`);
+                                console.log(`  PathLength: ${pathLength}`);
+                                console.log(`  StrokeDasharray: ${path.style.strokeDasharray}`);
+                                console.log(`  StrokeDashoffset: ${path.style.strokeDashoffset}`);
+                            }
                             
                             // 3. ANIMATION après petit délai
                             this.setAnimationTimeout(() => {
@@ -1924,6 +1941,15 @@ INSTRUCTIONS :
             // ⤴️ Générer un path fluide type cubic bezier avec tension minimale
             const dx = Math.max(Math.abs(x2 - x1) * 0.4, 30); // Tension minimale de 30px
             const d = `M ${x1},${y1} C ${x1 + dx},${y1} ${x2 - dx},${y2} ${x2},${y2}`;
+            
+            // 🔍 DEBUG SPÉCIAL pour materiaux et charges
+            if (fromTile === 'materiaux' || fromTile === 'charges') {
+                console.log(`🔬 DEBUG CRÉATION ${fromTile}→${toTile}:`);
+                console.log(`  Coordonnées: (${x1},${y1}) → (${x2},${y2})`);
+                console.log(`  Distance: ${Math.abs(x2 - x1)}`);
+                console.log(`  dx calculé: ${dx}`);
+                console.log(`  Path: ${d}`);
+            }
             
             // 🎨 Générer le gradient et l'utiliser
             const gradientId = this.createOrUpdateGradient(svg, color);
