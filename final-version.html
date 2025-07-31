@@ -697,11 +697,11 @@ INSTRUCTIONS :
                 console.log("📍 handleScroll déclenché");
                 const now = Date.now();
                 
-                // ✅ 7. Protection temporaire : ignorer scroll pendant animation
-                if (this.isAnimating) {
-                    console.log("⚠️ Scroll ignoré car animation en cours");
-                    return;
-                }
+                // ✅ 7. Protection temporaire désactivée - elle bloquait les animations
+                // if (this.isAnimating) {
+                //     console.log("⚠️ Scroll ignoré car animation en cours");
+                //     return;
+                // }
                 
                 // Debounce
                 console.log("🕐 Temps depuis dernier trigger:", now - lastTriggerTime, "ms");
