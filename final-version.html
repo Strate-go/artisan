@@ -867,8 +867,11 @@ INSTRUCTIONS :
                 // Ne pas toucher à l'opacité de la section active - laissons l'animation le faire
             });
             
+            // ✅ Initialiser le tracking des timeouts
+            this.pendingTimeouts = this.pendingTimeouts || [];
+
             // ✅ Sécurisation du lancement différé
-            setTimeout(() => {
+            const t1 = setTimeout(() => {
                 if (!this.isAnimationActive(animationId)) {
                     console.log("⛔ Annulé : animationId non valide (animation tuée avant lancement)");
                     return;
@@ -884,9 +887,10 @@ INSTRUCTIONS :
                     this.animateSection3(animationId);
                 }
             }, 200);
+            this.pendingTimeouts.push(t1);
 
             // ✅ Sécurisation du déblocage
-            setTimeout(() => {
+            const t2 = setTimeout(() => {
                 if (!this.isAnimationActive(animationId)) {
                     console.log("⛔ Annulé : déblocage ignoré (animationId plus actif)");
                     return;
@@ -895,6 +899,7 @@ INSTRUCTIONS :
                 this.isAnimating = false;
                 console.log("✅ Animation terminée pour", sectionNumber);
             }, 6000);
+            this.pendingTimeouts.push(t2);
         }
         
         resetAllTiles() {
@@ -1441,7 +1446,7 @@ INSTRUCTIONS :
         // Stopper l'animation en cours
         stopCurrentAnimation() {
             if (this.currentAnimationId) {
-                console.log('🛑 Animation en cours stoppée:', this.currentAnimationId.toString());
+                console.log('🛑 KILL SWITCH: Animation stoppée:', this.currentAnimationId.toString());
                 this.currentAnimationId = null;
                 this.isAnimating = false;
                 
@@ -1449,6 +1454,13 @@ INSTRUCTIONS :
                 document.querySelectorAll('#stratego-final-map .auto-connection').forEach(path => {
                     path.style.transition = 'none';
                 });
+
+                // ✅ Nouvelle mesure préventive : annuler les timeouts si stockés
+                if (this.pendingTimeouts && this.pendingTimeouts.length > 0) {
+                    this.pendingTimeouts.forEach(timeout => clearTimeout(timeout));
+                    this.pendingTimeouts = [];
+                    console.log('⛔ Tous les timeouts manuels ont été annulés');
+                }
             }
         }
         
