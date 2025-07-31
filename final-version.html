@@ -653,6 +653,7 @@ INSTRUCTIONS :
             this.isAnimating = false;
             this.scrollObserver = null;
             this.currentAnimationId = null; // ID unique pour suivre l'animation active
+            this.pendingTimeouts = []; // ✅ Tableau pour tracker tous les setTimeout
             // this.lastAnimatedSection supprimé car causait des blocages d'animation
         }
         
@@ -1433,7 +1434,7 @@ INSTRUCTIONS :
         
         // setTimeout sécurisé qui vérifie l'ID d'animation
         setAnimationTimeout(callback, delay, animationId) {
-            return setTimeout(() => {
+            const timeoutId = setTimeout(() => {
                 // Vérifier que cette animation est toujours active
                 if (!this.isAnimationActive(animationId)) {
                     console.log('🚫 Animation timeout abandonné (animation inactive)');
@@ -1441,6 +1442,12 @@ INSTRUCTIONS :
                 }
                 callback();
             }, delay);
+            
+            // ✅ Tracker ce timeout pour pouvoir l'annuler
+            this.pendingTimeouts = this.pendingTimeouts || [];
+            this.pendingTimeouts.push(timeoutId);
+            
+            return timeoutId;
         }
         
         // Stopper l'animation en cours
