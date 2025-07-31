@@ -870,10 +870,19 @@ INSTRUCTIONS :
             console.log('🚀 Démarrage animation pour section', sectionNumber);
             console.log("➡️ isAnimating au début de runSingleAnimation:", this.isAnimating);
             
+            // ✅ VÉRIFICATION CRITIQUE : Section a-t-elle changé ?
+            if (this.currentSection !== sectionNumber) {
+                console.log('⛔ Interruption animation car section a changé:', this.currentSection, '≠', sectionNumber);
+                return;
+            }
+            
             if (this.isAnimating) {
                 console.log('⏸️ Animation already running, skipping');
                 return;
             }
+            
+            // ✅ Tracker la section en cours d'animation
+            this.sectionNumberBeingAnimated = sectionNumber;
             
             // NOUVEAU : Créer un ID unique pour cette animation
             const animationId = this.createAnimationId();
@@ -989,6 +998,12 @@ INSTRUCTIONS :
         showConnections(connectionIds, animationId) {
             console.log(`🔍 showConnections appelé avec:`, connectionIds);
             
+            // ✅ VÉRIFICATION CRITIQUE : Section a-t-elle changé ?
+            if (this.currentSection !== this.sectionNumberBeingAnimated) {
+                console.log('❌ Abandon showConnections car section a changé:', this.currentSection, '≠', this.sectionNumberBeingAnimated);
+                return;
+            }
+            
             // Vérifier que le SVG principal existe
             const mainSvg = document.querySelector('#stratego-final-map .connections-svg');
             if (!mainSvg) {
@@ -1065,6 +1080,13 @@ INSTRUCTIONS :
         
         animateSection1(animationId) {
             console.log('▶️ Start anim 1', animationId.toString());
+            
+            // ✅ VÉRIFICATION CRITIQUE : Section a-t-elle changé ?
+            if (this.currentSection !== 1) {
+                console.log('❌ Abandon animation section 1 car section a changé:', this.currentSection, '≠ 1');
+                return;
+            }
+            
             if (!this.isAnimationActive(animationId)) {
                 console.log('🚫 Section 1 animation annulée avant démarrage');
                 return;
@@ -1110,6 +1132,13 @@ INSTRUCTIONS :
         
         animateSection2(animationId) {
             console.log('▶️ Start anim 2', animationId.toString());
+            
+            // ✅ VÉRIFICATION CRITIQUE : Section a-t-elle changé ?
+            if (this.currentSection !== 2) {
+                console.log('❌ Abandon animation section 2 car section a changé:', this.currentSection, '≠ 2');
+                return;
+            }
+            
             if (!this.isAnimationActive(animationId)) {
                 console.log('🚫 Section 2 animation annulée avant démarrage');
                 return;
@@ -1153,6 +1182,13 @@ INSTRUCTIONS :
         
         animateSection3(animationId) {
             console.log('▶️ Start anim 3', animationId.toString());
+            
+            // ✅ VÉRIFICATION CRITIQUE : Section a-t-elle changé ?
+            if (this.currentSection !== 3) {
+                console.log('❌ Abandon animation section 3 car section a changé:', this.currentSection, '≠ 3');
+                return;
+            }
+            
             if (!this.isAnimationActive(animationId)) {
                 console.log('🚫 Section 3 animation annulée avant démarrage');
                 return;
@@ -1434,6 +1470,12 @@ INSTRUCTIONS :
         
         // UTILITAIRE pour activer une tuile avec opacité et classe
         activateTile(tileId, sectionId) {
+            // ✅ VÉRIFICATION CRITIQUE : Section a-t-elle changé ?
+            if (this.currentSection !== sectionId) {
+                console.log('❌ Abandon activateTile car section a changé:', this.currentSection, '≠', sectionId);
+                return false;
+            }
+            
             const tile = document.querySelector(`#stratego-final-map .tile[data-tile="${tileId}"][data-section="${sectionId}"]`);
             if (tile) {
                 tile.style.opacity = '1';
@@ -1464,6 +1506,12 @@ INSTRUCTIONS :
         // setTimeout sécurisé qui vérifie l'ID d'animation
         setAnimationTimeout(callback, delay, animationId) {
             const timeoutId = setTimeout(() => {
+                // ✅ Double vérification au moment d'exécution
+                if (this.currentSection !== this.sectionNumberBeingAnimated) {
+                    console.log('🚫 Timeout ignoré, section active différente:', this.currentSection, '≠', this.sectionNumberBeingAnimated);
+                    return;
+                }
+                
                 // Vérifier que cette animation est toujours active
                 if (!this.isAnimationActive(animationId)) {
                     console.log('🚫 Animation timeout abandonné (animation inactive)');
