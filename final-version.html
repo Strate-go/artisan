@@ -1926,9 +1926,18 @@ INSTRUCTIONS :
             // Vérifier si la connexion existe déjà
             let path = document.getElementById(connectionId);
             if (path) {
-                // Mettre à jour la connexion existante avec le style amélioré
-                const dx = Math.max(Math.abs(x2 - x1) * 0.4, 30); // Tension minimale de 30px
-                const d = `M ${x1},${y1} C ${x1 + dx},${y1} ${x2 - dx},${y2} ${x2},${y2}`;
+                // Mettre à jour la connexion existante avec le style amélioré adaptatif
+                const isVertical = Math.abs(x2 - x1) < 20;
+                let d;
+                
+                if (isVertical) {
+                    const dy = Math.abs(y2 - y1) * 0.3;
+                    d = `M ${x1},${y1} C ${x1},${y1 + dy} ${x2},${y2 - dy} ${x2},${y2}`;
+                } else {
+                    const dx = Math.max(Math.abs(x2 - x1) * 0.4, 30);
+                    d = `M ${x1},${y1} C ${x1 + dx},${y1} ${x2 - dx},${y2} ${x2},${y2}`;
+                }
+                
                 path.setAttribute('d', d);
                 console.log(`🔄 Connexion ${connectionId} mise à jour`);
                 return true;
@@ -1938,16 +1947,26 @@ INSTRUCTIONS :
             path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
             path.id = connectionId; // ✅ ID unique
             
-            // ⤴️ Générer un path fluide type cubic bezier avec tension minimale
-            const dx = Math.max(Math.abs(x2 - x1) * 0.4, 30); // Tension minimale de 30px
-            const d = `M ${x1},${y1} C ${x1 + dx},${y1} ${x2 - dx},${y2} ${x2},${y2}`;
+            // ⤴️ Générer un path fluide type cubic bezier adaptatif
+            const isVertical = Math.abs(x2 - x1) < 20; // Ligne quasi-verticale
+            let d;
+            
+            if (isVertical) {
+                // Pour les lignes verticales : utiliser une tension verticale
+                const dy = Math.abs(y2 - y1) * 0.3; // Tension sur l'axe Y
+                const midY = (y1 + y2) / 2;
+                d = `M ${x1},${y1} C ${x1},${y1 + dy} ${x2},${y2 - dy} ${x2},${y2}`;
+            } else {
+                // Pour les lignes horizontales/diagonales : utiliser la tension horizontale
+                const dx = Math.max(Math.abs(x2 - x1) * 0.4, 30);
+                d = `M ${x1},${y1} C ${x1 + dx},${y1} ${x2 - dx},${y2} ${x2},${y2}`;
+            }
             
             // 🔍 DEBUG SPÉCIAL pour materiaux et charges
             if (fromTile === 'materiaux' || fromTile === 'charges') {
                 console.log(`🔬 DEBUG CRÉATION ${fromTile}→${toTile}:`);
                 console.log(`  Coordonnées: (${x1},${y1}) → (${x2},${y2})`);
-                console.log(`  Distance: ${Math.abs(x2 - x1)}`);
-                console.log(`  dx calculé: ${dx}`);
+                console.log(`  Type: ${isVertical ? 'VERTICALE' : 'HORIZONTALE'}`);
                 console.log(`  Path: ${d}`);
             }
             
