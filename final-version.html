@@ -855,6 +855,21 @@ INSTRUCTIONS :
             // RÉPÉTITION AUTOMATIQUE AVEC RESET
             this.animationInterval = setInterval(() => {
                 if (!this.isAnimating && document.visibilityState === 'visible' && this.currentSection === sectionNumber) {
+                    
+                    // 🔍 VÉRIFICATION CRITIQUE : La section est-elle visible à l'écran ?
+                    const sectionElement = document.querySelector(`#stratego-final-map .content-block[data-content="${sectionNumber}"]`);
+                    if (sectionElement) {
+                        const rect = sectionElement.getBoundingClientRect();
+                        const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
+                        
+                        if (!isVisible) {
+                            console.log(`🚫 Section ${sectionNumber} n'est pas visible à l'écran — annulation de la relance`);
+                            return;
+                        }
+                        
+                        console.log(`✅ Section ${sectionNumber} visible - position: top=${Math.round(rect.top)}px, bottom=${Math.round(rect.bottom)}px`);
+                    }
+                    
                     console.log(`🔄 Répétition automatique - Section ${sectionNumber}`);
                     // Reset TOUTES les tuiles de la section courante avant répétition
                     this.resetCurrentSectionTiles(sectionNumber);
@@ -867,6 +882,8 @@ INSTRUCTIONS :
                             console.log(`🚫 Répétition annulée - section changée (${this.currentSection} ≠ ${sectionNumber})`);
                         }
                     }, 300); // Petit délai après reset
+                } else {
+                    console.log(`🚫 Conditions non remplies pour répétition: isAnimating=${this.isAnimating}, visible=${document.visibilityState}, currentSection=${this.currentSection}, targetSection=${sectionNumber}`);
                 }
             }, 12000); // 12 secondes
             
