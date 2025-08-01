@@ -1751,15 +1751,17 @@ INSTRUCTIONS :
             
             // Pas de nettoyage automatique pour préserver les icônes
             
-            // Étape 2 : Créer le SVG de manière plus robuste
-            const container = document.querySelector('#stratego-final-map .single-interactive-map');
-            if (!container) {
-                console.error('❌ Container principal non trouvé !');
+            // Étape 2 : Créer le SVG dans le container PARENT (moins touché par Squarespace)
+            const parentContainer = document.querySelector('#stratego-final-map');
+            const mapContainer = document.querySelector('#stratego-final-map .single-interactive-map');
+            
+            if (!parentContainer || !mapContainer) {
+                console.error('❌ Containers non trouvés !');
                 return;
             }
             
             // SUPPRIMER COMPLÈTEMENT l'ancien SVG pour éviter les résidus corrompus
-            const oldSvg = container.querySelector('.connections-svg');
+            const oldSvg = parentContainer.querySelector('.connections-svg');
             if (oldSvg) {
                 console.log('🧹 SUPPRESSION complète de l\'ancien SVG corrompu');
                 oldSvg.remove();
@@ -1772,13 +1774,18 @@ INSTRUCTIONS :
             svg.id = uniqueId;
             svg.classList.add('connections-svg');
             
-            // ✅ ISOLATION MAXIMALE contre Squarespace
+            // ✅ ISOLATION MAXIMALE contre Squarespace + Position relative au mapContainer
+            const mapRect = mapContainer.getBoundingClientRect();
+            const parentRect = parentContainer.getBoundingClientRect();
+            const offsetTop = mapRect.top - parentRect.top;
+            const offsetLeft = mapRect.left - parentRect.left;
+            
             svg.style.cssText = `
                 position: absolute !important;
-                top: 0 !important;
-                left: 0 !important;
-                width: 100% !important;
-                height: 100% !important;
+                top: ${offsetTop}px !important;
+                left: ${offsetLeft}px !important;
+                width: ${mapRect.width}px !important;
+                height: ${mapRect.height}px !important;
                 z-index: 999 !important;
                 pointer-events: none !important;
                 overflow: visible !important;
@@ -1790,7 +1797,8 @@ INSTRUCTIONS :
             svg.setAttribute('data-squarespace-ignore', 'true');
             svg.setAttribute('preserveAspectRatio', 'none');
             
-            container.appendChild(svg);
+            // L'ajouter au PARENT container au lieu du map container
+            parentContainer.appendChild(svg);
             
             console.log(`✅ SVG isolé créé avec ID: ${uniqueId}`);
             
@@ -1917,40 +1925,40 @@ INSTRUCTIONS :
             return { from: bestFrom, to: bestTo };
         }
 
-        // 🔧 Construction du tracé SVG en L SIMPLIFIÉ (SANS courbes Bézier, SANS arcs pour l'instant)
-        drawConnection(startX, startY, endX, endY, cornerRadius = 10) {
-            // SIMPLIFICATION : Juste un tracé en L sans arcs pour corriger les erreurs
-            const pathParts = [];
-            
-            // Détermine la direction de départ : horizontale ou verticale
-            const isHorizontalFirst = Math.abs(endX - startX) > Math.abs(endY - startY);
+        // 🔧 Construction du tracé SVG avec courbes douces (version ChatGPT)
+        drawConnection(startX, startY, endX, endY, cornerRadius = 12) {
+            const offset = 40; // Décalage avant la première courbe
+            const radius = cornerRadius; // Rayon des courbes
 
-            // Arrondir toutes les coordonnées pour éviter les erreurs de formatage
+            // Arrondir toutes les coordonnées
             startX = Math.round(startX);
             startY = Math.round(startY);
             endX = Math.round(endX);
             endY = Math.round(endY);
 
-            if (isHorizontalFirst) {
-                // Direction horizontale d'abord
-                const midX = Math.round(startX + (endX - startX) / 2);
-                
-                pathParts.push(`M ${startX},${startY}`); // Start
-                pathParts.push(`L ${midX},${startY}`); // Horizontal
-                pathParts.push(`L ${midX},${endY}`); // Vertical  
-                pathParts.push(`L ${endX},${endY}`); // Horizontal final
-            } else {
-                // Direction verticale d'abord
-                const midY = Math.round(startY + (endY - startY) / 2);
-                
-                pathParts.push(`M ${startX},${startY}`); // Start
-                pathParts.push(`L ${startX},${midY}`); // Vertical
-                pathParts.push(`L ${endX},${midY}`); // Horizontal
-                pathParts.push(`L ${endX},${endY}`); // Vertical final
+            const dx = endX - startX;
+            const dy = endY - startY;
+
+            // ➤ Cas 1 : ligne verticale droite parfaite (même X)
+            if (Math.abs(dx) < 1) {
+                const result = `M ${startX},${startY} L ${endX},${endY}`;
+                console.log(`🔧 DrawConnection VERTICAL: ${result}`);
+                return result;
             }
 
-            const result = pathParts.join(" ");
-            console.log(`🔧 DrawConnection généré: ${result}`);
+            // ➤ Cas 2 : ligne horizontale droite parfaite (même Y)
+            if (Math.abs(dy) < 1) {
+                const result = `M ${startX},${startY} L ${endX},${endY}`;
+                console.log(`🔧 DrawConnection HORIZONTAL: ${result}`);
+                return result;
+            }
+
+            // ➤ Cas 3 : connexion en "L" avec deux courbes
+            const viaX = startX + (dx > 0 ? offset : -offset);
+
+            const result = `M ${startX},${startY} L ${viaX - (dx > 0 ? radius : -radius)},${startY} Q ${viaX},${startY} ${viaX},${startY + (dy > 0 ? radius : -radius)} L ${viaX},${endY - (dy > 0 ? radius : -radius)} Q ${viaX},${endY} ${viaX + (dx > 0 ? radius : -radius)},${endY} L ${endX},${endY}`;
+            
+            console.log(`🔧 DrawConnection EN L: ${result}`);
             return result;
         }
 
@@ -2077,13 +2085,13 @@ INSTRUCTIONS :
                 return false;
             }
             
-            // Calculer les coordonnées avec validation robuste
-            const svgRect = svg.getBoundingClientRect();
+            // Calculer les coordonnées avec validation robuste (relatives au mapContainer)
+            const mapContainerRect = document.querySelector('#stratego-final-map .single-interactive-map').getBoundingClientRect();
             const fromRect = fromElement.getBoundingClientRect();
             const toRect = toElement.getBoundingClientRect();
             
             // Vérifier que tous les rectangles sont valides
-            if (svgRect.width === 0 || svgRect.height === 0 || 
+            if (mapContainerRect.width === 0 || mapContainerRect.height === 0 || 
                 fromRect.width === 0 || fromRect.height === 0 ||
                 toRect.width === 0 || toRect.height === 0) {
                 console.warn(`⏸️ Éléments pas encore rendus, attente... (${fromTile}→${toTile})`);
@@ -2094,11 +2102,11 @@ INSTRUCTIONS :
                 return false;
             }
             
-            // Calcul sécurisé avec arrondi et validation
-            let x1 = Math.round(fromRect.left + fromRect.width/2 - svgRect.left);
-            let y1 = Math.round(fromRect.top + fromRect.height/2 - svgRect.top);
-            let x2 = Math.round(toRect.left + toRect.width/2 - svgRect.left);
-            let y2 = Math.round(toRect.top + toRect.height/2 - svgRect.top);
+            // Calcul sécurisé avec arrondi et validation (relatif au mapContainer)
+            let x1 = Math.round(fromRect.left + fromRect.width/2 - mapContainerRect.left);
+            let y1 = Math.round(fromRect.top + fromRect.height/2 - mapContainerRect.top);
+            let x2 = Math.round(toRect.left + toRect.width/2 - mapContainerRect.left);
+            let y2 = Math.round(toRect.top + toRect.height/2 - mapContainerRect.top);
             
             // Validation stricte des coordonnées
             if (isNaN(x1) || isNaN(y1) || isNaN(x2) || isNaN(y2) ||
@@ -2132,21 +2140,21 @@ INSTRUCTIONS :
             const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
             path.id = connectionId; // ✅ ID unique
             
-            // 🧭 Générer un path en L avec angles arrondis (SANS courbes Bézier)
-            // Convertir les rectangles en coordonnées relatives au SVG
+            // 🧭 Générer un path en L avec angles arrondis (version ChatGPT)
+            // Convertir les rectangles en coordonnées relatives au mapContainer
             const fromRectRelative = {
-                left: fromRect.left - svgRect.left,
-                top: fromRect.top - svgRect.top,
-                right: fromRect.right - svgRect.left,
-                bottom: fromRect.bottom - svgRect.top,
+                left: fromRect.left - mapContainerRect.left,
+                top: fromRect.top - mapContainerRect.top,
+                right: fromRect.right - mapContainerRect.left,
+                bottom: fromRect.bottom - mapContainerRect.top,
                 width: fromRect.width,
                 height: fromRect.height
             };
             const toRectRelative = {
-                left: toRect.left - svgRect.left,
-                top: toRect.top - svgRect.top,
-                right: toRect.right - svgRect.left,
-                bottom: toRect.bottom - svgRect.top,
+                left: toRect.left - mapContainerRect.left,
+                top: toRect.top - mapContainerRect.top,
+                right: toRect.right - mapContainerRect.left,
+                bottom: toRect.bottom - mapContainerRect.top,
                 width: toRect.width,
                 height: toRect.height
             };
