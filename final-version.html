@@ -1923,12 +1923,12 @@ INSTRUCTIONS :
             return { from: bestFrom, to: bestTo };
         }
 
-        // 🔧 Construction du tracé SVG avec courbes douces (version ChatGPT)
-        drawConnection(startX, startY, endX, endY, cornerRadius = 12) {
-            const offset = 40; // Décalage avant la première courbe
-            const radius = cornerRadius; // Rayon des courbes
+        // 🔧 Construction du tracé SVG en grille avec angles arrondis (version ChatGPT corrigée)
+        drawConnectionGrille(startX, startY, endX, endY, cornerRadius = 12) {
+            const offset = 40; // Décalage horizontal ou vertical avant courbe
+            const radius = cornerRadius;
 
-            // Arrondir toutes les coordonnées
+            // Arrondir les positions
             startX = Math.round(startX);
             startY = Math.round(startY);
             endX = Math.round(endX);
@@ -1937,27 +1937,46 @@ INSTRUCTIONS :
             const dx = endX - startX;
             const dy = endY - startY;
 
-            // ➤ Cas 1 : ligne verticale droite parfaite (même X)
-            if (Math.abs(dx) < 1) {
+            const isVertical = Math.abs(dx) < 4;
+            const isHorizontal = Math.abs(dy) < 4;
+
+            // ➤ Cas 1 : ligne droite verticale
+            if (isVertical) {
                 const result = `M ${startX},${startY} L ${endX},${endY}`;
-                console.log(`🔧 DrawConnection VERTICAL: ${result}`);
+                console.log(`🔧 VERTICAL: ${result}`);
                 return result;
             }
 
-            // ➤ Cas 2 : ligne horizontale droite parfaite (même Y)
-            if (Math.abs(dy) < 1) {
+            // ➤ Cas 2 : ligne droite horizontale
+            if (isHorizontal) {
                 const result = `M ${startX},${startY} L ${endX},${endY}`;
-                console.log(`🔧 DrawConnection HORIZONTAL: ${result}`);
+                console.log(`🔧 HORIZONTAL: ${result}`);
                 return result;
             }
 
-            // ➤ Cas 3 : connexion en "L" avec deux courbes
+            // ➤ Cas 3 : parcours en grille avec angles arrondis (Q)
             const viaX = startX + (dx > 0 ? offset : -offset);
+            const curve1Y = startY + (dy > 0 ? radius : -radius);
+            const curve2X = viaX + (dx > 0 ? radius : -radius);
+            const straight1X = viaX - (dx > 0 ? radius : -radius);
+            const straight2Y = endY - (dy > 0 ? radius : -radius);
 
-            const result = `M ${startX},${startY} L ${viaX - (dx > 0 ? radius : -radius)},${startY} Q ${viaX},${startY} ${viaX},${startY + (dy > 0 ? radius : -radius)} L ${viaX},${endY - (dy > 0 ? radius : -radius)} Q ${viaX},${endY} ${viaX + (dx > 0 ? radius : -radius)},${endY} L ${endX},${endY}`;
-            
-            console.log(`🔧 DrawConnection EN L: ${result}`);
-            return result;
+            const path = [
+                `M ${startX},${startY}`,
+                `L ${straight1X},${startY}`,
+                `Q ${viaX},${startY} ${viaX},${curve1Y}`,
+                `L ${viaX},${straight2Y}`,
+                `Q ${viaX},${endY} ${curve2X},${endY}`,
+                `L ${endX},${endY}`
+            ].join(' ');
+
+            console.log(`🔧 GRILLE: ${path}`);
+            return path;
+        }
+        
+        // Alias pour compatibilité
+        drawConnection(startX, startY, endX, endY, cornerRadius = 12) {
+            return this.drawConnectionGrille(startX, startY, endX, endY, cornerRadius);
         }
 
         // 🧹 Nettoyage SÉLECTIF uniquement de nos anciennes connexions
@@ -2017,9 +2036,14 @@ INSTRUCTIONS :
                     pointer-events: none !important;
                 }
                 
-                        /* Force les connexions orthogonales */
+                        /* Cache UNIQUEMENT les courbes Bézier CUBIQUES, pas les quadratiques */
         .auto-connection[d*="C "] {
-            display: none !important; /* Cache les courbes Bézier */
+            display: none !important; /* Cache les courbes Bézier cubiques */
+        }
+        
+        /* Assure-toi que les courbes Q restent visibles */
+        .auto-connection[d*="Q "] {
+            display: block !important; /* Force les courbes quadratiques visibles */
         }
         
         /* COUCHE SVG FIXE - Protection totale contre Squarespace */
@@ -2253,6 +2277,20 @@ INSTRUCTIONS :
             try {
                 svg.appendChild(path);
                 console.log(`✅ Connexion ${connectionId} créée avec succès`);
+                console.log(`📊 Path ajouté au DOM: ${path.getAttribute('d')}`);
+                console.log(`📊 SVG parent: ${svg.id}, Paths total: ${svg.children.length}`);
+                
+                // Vérifier immédiatement que le path est visible
+                setTimeout(() => {
+                    const checkPath = document.getElementById(connectionId);
+                    if (checkPath) {
+                        const computedStyle = window.getComputedStyle(checkPath);
+                        console.log(`🔍 Vérification ${connectionId}: display=${computedStyle.display}, opacity=${computedStyle.opacity}`);
+                    } else {
+                        console.error(`❌ ${connectionId} a disparu du DOM !`);
+                    }
+                }, 100);
+                
                 return true;
             } catch (error) {
                 console.error(`❌ Erreur lors de l'ajout de ${connectionId}:`, error);
