@@ -671,10 +671,10 @@ INSTRUCTIONS :
             this.forceOrthogonalStyles();
             this.setupConnectionRefresh();
             
-            // 🧹 Nettoyage initial des courbes Bézier
+            // 🧹 Nettoyage initial des courbes Bézier (seulement après que les nouvelles soient créées)
             setTimeout(() => {
                 this.cleanOldBezierConnections();
-            }, 500); 
+            }, 3000); // Plus tard pour laisser le temps aux nouvelles connexions 
             
             // CRÉATION AUTOMATIQUE : toutes les connexions après chargement
             // Attendre que la page soit complètement chargée et rendue
@@ -1718,9 +1718,6 @@ INSTRUCTIONS :
         createAllConnections() {
             console.log('🔧 Création automatique des connexions');
             
-            // 🧹 Nettoyage préventif des courbes Bézier avant création
-            this.cleanOldBezierConnections();
-            
             // Étape 1 : Créer le SVG de manière plus robuste
             const container = document.querySelector('#stratego-final-map .single-interactive-map');
             if (!container) {
@@ -1925,66 +1922,39 @@ INSTRUCTIONS :
             return pathParts.join(" ");
         }
 
-        // 🧹 Nettoyage complet des anciennes connexions Bézier
+        // 🧹 Nettoyage sélectif des connexions Bézier (plus conservateur)
         cleanOldBezierConnections() {
             const allPaths = document.querySelectorAll('.auto-connection');
             let cleaned = 0;
             
             allPaths.forEach(path => {
                 const d = path.getAttribute('d');
-                if (d && d.includes('C ')) {
-                    console.log(`🧹 Suppression path Bézier: ${path.id}`);
+                // SEULEMENT supprimer si c'est vraiment une courbe Bézier (contient C suivi d'un espace et des nombres)
+                if (d && /C\s+[\d\.\-,\s]+/.test(d)) {
+                    console.log(`🧹 Suppression path Bézier confirmé: ${path.id} - ${d.substring(0, 50)}...`);
                     path.remove();
                     cleaned++;
+                } else if (d) {
+                    console.log(`✅ Path orthogonal conservé: ${path.id} - ${d.substring(0, 50)}...`);
                 }
             });
             
             if (cleaned > 0) {
-                console.log(`🧹 ${cleaned} anciennes connexions Bézier supprimées`);
+                console.log(`🧹 ${cleaned} anciennes connexions Bézier supprimées, ${allPaths.length - cleaned} connexions orthogonales conservées`);
+            } else {
+                console.log(`✅ Aucune courbe Bézier détectée, ${allPaths.length} connexions orthogonales en place`);
             }
         }
 
-        // 🔄 Système de rafraîchissement automatique des connexions
+        // 🔄 Système de rafraîchissement automatique des connexions (TEMPORAIREMENT DÉSACTIVÉ)
         setupConnectionRefresh() {
-            // Observer les mutations DOM pour re-rendre les connexions
-            const observer = new MutationObserver((mutations) => {
-                let needsRefresh = false;
-                
-                mutations.forEach(mutation => {
-                    if (mutation.type === 'childList' || mutation.type === 'attributes') {
-                        // Vérifier si des connexions ont été modifiées/supprimées
-                        const hasConnectionChanges = Array.from(mutation.removedNodes).some(node => 
-                            node.classList && node.classList.contains('auto-connection')
-                        );
-                        
-                        if (hasConnectionChanges) {
-                            needsRefresh = true;
-                        }
-                    }
-                });
-                
-                if (needsRefresh) {
-                    console.log('🔄 DOM modifié - rafraîchissement des connexions');
-                    setTimeout(() => {
-                        this.cleanOldBezierConnections();
-                        this.createAllConnections();
-                    }, 100);
-                }
-            });
+            console.log('🔄 ConnectionRefresh temporairement désactivé pour éviter les suppressions');
             
-            observer.observe(document.body, { 
-                childList: true, 
-                subtree: true, 
-                attributes: true,
-                attributeFilter: ['d', 'class']
-            });
-            
-            // Rafraîchissement au resize
+            // SEULEMENT le resize pour l'instant
             window.addEventListener('resize', () => {
                 console.log('🔄 Resize détecté - rafraîchissement des connexions');
                 setTimeout(() => {
-                    this.cleanOldBezierConnections();
-                    this.createAllConnections();
+                    this.createAllConnections(); // Sans nettoyage agressif
                 }, 200);
             });
         }
