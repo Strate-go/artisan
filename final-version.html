@@ -675,7 +675,7 @@ INSTRUCTIONS :
             this.cleanOldBezierConnections(); // Nettoyage immédiat
             setTimeout(() => {
                 this.cleanOldBezierConnections(); // Nettoyage de rattrapage
-            }, 1000); 
+            }, 2000); // Après la création initiale 
             
             // CRÉATION AUTOMATIQUE : toutes les connexions après chargement
             // Attendre que la page soit complètement chargée et rendue
@@ -691,6 +691,15 @@ INSTRUCTIONS :
             };
             
             setTimeout(initConnections, 1000);
+            
+            // 🔄 Vérification spéciale pour mode aperçu Squarespace
+            setTimeout(() => {
+                const connections = document.querySelectorAll('#stratego-final-map .auto-connection');
+                if (connections.length === 0) {
+                    console.log('🔄 Mode aperçu détecté - recréation des connexions...');
+                    this.createAllConnections();
+                }
+            }, 3000);
             
             // AUCUNE animation au chargement - elle se lancera au scroll
             console.log('🎬 Initialisation simple - En attente du scroll utilisateur');
