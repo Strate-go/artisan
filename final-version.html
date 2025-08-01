@@ -665,7 +665,16 @@ INSTRUCTIONS :
             this.setupScrollObserver();
             
             // Protection contre CSS externe d'abord
-            this.protectAgainstExternalCSS(); 
+            this.protectAgainstExternalCSS();
+            
+            // 🔄 Systèmes de protection orthogonale
+            this.forceOrthogonalStyles();
+            this.setupConnectionRefresh();
+            
+            // 🧹 Nettoyage initial des courbes Bézier
+            setTimeout(() => {
+                this.cleanOldBezierConnections();
+            }, 500); 
             
             // CRÉATION AUTOMATIQUE : toutes les connexions après chargement
             // Attendre que la page soit complètement chargée et rendue
@@ -1709,6 +1718,9 @@ INSTRUCTIONS :
         createAllConnections() {
             console.log('🔧 Création automatique des connexions');
             
+            // 🧹 Nettoyage préventif des courbes Bézier avant création
+            this.cleanOldBezierConnections();
+            
             // Étape 1 : Créer le SVG de manière plus robuste
             const container = document.querySelector('#stratego-final-map .single-interactive-map');
             if (!container) {
@@ -1913,6 +1925,105 @@ INSTRUCTIONS :
             return pathParts.join(" ");
         }
 
+        // 🧹 Nettoyage complet des anciennes connexions Bézier
+        cleanOldBezierConnections() {
+            const allPaths = document.querySelectorAll('.auto-connection');
+            let cleaned = 0;
+            
+            allPaths.forEach(path => {
+                const d = path.getAttribute('d');
+                if (d && d.includes('C ')) {
+                    console.log(`🧹 Suppression path Bézier: ${path.id}`);
+                    path.remove();
+                    cleaned++;
+                }
+            });
+            
+            if (cleaned > 0) {
+                console.log(`🧹 ${cleaned} anciennes connexions Bézier supprimées`);
+            }
+        }
+
+        // 🔄 Système de rafraîchissement automatique des connexions
+        setupConnectionRefresh() {
+            // Observer les mutations DOM pour re-rendre les connexions
+            const observer = new MutationObserver((mutations) => {
+                let needsRefresh = false;
+                
+                mutations.forEach(mutation => {
+                    if (mutation.type === 'childList' || mutation.type === 'attributes') {
+                        // Vérifier si des connexions ont été modifiées/supprimées
+                        const hasConnectionChanges = Array.from(mutation.removedNodes).some(node => 
+                            node.classList && node.classList.contains('auto-connection')
+                        );
+                        
+                        if (hasConnectionChanges) {
+                            needsRefresh = true;
+                        }
+                    }
+                });
+                
+                if (needsRefresh) {
+                    console.log('🔄 DOM modifié - rafraîchissement des connexions');
+                    setTimeout(() => {
+                        this.cleanOldBezierConnections();
+                        this.createAllConnections();
+                    }, 100);
+                }
+            });
+            
+            observer.observe(document.body, { 
+                childList: true, 
+                subtree: true, 
+                attributes: true,
+                attributeFilter: ['d', 'class']
+            });
+            
+            // Rafraîchissement au resize
+            window.addEventListener('resize', () => {
+                console.log('🔄 Resize détecté - rafraîchissement des connexions');
+                setTimeout(() => {
+                    this.cleanOldBezierConnections();
+                    this.createAllConnections();
+                }, 200);
+            });
+        }
+
+        // 🎨 Application forcée des styles anti-Squarespace
+        forceOrthogonalStyles() {
+            const style = document.createElement('style');
+            style.id = 'orthogonal-connections-protection';
+            style.textContent = `
+                /* 🛡️ Protection des connexions orthogonales */
+                .connections-svg {
+                    overflow: visible !important;
+                    pointer-events: none !important;
+                }
+                
+                .auto-connection {
+                    stroke-linecap: round !important;
+                    stroke-linejoin: round !important;
+                    fill: none !important;
+                    transition: all 0.3s ease !important;
+                    pointer-events: none !important;
+                }
+                
+                /* Force les connexions orthogonales */
+                .auto-connection[d*="C "] {
+                    display: none !important; /* Cache les courbes Bézier */
+                }
+            `;
+            
+            // Supprimer l'ancien style s'il existe
+            const existingStyle = document.getElementById('orthogonal-connections-protection');
+            if (existingStyle) {
+                existingStyle.remove();
+            }
+            
+            document.head.appendChild(style);
+            console.log('🎨 Styles orthogonaux forcés');
+        }
+
         createOrUpdateGradient(svg, color) {
             const gradientId = `gradient-${color.replace('#', '')}`;
             
@@ -2007,43 +2118,11 @@ INSTRUCTIONS :
             // Créer le path avec ID unique et validation
             const connectionId = `connection-${fromTile}-${toTile}`;
             
-            // Vérifier si la connexion existe déjà
-            let path = document.getElementById(connectionId);
-            if (path) {
-                // Mettre à jour la connexion existante avec le style en L
-                // Convertir les rectangles en coordonnées relatives au SVG
-                const fromRectRelative = {
-                    left: fromRect.left - svgRect.left,
-                    top: fromRect.top - svgRect.top,
-                    right: fromRect.right - svgRect.left,
-                    bottom: fromRect.bottom - svgRect.top,
-                    width: fromRect.width,
-                    height: fromRect.height
-                };
-                const toRectRelative = {
-                    left: toRect.left - svgRect.left,
-                    top: toRect.top - svgRect.top,
-                    right: toRect.right - svgRect.left,
-                    bottom: toRect.bottom - svgRect.top,
-                    width: toRect.width,
-                    height: toRect.height
-                };
-                
-                // Trouver les meilleurs points de connexion
-                const connectionPoints = this.getBestConnectionPoints(fromRectRelative, toRectRelative);
-                
-                // Générer le path en L avec angles arrondis
-                const d = this.drawConnection(
-                    connectionPoints.from.x, 
-                    connectionPoints.from.y, 
-                    connectionPoints.to.x, 
-                    connectionPoints.to.y, 
-                    10 // cornerRadius
-                );
-                
-                path.setAttribute('d', d);
-                console.log(`🔄 Connexion ${connectionId} mise à jour avec style en L`);
-                return true;
+            // 🧹 TOUJOURS supprimer l'ancien path (même ID) pour éviter les résidus Bézier
+            let existingPath = document.getElementById(connectionId);
+            if (existingPath) {
+                console.log(`🧹 Suppression ancien path ${connectionId} (anti-Bézier)`);
+                existingPath.remove();
             }
             
             // Créer une nouvelle connexion
