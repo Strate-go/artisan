@@ -1559,11 +1559,30 @@ INSTRUCTIONS :
                 if (!isNaN(x1) && !isNaN(y1) && !isNaN(x2) && !isNaN(y2) &&
                     isFinite(x1) && isFinite(y1) && isFinite(x2) && isFinite(y2)) {
                     try {
-                        path.setAttribute('d', `M ${x1} ${y1} L ${x2} ${y2}`);
+                        // ✅ GARDER LE SYSTÈME ORTHOGONAL MÊME LORS DU RECALCUL
+                        const fromRect = {
+                            left: x1 - 50, top: y1 - 25, right: x1 + 50, bottom: y1 + 25,
+                            width: 100, height: 50
+                        };
+                        const toRect = {
+                            left: x2 - 50, top: y2 - 25, right: x2 + 50, bottom: y2 + 25,
+                            width: 100, height: 50
+                        };
+                        
+                        const connectionPoints = this.getBestConnectionPoints(fromRect, toRect);
+                        const orthogonalD = this.drawConnection(
+                            connectionPoints.from.x, connectionPoints.from.y,
+                            connectionPoints.to.x, connectionPoints.to.y, 10
+                        );
+                        
+                        path.setAttribute('d', orthogonalD);
                         successCount++;
-                        console.log(`✅ Connexion ${fromTile}→${toTile} recalculée: (${x1},${y1}) → (${x2},${y2})`);
+                        console.log(`✅ Connexion ${fromTile}→${toTile} recalculée en ORTHOGONAL: ${orthogonalD.substring(0, 50)}...`);
                     } catch (error) {
-                        console.error(`❌ Erreur lors du recalcul de ${fromTile}→${toTile}:`, error);
+                        // Fallback sur ligne droite si orthogonal échoue
+                        path.setAttribute('d', `M ${x1} ${y1} L ${x2} ${y2}`);
+                        console.warn(`⚠️ Fallback ligne droite pour ${fromTile}→${toTile}: (${x1},${y1}) → (${x2},${y2})`);
+                        successCount++;
                     }
                 } else {
                     console.error(`❌ Coordonnées invalides pour recalcul ${fromTile}→${toTile}: (${x1},${y1}) → (${x2},${y2})`);
@@ -1982,17 +2001,89 @@ INSTRUCTIONS :
             }
         }
 
-        // 🔄 Système de rafraîchissement automatique des connexions (TEMPORAIREMENT DÉSACTIVÉ)
+        // 🔄 Système de protection AGRESSIVE contre les modifications externes
         setupConnectionRefresh() {
-            console.log('🔄 ConnectionRefresh temporairement désactivé pour éviter les suppressions');
+            console.log('🛡️ Protection agressive des connexions orthogonales activée');
             
-            // SEULEMENT le resize pour l'instant
+            // 1. Resize normal
             window.addEventListener('resize', () => {
                 console.log('🔄 Resize détecté - rafraîchissement des connexions');
                 setTimeout(() => {
-                    this.createAllConnections(); // Sans nettoyage agressif
+                    this.createAllConnections();
                 }, 200);
             });
+            
+            // 2. PROTECTION PAR MUTATION OBSERVER (réactivée)
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'd') {
+                        const path = mutation.target;
+                        const pathId = path.id;
+                        const newD = path.getAttribute('d');
+                        
+                        // Si c'est une de nos connexions et qu'elle devient ligne droite
+                        if (pathId && pathId.startsWith('connection-') && newD) {
+                            // Détecter si c'est devenu une ligne droite (juste M et L, pas de segments orthogonaux)
+                            if (/^M\s+[\d\.]+,[\d\.]+\s+L\s+[\d\.]+,[\d\.]+$/.test(newD.trim())) {
+                                console.log(`🚨 PROTECTION: ${pathId} redevenu ligne droite: ${newD}`);
+                                console.log('🔧 Recréation orthogonale immédiate...');
+                                
+                                // Recréer la connexion orthogonale
+                                const [, fromTile, toTile] = pathId.split('-');
+                                if (fromTile && toTile) {
+                                    const svg = path.closest('svg');
+                                    if (svg) {
+                                        setTimeout(() => {
+                                            this.createSingleConnection(svg, fromTile, toTile, '#bf9b30', '3');
+                                        }, 100);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            });
+            
+            // Observer tous les paths dans notre map
+            setTimeout(() => {
+                const connections = document.querySelectorAll('#stratego-final-map .auto-connection');
+                connections.forEach(path => {
+                    observer.observe(path, {
+                        attributes: true,
+                        attributeFilter: ['d']
+                    });
+                });
+                console.log(`🛡️ Protection installée sur ${connections.length} connexions`);
+            }, 2000);
+            
+            // 3. VÉRIFICATION PÉRIODIQUE
+            setInterval(() => {
+                const connections = document.querySelectorAll('#stratego-final-map .auto-connection');
+                let corruptedCount = 0;
+                
+                connections.forEach(path => {
+                    const d = path.getAttribute('d');
+                    const pathId = path.id;
+                    
+                    // Vérifier si c'est devenu une ligne droite
+                    if (d && /^M\s+[\d\.]+,[\d\.]+\s+L\s+[\d\.]+,[\d\.]+$/.test(d.trim())) {
+                        console.log(`🔧 RÉPARATION PÉRIODIQUE: ${pathId} ligne droite détectée`);
+                        
+                        const [, fromTile, toTile] = pathId.split('-');
+                        if (fromTile && toTile) {
+                            const svg = path.closest('svg');
+                            if (svg) {
+                                this.createSingleConnection(svg, fromTile, toTile, '#bf9b30', '3');
+                                corruptedCount++;
+                            }
+                        }
+                    }
+                });
+                
+                if (corruptedCount > 0) {
+                    console.log(`🔧 ${corruptedCount} connexions réparées automatiquement`);
+                }
+            }, 5000); // Vérification toutes les 5 secondes
         }
 
         // 🎨 Application forcée des styles anti-Squarespace
