@@ -2206,15 +2206,19 @@ INSTRUCTIONS :
             console.log(`🔧 SYSTÈME ORTHOGONAL ${fromTile}→${toTile}:`);
             console.log(`  Points connexion: (${connectionPoints.from.x},${connectionPoints.from.y}) → (${connectionPoints.to.x},${connectionPoints.to.y})`);
             console.log(`  Path généré: ${d}`);
-            console.log(`  Contient 'L': ${d.includes('L')}, Contient 'A': ${d.includes('A')}, Contient 'C': ${d.includes('C')}`);
+            console.log(`  Contient 'L': ${d.includes('L')}, Contient 'A': ${d.includes('A')}, Contient 'C': ${d.includes('C')}, Contient 'Q': ${d.includes('Q')}`);
             
+            // ✅ CORRECTION : Accepter les courbes Q (Quadratic Bézier) de ChatGPT
             if (d.includes('C')) {
-                console.error(`❌ ERREUR: Path contient encore des courbes Bézier! ${d}`);
+                console.error(`❌ ERREUR: Path contient des courbes Bézier cubiques! ${d}`);
+            }
+            if (d.includes('Q')) {
+                console.log(`✅ Path avec courbes quadratiques (ChatGPT): ${d}`);
             }
             if (!d.includes('L')) {
                 console.error(`❌ ERREUR: Path ne contient pas de segments droits! ${d}`);
             } else {
-                console.log(`✅ Path orthogonal valide: ${d}`);
+                console.log(`✅ Path avec segments droits valide: ${d}`);
             }
             
             // 🔍 DEBUG SPÉCIAL pour materiaux et charges
