@@ -1878,48 +1878,41 @@ INSTRUCTIONS :
             return { from: bestFrom, to: bestTo };
         }
 
-        // 🔧 Construction du tracé SVG en L avec angles arrondis (SANS courbes Bézier)
+        // 🔧 Construction du tracé SVG en L SIMPLIFIÉ (SANS courbes Bézier, SANS arcs pour l'instant)
         drawConnection(startX, startY, endX, endY, cornerRadius = 10) {
+            // SIMPLIFICATION : Juste un tracé en L sans arcs pour corriger les erreurs
             const pathParts = [];
             
             // Détermine la direction de départ : horizontale ou verticale
             const isHorizontalFirst = Math.abs(endX - startX) > Math.abs(endY - startY);
 
+            // Arrondir toutes les coordonnées pour éviter les erreurs de formatage
+            startX = Math.round(startX);
+            startY = Math.round(startY);
+            endX = Math.round(endX);
+            endY = Math.round(endY);
+
             if (isHorizontalFirst) {
-                const midX = startX + (endX - startX) / 2;
-
+                // Direction horizontale d'abord
+                const midX = Math.round(startX + (endX - startX) / 2);
+                
                 pathParts.push(`M ${startX},${startY}`); // Start
-                pathParts.push(`L ${midX - cornerRadius},${startY}`); // Horizontal jusqu'au virage
-
-                // Coin arrondi
-                const sweep1 = endY > startY ? 1 : 0;
-                pathParts.push(`A ${cornerRadius},${cornerRadius} 0 0,${sweep1} ${midX},${startY + (endY > startY ? cornerRadius : -cornerRadius)}`);
-
-                pathParts.push(`L ${midX},${endY - (endY > startY ? cornerRadius : -cornerRadius)}`); // Vertical
-
-                // Deuxième virage
-                const sweep2 = endX > midX ? 1 : 0;
-                pathParts.push(`A ${cornerRadius},${cornerRadius} 0 0,${sweep2} ${midX + (endX > midX ? cornerRadius : -cornerRadius)},${endY}`);
-
+                pathParts.push(`L ${midX},${startY}`); // Horizontal
+                pathParts.push(`L ${midX},${endY}`); // Vertical  
                 pathParts.push(`L ${endX},${endY}`); // Horizontal final
             } else {
-                const midY = startY + (endY - startY) / 2;
-
-                pathParts.push(`M ${startX},${startY}`);
-                pathParts.push(`L ${startX},${midY - cornerRadius}`);
-
-                const sweep1 = endX > startX ? 1 : 0;
-                pathParts.push(`A ${cornerRadius},${cornerRadius} 0 0,${sweep1} ${startX + (endX > startX ? cornerRadius : -cornerRadius)},${midY}`);
-
-                pathParts.push(`L ${endX - (endX > startX ? cornerRadius : -cornerRadius)},${midY}`);
-
-                const sweep2 = endY > midY ? 1 : 0;
-                pathParts.push(`A ${cornerRadius},${cornerRadius} 0 0,${sweep2} ${endX},${midY + (endY > midY ? cornerRadius : -cornerRadius)}`);
-
-                pathParts.push(`L ${endX},${endY}`);
+                // Direction verticale d'abord
+                const midY = Math.round(startY + (endY - startY) / 2);
+                
+                pathParts.push(`M ${startX},${startY}`); // Start
+                pathParts.push(`L ${startX},${midY}`); // Vertical
+                pathParts.push(`L ${endX},${midY}`); // Horizontal
+                pathParts.push(`L ${endX},${endY}`); // Vertical final
             }
 
-            return pathParts.join(" ");
+            const result = pathParts.join(" ");
+            console.log(`🔧 DrawConnection généré: ${result}`);
+            return result;
         }
 
         // 🧹 Nettoyage sélectif des connexions Bézier (plus conservateur)
