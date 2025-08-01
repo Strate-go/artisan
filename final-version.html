@@ -2119,7 +2119,28 @@ INSTRUCTIONS :
             };
             
             // Trouver les meilleurs points de connexion
+            console.log(`🎯 CALCUL POINTS CONNEXION ${fromTile}→${toTile}:`);
+            console.log(`  FromRect: `, fromRectRelative);
+            console.log(`  ToRect: `, toRectRelative);
+            
+            // 🔍 Vérification des fonctions orthogonales
+            if (typeof this.getBestConnectionPoints !== 'function') {
+                console.error(`❌ ERREUR CRITIQUE: getBestConnectionPoints n'existe pas!`);
+                return false;
+            }
+            if (typeof this.drawConnection !== 'function') {
+                console.error(`❌ ERREUR CRITIQUE: drawConnection n'existe pas!`);
+                return false;
+            }
+            
             const connectionPoints = this.getBestConnectionPoints(fromRectRelative, toRectRelative);
+            
+            console.log(`  Résultat getBestConnectionPoints:`, connectionPoints);
+            
+            if (!connectionPoints || !connectionPoints.from || !connectionPoints.to) {
+                console.error(`❌ ERREUR: getBestConnectionPoints a échoué!`, connectionPoints);
+                return false;
+            }
             
             // Générer le path en L avec angles arrondis
             const d = this.drawConnection(
@@ -2129,6 +2150,19 @@ INSTRUCTIONS :
                 connectionPoints.to.y, 
                 10 // cornerRadius
             );
+            
+            // 🔍 DEBUG OBLIGATOIRE pour vérifier le système orthogonal
+            console.log(`🔧 SYSTÈME ORTHOGONAL ${fromTile}→${toTile}:`);
+            console.log(`  Points connexion: (${connectionPoints.from.x},${connectionPoints.from.y}) → (${connectionPoints.to.x},${connectionPoints.to.y})`);
+            console.log(`  Path généré: ${d}`);
+            console.log(`  Contient 'L': ${d.includes('L')}, Contient 'A': ${d.includes('A')}, Contient 'C': ${d.includes('C')}`);
+            
+            if (d.includes('C')) {
+                console.error(`❌ ERREUR: Path contient encore des courbes Bézier! ${d}`);
+            }
+            if (!d.includes('L') || !d.includes('A')) {
+                console.error(`❌ ERREUR: Path ne contient pas de segments orthogonaux! ${d}`);
+            }
             
             // 🔍 DEBUG SPÉCIAL pour materiaux et charges
             if (fromTile === 'materiaux' || fromTile === 'charges') {
