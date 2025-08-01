@@ -670,14 +670,14 @@ INSTRUCTIONS :
             // Protection contre CSS externe d'abord
             this.protectAgainstExternalCSS();
             
-            // 🔄 Systèmes de protection orthogonale
-            this.forceOrthogonalStyles();
-            this.setupConnectionRefresh();
+            // 🧪 SYSTÈMES DE PROTECTION DÉSACTIVÉS pour diagnostic
+            this.forceOrthogonalStyles(); // Garde les styles CSS seulement
+            // this.setupConnectionRefresh(); // ← COMMENTÉ TEMPORAIREMENT
             
-            // 🧹 Nettoyage SÉLECTIF uniquement de nos anciennes connexions
-            setTimeout(() => {
-                this.cleanOnlyOurOldConnections();
-            }, 1000); 
+            // 🧹 Nettoyage DÉSACTIVÉ pour diagnostic  
+            // setTimeout(() => {
+            //     this.cleanOnlyOurOldConnections();
+            // }, 1000); // ← COMMENTÉ TEMPORAIREMENT 
             
             // CRÉATION AUTOMATIQUE : toutes les connexions après chargement
             // Attendre que la page soit complètement chargée et rendue
@@ -1748,9 +1748,9 @@ INSTRUCTIONS :
             console.log(`✅ Reset terminé pour section ${sectionNumber}`);
         }
         
-        // CRÉATION AUTOMATIQUE DES CONNEXIONS
+        // CRÉATION AUTOMATIQUE DES CONNEXIONS AVEC DEBUG RENFORCÉ
         createAllConnections() {
-            console.log('🔧 Création automatique des connexions STABLES');
+            console.log('🆕 === DÉBUT CRÉATION SVG AVEC DEBUG ===');
             
             // ✅ SOLUTION CHATGPT : Utiliser la couche SVG fixe
             const layer = document.getElementById("svg-connection-layer");
@@ -1765,16 +1765,21 @@ INSTRUCTIONS :
                 return;
             }
             
-            // Supprime l'ancien SVG s'il existe
-            const oldSvg = document.getElementById("stratego-connections");
+            // 🧪 TEMPORAIRE : ID FIXE pour éviter les conflits
+            const fixedId = "stratego-connections-static";
+            
+            // 🧹 SUPPRESSION COMMENTÉE pour diagnostic
+            const oldSvg = document.getElementById(fixedId);
             if (oldSvg) {
-                console.log('🧹 SUPPRESSION de l\'ancien SVG');
-                oldSvg.remove();
+                console.log('🧹 Ancien SVG trouvé, SUPPRESSION DÉSACTIVÉE pour debug');
+                console.log(`📊 Ancien SVG paths: ${oldSvg.children.length}`);
+                // oldSvg.remove(); // ← COMMENTÉ TEMPORAIREMENT
+                return; // Utilise l'existant
             }
             
             // Crée un nouveau SVG propre
             const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-            svg.setAttribute("id", "stratego-connections");
+            svg.setAttribute("id", fixedId);
             svg.setAttribute("width", "100%");
             svg.setAttribute("height", "100%");
             
@@ -1795,24 +1800,48 @@ INSTRUCTIONS :
             svg.classList.add('connections-svg');
             svg.setAttribute('data-stratego-svg', 'true');
             
+            console.log("🔧 SVG créé, ajout au DOM...");
             // Ajoute le SVG dans le DOM STABLE
             layer.appendChild(svg);
+            console.log(`✅ SVG ajouté avec ID: ${fixedId}`);
+            console.log(`📊 HTML du SVG: ${svg.outerHTML.substring(0, 200)}...`);
             
-            console.log(`✅ SVG stable créé dans la couche fixe`);
-            
-            // Attendre que le SVG soit bien dans le DOM
+            // 🔍 DEBUGGING RENFORCÉ : surveillance immédiate
             setTimeout(() => {
+                const stillThere = document.getElementById(fixedId);
+                if (!stillThere) {
+                    debugger; // ← PAUSE DEBUGGER à l'instant critique
+                    console.error("❌ SVG DISPARU ! Moment critique détecté");
+                    return;
+                }
+                console.log("✅ SVG stable après 100ms, création des connexions...");
                 this.createConnectionPaths(svg);
+                
+                // 🔍 Vérification continue
+                setTimeout(() => {
+                    const stillThere2 = document.getElementById(fixedId);
+                    if (!stillThere2) {
+                        debugger; // ← DEUXIÈME PAUSE si disparition tardive
+                        console.error("❌ SVG DISPARU après création des paths !");
+                    } else {
+                        console.log("✅ SVG toujours présent après création paths");
+                        console.log(`📊 Nombre de paths: ${svg.children.length}`);
+                    }
+                }, 1000);
             }, 100);
         }
         
         createConnectionPaths(svg) {
             // Vérifier que le SVG est toujours là
             if (!svg || !svg.parentNode) {
-                console.error('❌ SVG disparu du DOM, nouvelle tentative...');
-                this.createAllConnections();
-                return;
+                console.error('❌ SVG disparu du DOM dans createConnectionPaths !');
+                debugger; // ← PAUSE si SVG disparu pendant creation paths
+                return; // Ne pas relancer pour éviter la boucle
             }
+            
+            console.log(`🔧 Début création des paths dans SVG ${svg.id}`);
+            console.log(`📊 SVG parent: ${svg.parentNode.id}, SVG dimensions: ${svg.getAttribute('viewBox')}`);
+            
             
             // Étape 2 : Définir toutes les connexions
             const connections = [
@@ -1845,8 +1874,8 @@ INSTRUCTIONS :
             
             console.log(`✅ ${successCount}/${connections.length} connexions créées avec succès`);
             
-            // Protéger le SVG contre la suppression
-            this.protectSVG(svg);
+            // 🧪 PROTECTION SVG DÉSACTIVÉE pour diagnostic
+            // this.protectSVG(svg); // ← COMMENTÉ TEMPORAIREMENT
             
             // DEBUG : Lister tous les IDs créés
             console.log('🔍 IDs de connexions créés:');
