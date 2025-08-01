@@ -671,11 +671,16 @@ INSTRUCTIONS :
             this.forceOrthogonalStyles();
             this.setupConnectionRefresh();
             
-            // 🧹 Nettoyage IMMÉDIAT ET PLUS TARD des courbes Bézier
+            // 🚫 BLOCAGE PRÉVENTIF de Squarespace avant nettoyage
+            this.blockSquarespacePathCreation();
+            
+            // 🧹 Nettoyage IMMÉDIAT ET CONTINU des courbes Bézier
             this.cleanOldBezierConnections(); // Nettoyage immédiat
-            setTimeout(() => {
-                this.cleanOldBezierConnections(); // Nettoyage de rattrapage
-            }, 2000); // Après la création initiale 
+            
+            // Nettoyage continu toutes les secondes
+            this.cleanupInterval = setInterval(() => {
+                this.cleanOldBezierConnections();
+            }, 1000); 
             
             // CRÉATION AUTOMATIQUE : toutes les connexions après chargement
             // Attendre que la page soit complètement chargée et rendue
@@ -1362,6 +1367,9 @@ INSTRUCTIONS :
             if (this.animationInterval) {
                 clearInterval(this.animationInterval);
             }
+            if (this.cleanupInterval) {
+                clearInterval(this.cleanupInterval);
+            }
             // Plus de scroll observer à nettoyer
         }
         
@@ -1953,6 +1961,57 @@ INSTRUCTIONS :
             return result;
         }
 
+        // 🚫 BLOCAGE PRÉVENTIF de la création de paths corrompus par Squarespace
+        blockSquarespacePathCreation() {
+            console.log('🚫 Installation du blocage préventif Squarespace...');
+            
+            // 1. Intercepter createElementNS pour bloquer les paths suspects
+            const originalCreateElementNS = document.createElementNS;
+            document.createElementNS = function(namespaceURI, qualifiedName) {
+                const element = originalCreateElementNS.call(this, namespaceURI, qualifiedName);
+                
+                if (qualifiedName === 'path') {
+                    // Observer ce path pour détecter l'ajout d'attribut 'd' corrompu
+                    const pathObserver = new MutationObserver((mutations) => {
+                        mutations.forEach((mutation) => {
+                            if (mutation.type === 'attributes' && mutation.attributeName === 'd') {
+                                const d = element.getAttribute('d');
+                                if (d && (d.includes('218.399L281.69L192.933') || 
+                                         /[\d\.]+L[\d\.]+L[\d\.]+\s+[\d\.]+/.test(d))) {
+                                    console.log('🚫 PATH CORROMPU BLOQUÉ à la création:', d.substring(0, 50));
+                                    element.remove();
+                                    pathObserver.disconnect();
+                                }
+                            }
+                        });
+                    });
+                    
+                    pathObserver.observe(element, {
+                        attributes: true,
+                        attributeFilter: ['d']
+                    });
+                }
+                
+                return element;
+            };
+            
+            // 2. Intercepter setAttribute pour bloquer les attributs 'd' corrompus
+            const originalSetAttribute = Element.prototype.setAttribute;
+            Element.prototype.setAttribute = function(name, value) {
+                if (this.tagName === 'path' && name === 'd' && typeof value === 'string') {
+                    // Bloquer les paths corrompus spécifiques
+                    if (value.includes('218.399L281.69L192.933') || 
+                        /[\d\.]+L[\d\.]+L[\d\.]+\s+[\d\.]+/.test(value)) {
+                        console.log('🚫 setAttribute("d") BLOQUÉ pour path corrompu:', value.substring(0, 50));
+                        return; // Ne pas appliquer l'attribut
+                    }
+                }
+                return originalSetAttribute.call(this, name, value);
+            };
+            
+            console.log('✅ Blocage préventif installé');
+        }
+        
         // 🧹 Nettoyage ULTRA-AGRESSIF des connexions corrompues
         cleanOldBezierConnections() {
             // Chercher TOUS les paths SVG, même dans les SVG cachés
