@@ -1829,88 +1829,47 @@ INSTRUCTIONS :
             }
         }
         
-        // 🎯 Calcul des points de connexion optimaux sur les bords des tuiles
-        getBestConnectionPoints(fromRect, toRect) {
-            // Points centraux de chaque bord pour la tuile de départ
-            const fromPoints = {
-                top: { x: fromRect.left + fromRect.width / 2, y: fromRect.top },
-                right: { x: fromRect.right, y: fromRect.top + fromRect.height / 2 },
-                bottom: { x: fromRect.left + fromRect.width / 2, y: fromRect.bottom },
-                left: { x: fromRect.left, y: fromRect.top + fromRect.height / 2 }
-            };
-
-            // Points centraux de chaque bord pour la tuile d'arrivée
-            const toPoints = {
-                top: { x: toRect.left + toRect.width / 2, y: toRect.top },
-                right: { x: toRect.right, y: toRect.top + toRect.height / 2 },
-                bottom: { x: toRect.left + toRect.width / 2, y: toRect.bottom },
-                left: { x: toRect.left, y: toRect.top + toRect.height / 2 }
-            };
-
-            // Trouver la combinaison avec la distance la plus courte
-            let minDistance = Infinity;
-            let bestFrom = null;
-            let bestTo = null;
-
-            Object.keys(fromPoints).forEach(fromKey => {
-                Object.keys(toPoints).forEach(toKey => {
-                    const from = fromPoints[fromKey];
-                    const to = toPoints[toKey];
-                    const distance = Math.sqrt(Math.pow(to.x - from.x, 2) + Math.pow(to.y - from.y, 2));
-                    
-                    if (distance < minDistance) {
-                        minDistance = distance;
-                        bestFrom = from;
-                        bestTo = to;
-                    }
-                });
-            });
-
-            return { from: bestFrom, to: bestTo };
+        // 🎨 Génération de courbes Bézier fluides et robustes
+        createSmoothBezierPath(x1, y1, x2, y2) {
+            // Détection du type de ligne
+            const isVertical = Math.abs(x2 - x1) < 20;
+            const isHorizontal = Math.abs(y2 - y1) < 20;
+            
+            if (isVertical) {
+                // Pour les lignes verticales : tension verticale douce
+                const dy = Math.abs(y2 - y1) * 0.35;
+                const midY = (y1 + y2) / 2;
+                return `M ${x1},${y1} C ${x1},${y1 + dy} ${x2},${y2 - dy} ${x2},${y2}`;
+            } else if (isHorizontal) {
+                // Pour les lignes horizontales : tension horizontale douce  
+                const dx = Math.abs(x2 - x1) * 0.35;
+                const midX = (x1 + x2) / 2;
+                return `M ${x1},${y1} C ${x1 + dx},${y1} ${x2 - dx},${y2} ${x2},${y2}`;
+            } else {
+                // Pour les lignes diagonales : tension adaptative
+                const dx = Math.max(Math.abs(x2 - x1) * 0.4, 30);
+                const dy = Math.max(Math.abs(y2 - y1) * 0.3, 20);
+                
+                // Tension qui suit la direction générale
+                const dirX = x2 > x1 ? dx : -dx;
+                const dirY = y2 > y1 ? dy : -dy;
+                
+                return `M ${x1},${y1} C ${x1 + dirX * 0.5},${y1 + dirY * 0.3} ${x2 - dirX * 0.5},${y2 - dirY * 0.3} ${x2},${y2}`;
+            }
         }
 
-        // 🔧 Construction du tracé SVG en L avec angles arrondis (SANS courbes Bézier)
-        drawConnection(startX, startY, endX, endY, cornerRadius = 10) {
-            const pathParts = [];
-            
-            // Détermine la direction de départ : horizontale ou verticale
-            const isHorizontalFirst = Math.abs(endX - startX) > Math.abs(endY - startY);
-
-            if (isHorizontalFirst) {
-                const midX = startX + (endX - startX) / 2;
-
-                pathParts.push(`M ${startX},${startY}`); // Start
-                pathParts.push(`L ${midX - cornerRadius},${startY}`); // Horizontal jusqu'au virage
-
-                // Coin arrondi
-                const sweep1 = endY > startY ? 1 : 0;
-                pathParts.push(`A ${cornerRadius},${cornerRadius} 0 0,${sweep1} ${midX},${startY + (endY > startY ? cornerRadius : -cornerRadius)}`);
-
-                pathParts.push(`L ${midX},${endY - (endY > startY ? cornerRadius : -cornerRadius)}`); // Vertical
-
-                // Deuxième virage
-                const sweep2 = endX > midX ? 1 : 0;
-                pathParts.push(`A ${cornerRadius},${cornerRadius} 0 0,${sweep2} ${midX + (endX > midX ? cornerRadius : -cornerRadius)},${endY}`);
-
-                pathParts.push(`L ${endX},${endY}`); // Horizontal final
-            } else {
-                const midY = startY + (endY - startY) / 2;
-
-                pathParts.push(`M ${startX},${startY}`);
-                pathParts.push(`L ${startX},${midY - cornerRadius}`);
-
-                const sweep1 = endX > startX ? 1 : 0;
-                pathParts.push(`A ${cornerRadius},${cornerRadius} 0 0,${sweep1} ${startX + (endX > startX ? cornerRadius : -cornerRadius)},${midY}`);
-
-                pathParts.push(`L ${endX - (endX > startX ? cornerRadius : -cornerRadius)},${midY}`);
-
-                const sweep2 = endY > midY ? 1 : 0;
-                pathParts.push(`A ${cornerRadius},${cornerRadius} 0 0,${sweep2} ${endX},${midY + (endY > midY ? cornerRadius : -cornerRadius)}`);
-
-                pathParts.push(`L ${endX},${endY}`);
-            }
-
-            return pathParts.join(" ");
+        // 🛡️ Protection anti-reset Squarespace pour les connexions
+        forceConnectionStyles() {
+            const connections = document.querySelectorAll('.auto-connection');
+            connections.forEach(path => {
+                if (path) {
+                    // Forcer les styles essentiels
+                    path.style.strokeLinecap = 'round';
+                    path.style.strokeLinejoin = 'round';
+                    path.style.transition = 'all 0.3s ease';
+                    path.style.pointerEvents = 'none';
+                }
+            });
         }
 
         createOrUpdateGradient(svg, color) {
@@ -2010,39 +1969,10 @@ INSTRUCTIONS :
             // Vérifier si la connexion existe déjà
             let path = document.getElementById(connectionId);
             if (path) {
-                // Mettre à jour la connexion existante avec le style en L
-                // Convertir les rectangles en coordonnées relatives au SVG
-                const fromRectRelative = {
-                    left: fromRect.left - svgRect.left,
-                    top: fromRect.top - svgRect.top,
-                    right: fromRect.right - svgRect.left,
-                    bottom: fromRect.bottom - svgRect.top,
-                    width: fromRect.width,
-                    height: fromRect.height
-                };
-                const toRectRelative = {
-                    left: toRect.left - svgRect.left,
-                    top: toRect.top - svgRect.top,
-                    right: toRect.right - svgRect.left,
-                    bottom: toRect.bottom - svgRect.top,
-                    width: toRect.width,
-                    height: toRect.height
-                };
-                
-                // Trouver les meilleurs points de connexion
-                const connectionPoints = this.getBestConnectionPoints(fromRectRelative, toRectRelative);
-                
-                // Générer le path en L avec angles arrondis
-                const d = this.drawConnection(
-                    connectionPoints.from.x, 
-                    connectionPoints.from.y, 
-                    connectionPoints.to.x, 
-                    connectionPoints.to.y, 
-                    10 // cornerRadius
-                );
-                
+                // Mettre à jour la connexion existante avec courbes Bézier
+                const d = this.createSmoothBezierPath(x1, y1, x2, y2);
                 path.setAttribute('d', d);
-                console.log(`🔄 Connexion ${connectionId} mise à jour avec style en L`);
+                console.log(`🔄 Connexion ${connectionId} mise à jour avec courbes Bézier`);
                 return true;
             }
             
@@ -2050,36 +1980,8 @@ INSTRUCTIONS :
             path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
             path.id = connectionId; // ✅ ID unique
             
-            // 🧭 Générer un path en L avec angles arrondis (SANS courbes Bézier)
-            // Convertir les rectangles en coordonnées relatives au SVG
-            const fromRectRelative = {
-                left: fromRect.left - svgRect.left,
-                top: fromRect.top - svgRect.top,
-                right: fromRect.right - svgRect.left,
-                bottom: fromRect.bottom - svgRect.top,
-                width: fromRect.width,
-                height: fromRect.height
-            };
-            const toRectRelative = {
-                left: toRect.left - svgRect.left,
-                top: toRect.top - svgRect.top,
-                right: toRect.right - svgRect.left,
-                bottom: toRect.bottom - svgRect.top,
-                width: toRect.width,
-                height: toRect.height
-            };
-            
-            // Trouver les meilleurs points de connexion
-            const connectionPoints = this.getBestConnectionPoints(fromRectRelative, toRectRelative);
-            
-            // Générer le path en L avec angles arrondis
-            const d = this.drawConnection(
-                connectionPoints.from.x, 
-                connectionPoints.from.y, 
-                connectionPoints.to.x, 
-                connectionPoints.to.y, 
-                10 // cornerRadius
-            );
+            // 🎨 Générer des courbes Bézier fluides et robustes
+            const d = this.createSmoothBezierPath(x1, y1, x2, y2);
             
             // 🔍 DEBUG SPÉCIAL pour materiaux et charges
             if (fromTile === 'materiaux' || fromTile === 'charges') {
@@ -2097,11 +1999,18 @@ INSTRUCTIONS :
             path.setAttribute('stroke', `url(#${gradientId})`);
             path.setAttribute('stroke-width', width);
             path.setAttribute('stroke-linecap', 'round');
+            path.setAttribute('stroke-linejoin', 'round');
             path.setAttribute('fill', 'none');
             path.setAttribute('opacity', '0'); // Masqué par défaut
             path.classList.add('auto-connection');
             path.dataset.from = fromTile; // Gardé pour compatibilité
             path.dataset.to = toTile;
+            
+            // 🛡️ Protection anti-reset Squarespace
+            path.style.strokeLinecap = 'round';
+            path.style.strokeLinejoin = 'round';
+            path.style.transition = 'all 0.3s ease';
+            path.style.pointerEvents = 'none';
             
             try {
                 svg.appendChild(path);
