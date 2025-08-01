@@ -671,10 +671,11 @@ INSTRUCTIONS :
             this.forceOrthogonalStyles();
             this.setupConnectionRefresh();
             
-            // 🧹 Nettoyage initial des courbes Bézier (seulement après que les nouvelles soient créées)
+            // 🧹 Nettoyage IMMÉDIAT ET PLUS TARD des courbes Bézier
+            this.cleanOldBezierConnections(); // Nettoyage immédiat
             setTimeout(() => {
-                this.cleanOldBezierConnections();
-            }, 3000); // Plus tard pour laisser le temps aux nouvelles connexions 
+                this.cleanOldBezierConnections(); // Nettoyage de rattrapage
+            }, 1000); 
             
             // CRÉATION AUTOMATIQUE : toutes les connexions après chargement
             // Attendre que la page soit complètement chargée et rendue
@@ -1915,27 +1916,60 @@ INSTRUCTIONS :
             return result;
         }
 
-        // 🧹 Nettoyage sélectif des connexions Bézier (plus conservateur)
+        // 🧹 Nettoyage AGRESSIF des connexions Bézier et corrompues
         cleanOldBezierConnections() {
-            const allPaths = document.querySelectorAll('.auto-connection');
+            // Chercher TOUS les paths SVG, pas seulement ceux avec .auto-connection
+            const allPaths = document.querySelectorAll('path');
             let cleaned = 0;
+            
+            console.log(`🧹 Scan de ${allPaths.length} paths pour nettoyage...`);
             
             allPaths.forEach(path => {
                 const d = path.getAttribute('d');
-                // SEULEMENT supprimer si c'est vraiment une courbe Bézier (contient C suivi d'un espace et des nombres)
-                if (d && /C\s+[\d\.\-,\s]+/.test(d)) {
-                    console.log(`🧹 Suppression path Bézier confirmé: ${path.id} - ${d.substring(0, 50)}...`);
+                const pathId = path.id || 'sans-id';
+                
+                if (!d) return; // Skip si pas de path
+                
+                // 1. COURBES BÉZIER (contient C)
+                if (/C\s+[\d\.\-,\s]+/.test(d)) {
+                    console.log(`🧹 BÉZIER trouvé: ${pathId} - ${d.substring(0, 50)}...`);
                     path.remove();
                     cleaned++;
-                } else if (d) {
-                    console.log(`✅ Path orthogonal conservé: ${path.id} - ${d.substring(0, 50)}...`);
+                    return;
+                }
+                
+                // 2. PATHS CORROMPUS (coordonnées malformées)
+                if (/[\d\.]+L[\d\.]+L[\d\.]+\s+[\d\.]+/.test(d)) {
+                    console.log(`🧹 PATH CORROMPU trouvé: ${pathId} - ${d.substring(0, 50)}...`);
+                    path.remove();
+                    cleaned++;
+                    return;
+                }
+                
+                // 3. PATHS avec des formats bizarres
+                if (d.includes('218.399L281.69L192.933')) {
+                    console.log(`🧹 PATH SPÉCIFIQUEMENT CORROMPU trouvé: ${pathId} - ${d}`);
+                    path.remove();
+                    cleaned++;
+                    return;
+                }
+                
+                // 4. PATHS non-stratego (sans nos IDs)
+                if (!pathId.startsWith('connection-') && path.closest('#stratego-final-map')) {
+                    console.log(`🧹 PATH SUSPECT trouvé: ${pathId} - ${d.substring(0, 30)}...`);
+                    // Ne pas supprimer, juste signaler
+                }
+                
+                // Conservé
+                if (pathId.startsWith('connection-')) {
+                    console.log(`✅ Path orthogonal conservé: ${pathId} - ${d.substring(0, 30)}...`);
                 }
             });
             
             if (cleaned > 0) {
-                console.log(`🧹 ${cleaned} anciennes connexions Bézier supprimées, ${allPaths.length - cleaned} connexions orthogonales conservées`);
+                console.log(`🧹 ${cleaned} paths corrompus/Bézier supprimés`);
             } else {
-                console.log(`✅ Aucune courbe Bézier détectée, ${allPaths.length} connexions orthogonales en place`);
+                console.log(`✅ Aucun path corrompu détecté`);
             }
         }
 
