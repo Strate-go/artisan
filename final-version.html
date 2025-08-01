@@ -1829,77 +1829,88 @@ INSTRUCTIONS :
             }
         }
         
-        // 📍 Calcul du bon bord de la tuile pour connexions orthogonales
-        getConnectionPoint(rect, deltaX, deltaY, offsetIndex, total, spacing) {
-            const halfW = rect.width / 2;
-            const halfH = rect.height / 2;
-            const offset = (offsetIndex - (total - 1) / 2) * spacing;
-
-            if (Math.abs(deltaX) > Math.abs(deltaY)) {
-                // Connexion horizontale → bord gauche ou droit
-                return {
-                    x: deltaX > 0 ? rect.right : rect.left,
-                    y: rect.top + halfH + offset,
-                };
-            } else {
-                // Connexion verticale → bord haut ou bas
-                return {
-                    x: rect.left + halfW + offset,
-                    y: deltaY > 0 ? rect.bottom : rect.top,
-                };
-            }
-        }
-
-        // ✨ Construction du tracé SVG avec arrondis à 90°
-        buildPathWithRoundedCorner(from, to, horizontalFirst, radius = 20) {
-            let path = `M ${from.x},${from.y} `;
-
-            if (horizontalFirst) {
-                const midX = to.x;
-                const cornerY = from.y + (to.y > from.y ? radius : -radius);
-                const cornerX = to.x + (from.x < to.x ? -radius : radius);
-                const arcFlag = to.y > from.y ? 1 : 0;
-
-                path += `L ${cornerX},${from.y} `; // Ligne droite horizontale
-                path += `A ${radius},${radius} 0 0,${arcFlag} ${midX},${cornerY} `; // Arrondi
-                path += `L ${to.x},${to.y} `; // Ligne finale verticale
-            } else {
-                const midY = to.y;
-                const cornerX = from.x + (to.x > from.x ? radius : -radius);
-                const cornerY = to.y + (from.y < to.y ? -radius : radius);
-                const arcFlag = to.x > from.x ? 1 : 0;
-
-                path += `L ${from.x},${cornerY} `; // Ligne droite verticale
-                path += `A ${radius},${radius} 0 0,${arcFlag} ${cornerX},${midY} `; // Arrondi
-                path += `L ${to.x},${to.y} `; // Ligne finale horizontale
-            }
-
-            return path.trim();
-        }
-
-        // 🧭 Fonction principale pour connexions orthogonales arrondies
-        createRoundedConnectionPath(fromRect, toRect, offsetIndex = 0, totalConnections = 1, spacing = 8, cornerRadius = 20) {
-            const fromCenter = {
-                x: fromRect.left + fromRect.width / 2,
-                y: fromRect.top + fromRect.height / 2,
+        // 🎯 Calcul des points de connexion optimaux sur les bords des tuiles
+        getBestConnectionPoints(fromRect, toRect) {
+            // Points centraux de chaque bord pour la tuile de départ
+            const fromPoints = {
+                top: { x: fromRect.left + fromRect.width / 2, y: fromRect.top },
+                right: { x: fromRect.right, y: fromRect.top + fromRect.height / 2 },
+                bottom: { x: fromRect.left + fromRect.width / 2, y: fromRect.bottom },
+                left: { x: fromRect.left, y: fromRect.top + fromRect.height / 2 }
             };
 
-            const toCenter = {
-                x: toRect.left + toRect.width / 2,
-                y: toRect.top + toRect.height / 2,
+            // Points centraux de chaque bord pour la tuile d'arrivée
+            const toPoints = {
+                top: { x: toRect.left + toRect.width / 2, y: toRect.top },
+                right: { x: toRect.right, y: toRect.top + toRect.height / 2 },
+                bottom: { x: toRect.left + toRect.width / 2, y: toRect.bottom },
+                left: { x: toRect.left, y: toRect.top + toRect.height / 2 }
             };
 
-            // Déterminer la direction générale
-            const deltaX = toCenter.x - fromCenter.x;
-            const deltaY = toCenter.y - fromCenter.y;
-            const isHorizontalFirst = Math.abs(deltaX) > Math.abs(deltaY);
+            // Trouver la combinaison avec la distance la plus courte
+            let minDistance = Infinity;
+            let bestFrom = null;
+            let bestTo = null;
 
-            // Calcul du point de départ sur le bon bord
-            const fromPoint = this.getConnectionPoint(fromRect, deltaX, deltaY, offsetIndex, totalConnections, spacing);
-            const toPoint = this.getConnectionPoint(toRect, -deltaX, -deltaY, offsetIndex, totalConnections, spacing);
+            Object.keys(fromPoints).forEach(fromKey => {
+                Object.keys(toPoints).forEach(toKey => {
+                    const from = fromPoints[fromKey];
+                    const to = toPoints[toKey];
+                    const distance = Math.sqrt(Math.pow(to.x - from.x, 2) + Math.pow(to.y - from.y, 2));
+                    
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        bestFrom = from;
+                        bestTo = to;
+                    }
+                });
+            });
 
-            // Construction du path avec arrondi
-            return this.buildPathWithRoundedCorner(fromPoint, toPoint, isHorizontalFirst, cornerRadius);
+            return { from: bestFrom, to: bestTo };
+        }
+
+        // 🔧 Construction du tracé SVG en L avec angles arrondis (SANS courbes Bézier)
+        drawConnection(startX, startY, endX, endY, cornerRadius = 10) {
+            const pathParts = [];
+            
+            // Détermine la direction de départ : horizontale ou verticale
+            const isHorizontalFirst = Math.abs(endX - startX) > Math.abs(endY - startY);
+
+            if (isHorizontalFirst) {
+                const midX = startX + (endX - startX) / 2;
+
+                pathParts.push(`M ${startX},${startY}`); // Start
+                pathParts.push(`L ${midX - cornerRadius},${startY}`); // Horizontal jusqu'au virage
+
+                // Coin arrondi
+                const sweep1 = endY > startY ? 1 : 0;
+                pathParts.push(`A ${cornerRadius},${cornerRadius} 0 0,${sweep1} ${midX},${startY + (endY > startY ? cornerRadius : -cornerRadius)}`);
+
+                pathParts.push(`L ${midX},${endY - (endY > startY ? cornerRadius : -cornerRadius)}`); // Vertical
+
+                // Deuxième virage
+                const sweep2 = endX > midX ? 1 : 0;
+                pathParts.push(`A ${cornerRadius},${cornerRadius} 0 0,${sweep2} ${midX + (endX > midX ? cornerRadius : -cornerRadius)},${endY}`);
+
+                pathParts.push(`L ${endX},${endY}`); // Horizontal final
+            } else {
+                const midY = startY + (endY - startY) / 2;
+
+                pathParts.push(`M ${startX},${startY}`);
+                pathParts.push(`L ${startX},${midY - cornerRadius}`);
+
+                const sweep1 = endX > startX ? 1 : 0;
+                pathParts.push(`A ${cornerRadius},${cornerRadius} 0 0,${sweep1} ${startX + (endX > startX ? cornerRadius : -cornerRadius)},${midY}`);
+
+                pathParts.push(`L ${endX - (endX > startX ? cornerRadius : -cornerRadius)},${midY}`);
+
+                const sweep2 = endY > midY ? 1 : 0;
+                pathParts.push(`A ${cornerRadius},${cornerRadius} 0 0,${sweep2} ${endX},${midY + (endY > midY ? cornerRadius : -cornerRadius)}`);
+
+                pathParts.push(`L ${endX},${endY}`);
+            }
+
+            return pathParts.join(" ");
         }
 
         createOrUpdateGradient(svg, color) {
@@ -1999,7 +2010,7 @@ INSTRUCTIONS :
             // Vérifier si la connexion existe déjà
             let path = document.getElementById(connectionId);
             if (path) {
-                // Mettre à jour la connexion existante avec le style orthogonal
+                // Mettre à jour la connexion existante avec le style en L
                 // Convertir les rectangles en coordonnées relatives au SVG
                 const fromRectRelative = {
                     left: fromRect.left - svgRect.left,
@@ -2017,9 +2028,21 @@ INSTRUCTIONS :
                     width: toRect.width,
                     height: toRect.height
                 };
-                const d = this.createRoundedConnectionPath(fromRectRelative, toRectRelative, 0, 1, 8, 20);
+                
+                // Trouver les meilleurs points de connexion
+                const connectionPoints = this.getBestConnectionPoints(fromRectRelative, toRectRelative);
+                
+                // Générer le path en L avec angles arrondis
+                const d = this.drawConnection(
+                    connectionPoints.from.x, 
+                    connectionPoints.from.y, 
+                    connectionPoints.to.x, 
+                    connectionPoints.to.y, 
+                    10 // cornerRadius
+                );
+                
                 path.setAttribute('d', d);
-                console.log(`🔄 Connexion ${connectionId} mise à jour avec style orthogonal`);
+                console.log(`🔄 Connexion ${connectionId} mise à jour avec style en L`);
                 return true;
             }
             
@@ -2027,7 +2050,7 @@ INSTRUCTIONS :
             path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
             path.id = connectionId; // ✅ ID unique
             
-            // 🧭 Générer un path orthogonal avec arrondis (style Stripe)
+            // 🧭 Générer un path en L avec angles arrondis (SANS courbes Bézier)
             // Convertir les rectangles en coordonnées relatives au SVG
             const fromRectRelative = {
                 left: fromRect.left - svgRect.left,
@@ -2045,7 +2068,18 @@ INSTRUCTIONS :
                 width: toRect.width,
                 height: toRect.height
             };
-            const d = this.createRoundedConnectionPath(fromRectRelative, toRectRelative, 0, 1, 8, 20);
+            
+            // Trouver les meilleurs points de connexion
+            const connectionPoints = this.getBestConnectionPoints(fromRectRelative, toRectRelative);
+            
+            // Générer le path en L avec angles arrondis
+            const d = this.drawConnection(
+                connectionPoints.from.x, 
+                connectionPoints.from.y, 
+                connectionPoints.to.x, 
+                connectionPoints.to.y, 
+                10 // cornerRadius
+            );
             
             // 🔍 DEBUG SPÉCIAL pour materiaux et charges
             if (fromTile === 'materiaux' || fromTile === 'charges') {
