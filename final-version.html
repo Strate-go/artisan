@@ -92,6 +92,9 @@ INSTRUCTIONS :
 
         <!-- CARTE INTERACTIVE UNIQUE -->
         <div class="single-interactive-map">
+            <!-- COUCHE SVG FIXE - NE PAS TOUCHER -->
+            <div id="svg-connection-layer"></div>
+            
             <!-- PROBLÈMES (Section 1 - Rentabilité) -->
             <div class="tile problem" data-tile="devis" data-section="1" style="grid-column: 1; grid-row: 2;">
                 <div class="tile-icon">
@@ -1747,60 +1750,55 @@ INSTRUCTIONS :
         
         // CRÉATION AUTOMATIQUE DES CONNEXIONS
         createAllConnections() {
-            console.log('🔧 Création automatique des connexions ISOLÉES');
+            console.log('🔧 Création automatique des connexions STABLES');
             
-            // Pas de nettoyage automatique pour préserver les icônes
-            
-            // Étape 2 : Créer le SVG dans le container PARENT (moins touché par Squarespace)
-            const parentContainer = document.querySelector('#stratego-final-map');
-            const mapContainer = document.querySelector('#stratego-final-map .single-interactive-map');
-            
-            if (!parentContainer || !mapContainer) {
-                console.error('❌ Containers non trouvés !');
+            // ✅ SOLUTION CHATGPT : Utiliser la couche SVG fixe
+            const layer = document.getElementById("svg-connection-layer");
+            if (!layer) {
+                console.warn("⚠️ Le conteneur SVG #svg-connection-layer est introuvable.");
                 return;
             }
             
-            // SUPPRIMER COMPLÈTEMENT l'ancien SVG pour éviter les résidus corrompus
-            const oldSvg = parentContainer.querySelector('.connections-svg');
+            const mapContainer = document.querySelector('#stratego-final-map .single-interactive-map');
+            if (!mapContainer) {
+                console.error('❌ Map container non trouvé !');
+                return;
+            }
+            
+            // Supprime l'ancien SVG s'il existe
+            const oldSvg = document.getElementById("stratego-connections");
             if (oldSvg) {
-                console.log('🧹 SUPPRESSION complète de l\'ancien SVG corrompu');
+                console.log('🧹 SUPPRESSION de l\'ancien SVG');
                 oldSvg.remove();
             }
             
-            console.log('🆕 Création d\'un SVG TOTALEMENT NEUF...');
-            // Créer un SVG complètement isolé avec un ID unique
-            const uniqueId = 'stratego-connections-' + Date.now();
-            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-            svg.id = uniqueId;
+            // Crée un nouveau SVG propre
+            const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            svg.setAttribute("id", "stratego-connections");
+            svg.setAttribute("width", "100%");
+            svg.setAttribute("height", "100%");
+            
+            // Calculer les dimensions du container
+            const containerRect = mapContainer.getBoundingClientRect();
+            svg.setAttribute("viewBox", `0 0 ${containerRect.width} ${containerRect.height}`);
+            
+            svg.setAttribute("style", `
+                position: absolute;
+                top: 0;
+                left: 0;
+                pointer-events: none;
+                z-index: 5;
+                overflow: visible;
+            `);
+            
+            // Ajouter des classes pour identification
             svg.classList.add('connections-svg');
-            
-            // ✅ ISOLATION MAXIMALE contre Squarespace + Position relative au mapContainer
-            const mapRect = mapContainer.getBoundingClientRect();
-            const parentRect = parentContainer.getBoundingClientRect();
-            const offsetTop = mapRect.top - parentRect.top;
-            const offsetLeft = mapRect.left - parentRect.left;
-            
-            svg.style.cssText = `
-                position: absolute !important;
-                top: ${offsetTop}px !important;
-                left: ${offsetLeft}px !important;
-                width: ${mapRect.width}px !important;
-                height: ${mapRect.height}px !important;
-                z-index: 999 !important;
-                pointer-events: none !important;
-                overflow: visible !important;
-                isolation: isolate !important;
-            `;
-            
-            // Attributs de protection
             svg.setAttribute('data-stratego-svg', 'true');
-            svg.setAttribute('data-squarespace-ignore', 'true');
-            svg.setAttribute('preserveAspectRatio', 'none');
             
-            // L'ajouter au PARENT container au lieu du map container
-            parentContainer.appendChild(svg);
+            // Ajoute le SVG dans le DOM STABLE
+            layer.appendChild(svg);
             
-            console.log(`✅ SVG isolé créé avec ID: ${uniqueId}`);
+            console.log(`✅ SVG stable créé dans la couche fixe`);
             
             // Attendre que le SVG soit bien dans le DOM
             setTimeout(() => {
@@ -2019,10 +2017,21 @@ INSTRUCTIONS :
                     pointer-events: none !important;
                 }
                 
-                /* Force les connexions orthogonales */
-                .auto-connection[d*="C "] {
-                    display: none !important; /* Cache les courbes Bézier */
-                }
+                        /* Force les connexions orthogonales */
+        .auto-connection[d*="C "] {
+            display: none !important; /* Cache les courbes Bézier */
+        }
+        
+        /* COUCHE SVG FIXE - Protection totale contre Squarespace */
+        #svg-connection-layer {
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            z-index: 5 !important;
+            pointer-events: none !important;
+        }
             `;
             
             // Supprimer l'ancien style s'il existe
@@ -2085,13 +2094,14 @@ INSTRUCTIONS :
                 return false;
             }
             
-            // Calculer les coordonnées avec validation robuste (relatives au mapContainer)
-            const mapContainerRect = document.querySelector('#stratego-final-map .single-interactive-map').getBoundingClientRect();
+            // ✅ NOUVEAU : Calculer les coordonnées relatives à la couche SVG fixe
+            const svgLayer = document.getElementById("svg-connection-layer");
+            const layerRect = svgLayer.getBoundingClientRect();
             const fromRect = fromElement.getBoundingClientRect();
             const toRect = toElement.getBoundingClientRect();
             
             // Vérifier que tous les rectangles sont valides
-            if (mapContainerRect.width === 0 || mapContainerRect.height === 0 || 
+            if (layerRect.width === 0 || layerRect.height === 0 || 
                 fromRect.width === 0 || fromRect.height === 0 ||
                 toRect.width === 0 || toRect.height === 0) {
                 console.warn(`⏸️ Éléments pas encore rendus, attente... (${fromTile}→${toTile})`);
@@ -2102,11 +2112,11 @@ INSTRUCTIONS :
                 return false;
             }
             
-            // Calcul sécurisé avec arrondi et validation (relatif au mapContainer)
-            let x1 = Math.round(fromRect.left + fromRect.width/2 - mapContainerRect.left);
-            let y1 = Math.round(fromRect.top + fromRect.height/2 - mapContainerRect.top);
-            let x2 = Math.round(toRect.left + toRect.width/2 - mapContainerRect.left);
-            let y2 = Math.round(toRect.top + toRect.height/2 - mapContainerRect.top);
+            // Calcul sécurisé avec arrondi et validation (relatif à la couche SVG)
+            let x1 = Math.round(fromRect.left + fromRect.width/2 - layerRect.left);
+            let y1 = Math.round(fromRect.top + fromRect.height/2 - layerRect.top);
+            let x2 = Math.round(toRect.left + toRect.width/2 - layerRect.left);
+            let y2 = Math.round(toRect.top + toRect.height/2 - layerRect.top);
             
             // Validation stricte des coordonnées
             if (isNaN(x1) || isNaN(y1) || isNaN(x2) || isNaN(y2) ||
@@ -2141,20 +2151,20 @@ INSTRUCTIONS :
             path.id = connectionId; // ✅ ID unique
             
             // 🧭 Générer un path en L avec angles arrondis (version ChatGPT)
-            // Convertir les rectangles en coordonnées relatives au mapContainer
+            // Convertir les rectangles en coordonnées relatives à la couche SVG
             const fromRectRelative = {
-                left: fromRect.left - mapContainerRect.left,
-                top: fromRect.top - mapContainerRect.top,
-                right: fromRect.right - mapContainerRect.left,
-                bottom: fromRect.bottom - mapContainerRect.top,
+                left: fromRect.left - layerRect.left,
+                top: fromRect.top - layerRect.top,
+                right: fromRect.right - layerRect.left,
+                bottom: fromRect.bottom - layerRect.top,
                 width: fromRect.width,
                 height: fromRect.height
             };
             const toRectRelative = {
-                left: toRect.left - mapContainerRect.left,
-                top: toRect.top - mapContainerRect.top,
-                right: toRect.right - mapContainerRect.left,
-                bottom: toRect.bottom - mapContainerRect.top,
+                left: toRect.left - layerRect.left,
+                top: toRect.top - layerRect.top,
+                right: toRect.right - layerRect.left,
+                bottom: toRect.bottom - layerRect.top,
                 width: toRect.width,
                 height: toRect.height
             };
