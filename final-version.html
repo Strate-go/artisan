@@ -2096,7 +2096,7 @@ INSTRUCTIONS :
             }
             
             // Créer une nouvelle connexion
-            path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
             path.id = connectionId; // ✅ ID unique
             
             // 🧭 Générer un path en L avec angles arrondis (SANS courbes Bézier)
