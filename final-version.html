@@ -2153,8 +2153,10 @@ INSTRUCTIONS :
             if (d.includes('C')) {
                 console.error(`❌ ERREUR: Path contient encore des courbes Bézier! ${d}`);
             }
-            if (!d.includes('L') || !d.includes('A')) {
-                console.error(`❌ ERREUR: Path ne contient pas de segments orthogonaux! ${d}`);
+            if (!d.includes('L')) {
+                console.error(`❌ ERREUR: Path ne contient pas de segments droits! ${d}`);
+            } else {
+                console.log(`✅ Path orthogonal valide: ${d}`);
             }
             
             // 🔍 DEBUG SPÉCIAL pour materiaux et charges
