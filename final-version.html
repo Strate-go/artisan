@@ -1745,44 +1745,53 @@ INSTRUCTIONS :
         
         // CRÉATION AUTOMATIQUE DES CONNEXIONS
         createAllConnections() {
-            console.log('🔧 Création automatique des connexions');
+            console.log('🔧 Création automatique des connexions ISOLÉES');
             
-            // Étape 1 : Créer le SVG de manière plus robuste
+            // Étape 1 : Nettoyer TOUT d'abord (éliminer le path corrompu)
+            this.cleanOldBezierConnections();
+            
+            // Étape 2 : Créer le SVG de manière plus robuste
             const container = document.querySelector('#stratego-final-map .single-interactive-map');
             if (!container) {
                 console.error('❌ Container principal non trouvé !');
                 return;
             }
             
-            // Vérifier si le SVG existe déjà
-            let svg = container.querySelector('.connections-svg');
-            if (svg) {
-                console.log('🔄 SVG existant trouvé, nettoyage...');
-                // Nettoyer le contenu existant au lieu de supprimer le SVG
-                svg.innerHTML = '';
-            } else {
-                console.log('🆕 Création d\'un nouveau SVG...');
-                // Créer le nouveau SVG
-                svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-                svg.classList.add('connections-svg');
-                svg.style.cssText = `
-                    position: absolute !important;
-                    top: 0 !important;
-                    left: 0 !important;
-                    width: 100% !important;
-                    height: 100% !important;
-                    z-index: 999 !important;
-                    pointer-events: none !important;
-                    overflow: visible !important;
-                `;
-                
-                // Ajouter un attribut pour identifier notre SVG
-                svg.setAttribute('data-stratego-svg', 'true');
-                
-                container.appendChild(svg);
+            // SUPPRIMER COMPLÈTEMENT l'ancien SVG pour éviter les résidus corrompus
+            const oldSvg = container.querySelector('.connections-svg');
+            if (oldSvg) {
+                console.log('🧹 SUPPRESSION complète de l\'ancien SVG corrompu');
+                oldSvg.remove();
             }
             
-            console.log('✅ SVG préparé');
+            console.log('🆕 Création d\'un SVG TOTALEMENT NEUF...');
+            // Créer un SVG complètement isolé avec un ID unique
+            const uniqueId = 'stratego-connections-' + Date.now();
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.id = uniqueId;
+            svg.classList.add('connections-svg');
+            
+            // ✅ ISOLATION MAXIMALE contre Squarespace
+            svg.style.cssText = `
+                position: absolute !important;
+                top: 0 !important;
+                left: 0 !important;
+                width: 100% !important;
+                height: 100% !important;
+                z-index: 999 !important;
+                pointer-events: none !important;
+                overflow: visible !important;
+                isolation: isolate !important;
+            `;
+            
+            // Attributs de protection
+            svg.setAttribute('data-stratego-svg', 'true');
+            svg.setAttribute('data-squarespace-ignore', 'true');
+            svg.setAttribute('preserveAspectRatio', 'none');
+            
+            container.appendChild(svg);
+            
+            console.log(`✅ SVG isolé créé avec ID: ${uniqueId}`);
             
             // Attendre que le SVG soit bien dans le DOM
             setTimeout(() => {
@@ -1944,60 +1953,76 @@ INSTRUCTIONS :
             return result;
         }
 
-        // 🧹 Nettoyage AGRESSIF des connexions Bézier et corrompues
+        // 🧹 Nettoyage ULTRA-AGRESSIF des connexions corrompues
         cleanOldBezierConnections() {
-            // Chercher TOUS les paths SVG, pas seulement ceux avec .auto-connection
-            const allPaths = document.querySelectorAll('path');
+            // Chercher TOUS les paths SVG, même dans les SVG cachés
+            const allPaths = document.querySelectorAll('path, svg path');
             let cleaned = 0;
             
-            console.log(`🧹 Scan de ${allPaths.length} paths pour nettoyage...`);
+            console.log(`🧹 NETTOYAGE ULTRA-AGRESSIF de ${allPaths.length} paths...`);
             
             allPaths.forEach(path => {
                 const d = path.getAttribute('d');
                 const pathId = path.id || 'sans-id';
+                const svgParent = path.closest('svg');
+                const svgId = svgParent ? (svgParent.id || 'svg-sans-id') : 'aucun-svg';
                 
                 if (!d) return; // Skip si pas de path
                 
+                // ⚡ CIBLE PRIORITAIRE : Le path problématique exact
+                if (d.includes('218.399L281.69L192.933') || 
+                    d.includes('218.399') || 
+                    /[\d\.]+L[\d\.]+L[\d\.]+\s+[\d\.]+/.test(d)) {
+                    console.log(`🎯 PATH CORROMPU CIBLE éliminé: ${pathId} dans ${svgId}`);
+                    console.log(`   Path: ${d}`);
+                    try {
+                        path.remove();
+                        cleaned++;
+                    } catch (e) {
+                        console.log(`   Erreur suppression: ${e.message}`);
+                    }
+                    return;
+                }
+                
                 // 1. COURBES BÉZIER (contient C)
                 if (/C\s+[\d\.\-,\s]+/.test(d)) {
-                    console.log(`🧹 BÉZIER trouvé: ${pathId} - ${d.substring(0, 50)}...`);
-                    path.remove();
-                    cleaned++;
+                    console.log(`🧹 BÉZIER: ${pathId} dans ${svgId}`);
+                    try {
+                        path.remove();
+                        cleaned++;
+                    } catch (e) {}
                     return;
                 }
                 
-                // 2. PATHS CORROMPUS (coordonnées malformées)
-                if (/[\d\.]+L[\d\.]+L[\d\.]+\s+[\d\.]+/.test(d)) {
-                    console.log(`🧹 PATH CORROMPU trouvé: ${pathId} - ${d.substring(0, 50)}...`);
-                    path.remove();
-                    cleaned++;
+                // 2. TOUS les paths dans notre zone SAUF nos connexions propres
+                if (path.closest('#stratego-final-map') && !pathId.startsWith('connection-')) {
+                    console.log(`🧹 PATH EXTERNE dans stratego-map: ${pathId} - ${d.substring(0, 30)}...`);
+                    try {
+                        path.remove();
+                        cleaned++;
+                    } catch (e) {}
                     return;
-                }
-                
-                // 3. PATHS avec des formats bizarres
-                if (d.includes('218.399L281.69L192.933')) {
-                    console.log(`🧹 PATH SPÉCIFIQUEMENT CORROMPU trouvé: ${pathId} - ${d}`);
-                    path.remove();
-                    cleaned++;
-                    return;
-                }
-                
-                // 4. PATHS non-stratego (sans nos IDs)
-                if (!pathId.startsWith('connection-') && path.closest('#stratego-final-map')) {
-                    console.log(`🧹 PATH SUSPECT trouvé: ${pathId} - ${d.substring(0, 30)}...`);
-                    // Ne pas supprimer, juste signaler
                 }
                 
                 // Conservé
                 if (pathId.startsWith('connection-')) {
-                    console.log(`✅ Path orthogonal conservé: ${pathId} - ${d.substring(0, 30)}...`);
+                    console.log(`✅ Notre connexion conservée: ${pathId} - ${d.substring(0, 30)}...`);
                 }
             });
             
+            // 🧨 NETTOYAGE EXTRÊME : Supprimer tous les SVG suspects dans notre zone
+            const suspectSvgs = document.querySelectorAll('#stratego-final-map svg:not([data-stratego-svg])');
+            suspectSvgs.forEach(svg => {
+                const svgId = svg.id || 'svg-sans-id';
+                console.log(`🧨 SVG SUSPECT supprimé: ${svgId}`);
+                svg.remove();
+                cleaned++;
+            });
+            
             if (cleaned > 0) {
-                console.log(`🧹 ${cleaned} paths corrompus/Bézier supprimés`);
+                console.log(`🧹 ${cleaned} éléments corrompus/suspects supprimés`);
             } else {
-                console.log(`✅ Aucun path corrompu détecté`);
+                console.log(`✅ Nettoyage terminé, aucun élément suspect`);
             }
         }
 
